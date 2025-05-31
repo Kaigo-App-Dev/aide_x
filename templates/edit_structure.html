@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>テンプレート編集</h2>
+
+<!-- バリデーションエラー表示 -->
+{% if errors %}
+<div style="color: red; border: 1px solid red; padding: 10px; margin-bottom: 15px;">
+  <strong>⚠ 入力エラーがあります：</strong>
+  <ul>
+    {% for e in errors %}
+    <li>{{ e }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<form method="post">
+  <label for="title">タイトル：</label><br>
+  <input type="text" name="title" id="title" value="{{ structure.title }}"><br><br>
+
+  <label for="description">説明：</label><br>
+  <textarea name="description" id="description" rows="3" cols="50">{{ structure.description }}</textarea><br><br>
+
+  <label for="content">構成内容（JSON）：</label><br>
+  <textarea name="content" id="content" rows="15" cols="80">{{ structure.content }}</textarea><br><br>
+
+  <div style="margin-top: 10px;">
+    <label>
+      <input type="checkbox" name="is_final" {% if structure.is_final %}checked{% endif %}>
+      最終確定テンプレートとする
+    </label>
+  </div>
+
+  <div style="margin-top: 15px;">
+     <button type="submit" class="btn btn-success">💾 保存</button>
+     <a href="{{ url_for('preview.preview_structure', structure_id=structure.id) }}"
+        class="btn btn-info ms-2">👁 プレビュー</a>
+     <a href="{{ url_for('structure.list_structures') }}" class="btn btn-secondary ms-2">← 一覧に戻る</a>
+  </div>
+</form>
+
+<form method="get" action="{{ url_for('structure.evaluate_structure', structure_id=structure.id) }}" style="margin-top: 10px;">
+  <button type="submit" class="btn btn-warning">🧪 構成整合性チェック</button>
+</form>
+
+<form method="post" action="{{ url_for('structure.decide_structure', structure_id=structure.id) }}" style="margin-top: 10px;">
+  <button type="submit">✅ これで決定</button>
+</form>
+
+{% if structure.is_final %}
+  <p style="color: green;"><strong>✅ この構成は採用済みです。</strong></p>
+{% endif %}
+
+{% if structure.history %}
+  <hr>
+  <h3>🕓 履歴ログ</h3>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+      <tr>
+        <th>日時</th>
+        <th>操作</th>
+        <th>詳細</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in structure.history|sort(attribute='timestamp', reverse=True) %}
+      <tr>
+        <td>{{ entry.timestamp[:19]|replace("T", " ") }}</td>
+        <td>{{ entry.action }}</td>
+        <td>
+          {{ entry.detail }}
+          {% if entry.snapshot %}
+            <form method="post" action="{{ url_for('structure.restore_from_history', structure_id=structure.id) }}" style="display:inline;">
+              <input type="hidden" name="timestamp" value="{{ entry.timestamp }}">
+              <button type="submit" style="margin-left: 10px;">🔄 この時点に戻す</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p><small>履歴はまだ記録されていません。</small></p>
+{% endif %}
+
+{% endblock %}

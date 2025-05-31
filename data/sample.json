@@ -1,0 +1,10 @@
+{
+  "id": "sample",
+  "title": "簡易ToDoアプリ構成",
+  "description": "FlaskベースでToDoリストを管理するWebアプリの構成テンプレート。追加・削除・完了マーク機能を持つ。\r\n",
+  "content": "{\r\n  \"id\": \"test-001\",\r\n  \"title\": \"簡易テスト構成\",\r\n  \"description\": \"Claude評価のテスト用テンプレートです。\",\r\n  \"steps\": [\r\n    {\"name\": \"ステップA\", \"type\": \"input\", \"content\": \"入力してください\"},\r\n    {\"name\": \"ステップB\", \"type\": \"output\", \"content\": \"出力されます\"}\r\n  ]\r\n}\r\n\r\n",
+  "is_final": false,
+  "intent_match": 85,
+  "quality_score": 75,
+  "intent_reason": "Claudeによる構成意図の説明（仮）"
+}

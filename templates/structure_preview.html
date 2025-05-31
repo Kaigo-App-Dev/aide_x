@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <!-- フラッシュメッセージ -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} mt-3">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- タイトル -->
+  <h2>🔍 プレビュー: {{ structure.title }}</h2>
+
+  <!-- 評価結果 -->
+  {% if structure.evaluation %}
+    <div class="alert alert-info mt-3">
+      <strong>🧠 評価結果：</strong><br>
+      一致度：{{ structure.evaluation.intent_match }}%、品質スコア：{{ structure.evaluation.quality_score }}%<br>
+      理由：{{ structure.evaluation.intent_reason }}
+    </div>
+  {% endif %}
+
+  <!-- プレビュー用フォーム -->
+  <form method="post" action="{{ url_for('preview.submit_structure', structure_id=structure.id) }}">
+  {% for section in structure.sections %}
+    <div class="mb-3">
+      <label class="form-label">{{ section.label }}</label>
+
+      {% if section.type == "text" %}
+        <input type="text" class="form-control" name="{{ section.name }}">
+
+      {% elif section.type == "textarea" %}
+        <textarea class="form-control" name="{{ section.name }}"></textarea>
+
+      {% elif section.type == "radio" %}
+        {% for option in section.options %}
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="{{ section.name }}" id="{{ section.name }}_{{ loop.index }}" value="{{ option }}">
+            <label class="form-check-label" for="{{ section.name }}_{{ loop.index }}">{{ option }}</label>
+          </div>
+        {% endfor %}
+
+      {% elif section.type == "select" %}
+        <select class="form-select" name="{{ section.name }}">
+          {% for option in section.options %}
+            <option value="{{ option }}">{{ option }}</option>
+          {% endfor %}
+        </select>
+
+      {% elif section.type == "checkbox" %}
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="{{ section.name }}" id="{{ section.name }}">
+          <label class="form-check-label" for="{{ section.name }}">{{ section.label }}</label>
+        </div>
+
+      {% elif section.type == "date" %}
+        <input type="date" class="form-control" name="{{ section.name }}">
+
+      {% elif section.type == "number" %}
+        <input type="number" class="form-control" name="{{ section.name }}">
+
+      {% elif section.type == "file" %}
+        <input type="file" class="form-control" name="{{ section.name }}">
+
+      {% else %}
+        <input type="text" class="form-control" name="{{ section.name }}">
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  <!-- 🔽 ここが新たに追加される送信ボタン -->
+  <button type="submit" class="btn btn-primary mt-3">✅ 入力を送信</button>
+</form>
+
+  <a href="{{ url_for('structure.edit_structure', structure_id=structure.id) }}" class="btn btn-secondary mt-3">← 編集画面に戻る</a>
+</div>
+{% endblock %}

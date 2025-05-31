@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>📝 構成テンプレート詳細: {{ structure.title or structure.id }}</h2>
+
+  <!-- JSON表示 -->
+  <pre class="bg-light p-3 rounded" style="white-space: pre-wrap; max-height: 600px; overflow-y: auto;">
+{{ content_json }}
+  </pre>
+
+  <!-- グラフセクション -->
+  <div class="mt-5">
+    <h3>📈 評価スコア推移</h3>
+    <canvas id="scoreChart" width="800" height="400"></canvas>
+    <p class="mt-3 small text-muted">
+      意図一致率と品質スコアは100%に近いほど良好です。<br>
+      ⬆ 80%以上：安定構成、50〜80%：改善検討、50%未満：改善推奨。
+    </p>
+  </div>
+
+  <div class="mt-4">
+    <a href="{{ url_for('structure.history') }}" class="btn btn-secondary">← 履歴一覧に戻る</a>
+    <a href="{{ url_for('preview.preview_structure', structure_id=structure.id) }}"
+       class="btn btn-info ms-2"
+       onclick="return confirm('プレビューは最後に保存した状態を表示します。未保存の内容は反映されません。続行しますか？');">
+       👁 プレビュー
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <!-- Chart.js 読み込み -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    const structureId = "{{ structure.id }}";
+
+    fetch(`/structure/score_history/${structureId}`)
+      .then(response => response.json())
+      .then(data => {
+        const labels = data.map(entry => new Date(entry.timestamp).toLocaleString());
+        const intentMatch = data.map(entry => entry.intent_match);
+        const qualityScore = data.map(entry => entry.quality_score);
+
+        const ctx = document.getElementById('scoreChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: '意図一致率（Intent Match）',
+                data: intentMatch,
+                borderColor: 'blue',
+                tension: 0.3,
+                fill: false
+              },
+              {
+                label: '品質スコア（Quality Score）',
+                data: qualityScore,
+                borderColor: 'green',
+                tension: 0.3,
+                fill: false
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                min: 0,
+                max: 1.0,
+                ticks: {
+                  callback: function(value) {
+                    return (value * 100).toFixed(1) + '%';
+                  }
+                },
+                title: {
+                  display: true,
+                  text: 'スコア（%）'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: '更新日時'
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  font: {
+                    size: 14
+                  }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.dataset.label || '';
+                    const value = (context.raw * 100).toFixed(1);
+                    return `${label}: ${value}%`;
+                  }
+                }
+              },
+              title: {
+                display: true,
+                text: '構成テンプレートの進化スコア推移'
+              }
+            }
+          }
+        });
+      });
+  </script>
+{% endblock %}

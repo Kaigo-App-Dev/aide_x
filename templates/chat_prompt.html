@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>🧠 構成共創チャット（ChatGPT）</h2>
+
+<div style="border: 1px solid #ccc; padding: 10px; max-height: 400px; overflow-y: auto;">
+  {% for message in chat_history %}
+    <p><strong>{{ message.role }}:</strong> {{ message.content }}</p>
+  {% endfor %}
+</div>
+
+<form method="post" style="margin-top: 15px;">
+  <textarea name="message" rows="3" cols="80" placeholder="構成について聞いてみましょう..."></textarea><br>
+  <button type="submit">送信</button>
+  <a href="{{ url_for('chat.chat_prompt') }}?save=1">
+    💾 この応答をテンプレートとして保存
+  <a href="{{ url_for('chat.chat_prompt') }}?save=1">
+    💾 ChatGPT応答を保存
+  </a>
+  &nbsp;&nbsp;
+  <a href="{{ url_for('chat.chat_prompt') }}?claude_save=1">
+    🤖 Claudeで整形して保存
+  </a>
+  <a href="{{ url_for('chat.compare_structures') }}">
+    🆚 Claudeとの構成比較を見る
+  </a>
+
+
+</form>
+{% endblock %}

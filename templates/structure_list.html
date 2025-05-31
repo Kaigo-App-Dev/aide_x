@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>構成テンプレート一覧</h2>
+  <a href="{{ url_for('structure.new_structure') }}" class="btn btn-primary">＋ 新規作成</a>
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>タイトル</th>
+      <th>intent_match</th>
+      <th>quality_score</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in structures %}
+    <tr>
+      <td>{{ s.id }}</td>
+      <td>
+        {{ s.title or '（無題）' }}
+        {% if s.is_final %}
+          <span style="color: green;">✅</span>
+        {% endif %}
+        {% if s.intent_reason %}
+          <br>
+          <details>
+            <summary>💬 Claude意図</summary>
+            <small>{{ s.intent_reason[:60] }}...</small>
+          </details>
+        {% endif %}
+      </td>
+      <td>
+        {% if s.intent_match is defined %}
+          {{ '%.0f' % s.intent_match }}<br>
+          <progress value="{{ s.intent_match }}" max="100" style="width: 80px;"></progress>
+        {% else %}
+          -
+        {% endif %}
+      </td>
+      <td>
+        {% if s.quality_score is defined %}
+          {{ '%.0f' % s.quality_score }}<br>
+          <progress value="{{ s.quality_score }}" max="100" style="width: 80px;"></progress>
+        {% else %}
+          -
+        {% endif %}
+      </td>
+      <td>
+        <a href="{{ url_for('structure.edit_structure', structure_id=s.id) }}">✏ 編集</a> |
+        <a href="{{ url_for('structure.evaluate_structure', structure_id=s.id) }}">🧠 診断</a><br>
+
+        {% if s.intent_match is defined and s.intent_match < 70 %}
+          <a href="{{ url_for('structure.improve_structure', structure_id=s.id) }}" style="color: red;">⚠ 改善提案へ</a><br>
+        {% endif %}
+
+        {% if s.is_final %}
+          <span style="color: green;">✅ 決定済</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

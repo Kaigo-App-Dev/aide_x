@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>AIDE-X</title>
+
+    <!-- Bootstrap CSS CDN追加 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      /* 元の簡易スタイルは残す（必要に応じて上書き可能） */
+      .container {
+        max-width: 800px;
+        margin: 2em auto;
+        font-family: Arial, sans-serif;
+      }
+      .flash {
+        padding: 1em;
+        margin-bottom: 1em;
+        border-radius: 5px;
+      }
+      .flash-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .flash-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      a.btn-primary {
+        display: inline-block;
+        padding: 0.5em 1em;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+      }
+      a.btn-primary:hover {
+        background-color: #0056b3;
+      }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- フラッシュメッセージ表示 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- 自動進化ループ実行リンク -->
+        <p>
+          <a href="{{ url_for('evolve.start_evolution') }}" class="btn btn-primary">自動進化ループ開始</a>
+        </p>
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Bootstrap JS（必要に応じて） -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

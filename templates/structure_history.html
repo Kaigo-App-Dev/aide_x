@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>🕘 構成テンプレート履歴一覧</h2>
+
+<form method="get" class="mb-3">
+  <input type="text" name="keyword" placeholder="タイトルまたはIDで検索" value="{{ keyword }}">
+
+  <label>開始日:
+    <input type="date" name="start_date" value="{{ start_date }}">
+  </label>
+  <label>終了日:
+    <input type="date" name="end_date" value="{{ end_date }}">
+  </label>
+
+  <label>確定状態:
+    <select name="is_final">
+      <option value="" {% if not is_final_filter %}selected{% endif %}>すべて</option>
+      <option value="true" {% if is_final_filter == 'true' %}selected{% endif %}>確定済み</option>
+      <option value="false" {% if is_final_filter == 'false' %}selected{% endif %}>未確定</option>
+    </select>
+  </label>
+
+  <button type="submit">絞り込み</button>
+</form>
+
+<table border="1" cellpadding="5" cellspacing="0" style="width:100%;">
+  <thead>
+    <tr>
+      <th><a href="?sort=id&order={{ 'asc' if sort_key!='id' or order=='desc' else 'desc' }}">ID</a></th>
+      <th><a href="?sort=title&order={{ 'asc' if sort_key!='title' or order=='desc' else 'desc' }}">タイトル</a></th>
+      <th><a href="?sort=intent_match&order={{ 'asc' if sort_key!='intent_match' or order=='desc' else 'desc' }}">Intent Match</a></th>
+      <th><a href="?sort=updated_at&order={{ 'asc' if sort_key!='updated_at' or order=='desc' else 'desc' }}">更新日時</a></th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in structures %}
+    <tr>
+      <td>{{ s.id }}</td>
+      <td>{{ s.title }}</td>
+      <td>{{ "%.2f"|format(s.intent_match or 0) }}</td>
+      <td>{{ s.updated_at }}</td>
+      <td><a href="{{ url_for('structure.edit_structure', id=s.id) }}">編集</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">該当データがありません</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

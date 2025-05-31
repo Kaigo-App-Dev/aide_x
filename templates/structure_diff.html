@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>📘 構成テンプレート 差分表示</h2>
+
+<h3>🕘 過去バージョン</h3>
+<pre style="background:#fff0f0; padding:10px;">{{ past | safe }}</pre>
+
+<h3>📘 現在バージョン</h3>
+<pre style="background:#f0f8ff; padding:10px;">{{ current | safe }}</pre>
+
+<h3>🟡 差分ハイライト</h3>
+<pre style="background:#fff8e1; padding:10px;">{{ diff_html | safe }}</pre>
+
+<a href="{{ url_for('structure.list_structures') }}">← 戻る</a>
+{% endblock %}
