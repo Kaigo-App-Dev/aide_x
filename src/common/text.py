@@ -1,6 +1,6 @@
 from markupsafe import Markup
 from typing import Dict, Any, List, Optional
-from src.common.types import StructureDict, UIComponent
+from src.types import StructureDict, UIComponent
 
 def nl2br(value: Optional[str]) -> str:
     """

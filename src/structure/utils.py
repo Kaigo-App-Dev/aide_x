@@ -9,7 +9,7 @@ import logging
 from datetime import datetime
 from uuid import uuid4
 from typing import Dict, Any, List, Optional, cast, TypedDict, Union, Tuple
-from src.common.types import StructureDict, StructureHistory, EvaluationResult, LLMResponse
+from src.types import StructureDict, StructureHistory, EvaluationResult, LLMResponse
 
 # Initialize logger
 logger = logging.getLogger(__name__)

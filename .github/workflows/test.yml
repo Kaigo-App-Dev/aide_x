@@ -1,4 +1,4 @@
-name: Run Pytest
+name: Test
 
 on:
   push:
@@ -9,24 +9,39 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: [3.9, 3.10, 3.11]
 
     steps:
-      - name: 📥 リポジトリをチェックアウト
-        uses: actions/checkout@v4
-
-      - name: 🐍 Python ${{ matrix.python-version }} をセットアップ
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: 📦 依存関係をインストール
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt || pip install pytest
-
-      - name: 🧪 Pytestを実行
-        run: pytest
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov
+    
+    - name: Set up environment variables
+      run: |
+        echo "OPENAI_API_KEY=dummy_key" >> $GITHUB_ENV
+        echo "CLAUDE_API_KEY=dummy_key" >> $GITHUB_ENV
+        echo "GOOGLE_API_KEY=dummy_key" >> $GITHUB_ENV
+        echo "FLASK_ENV=testing" >> $GITHUB_ENV
+        echo "FLASK_DEBUG=True" >> $GITHUB_ENV
+        echo "LOG_LEVEL=DEBUG" >> $GITHUB_ENV
+    
+    - name: Run tests
+      run: |
+        pytest tests/ --cov=src --cov-report=xml
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: true

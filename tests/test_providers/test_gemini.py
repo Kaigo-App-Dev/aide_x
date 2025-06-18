@@ -5,13 +5,13 @@ Gemini Provider Tests
 import pytest
 from unittest.mock import patch, MagicMock
 from src.llm.providers.gemini import GeminiProvider
-from src.common.exceptions import AIProviderError, PromptNotFoundError, APIRequestError, ResponseFormatError
+from src.exceptions import AIProviderError, PromptNotFoundError, APIRequestError, ResponseFormatError
 from src.llm.prompts import prompt_manager, PromptManager
 from src.llm.providers.base import ChatMessage
 
 @pytest.fixture(autouse=True)
 def patch_save_log():
-    with patch("src.common.logging_utils.save_log") as mock_save_log:
+    with patch("src.logging_utils.save_log") as mock_save_log:
         yield mock_save_log
 
 @pytest.fixture
@@ -30,7 +30,7 @@ def test_message_conversion_and_response(mock_prompt_manager, patch_save_log):
         mock_model.generate_content.return_value = mock_response
         mock_genai.GenerativeModel.return_value = mock_model
 
-        provider = GeminiProvider(api_key="dummy-key")
+        provider = GeminiProvider(api_key="dummy-key", prompt_manager=mock_prompt_manager)
         result = provider.chat([
             ChatMessage(role="user", content="Test message")
         ])
@@ -56,13 +56,13 @@ def test_message_conversion_and_response(mock_prompt_manager, patch_save_log):
 
 def test_prompt_not_found(mock_prompt_manager, patch_save_log):
     mock_prompt_manager.get_prompt.return_value = None
-    provider = GeminiProvider(api_key="dummy-key")
+    provider = GeminiProvider(api_key="dummy-key", prompt_manager=mock_prompt_manager)
     with pytest.raises(PromptNotFoundError) as exc_info:
         provider.chat([ChatMessage(role="user", content="Test message")])
-    assert "Gemini: Prompt not found." in str(exc_info.value)
+    assert "Prompt template 'chat' not found for provider 'gemini'" in str(exc_info.value)
     patch_save_log.assert_called_once_with(
         "gemini_error",
-        {"model": "gemini-pro", "error": "Gemini: Prompt not found."},
+        {"model": "gemini-pro", "error": "Prompt template 'chat' not found for provider 'gemini'"},
         category="gemini"
     )
 
@@ -72,7 +72,7 @@ def test_api_error(mock_prompt_manager, patch_save_log):
         mock_model.generate_content.side_effect = Exception("API is down")
         mock_genai.GenerativeModel.return_value = mock_model
 
-        provider = GeminiProvider(api_key="dummy-key")
+        provider = GeminiProvider(api_key="dummy-key", prompt_manager=mock_prompt_manager)
         with pytest.raises(APIRequestError) as exc_info:
             provider.chat([ChatMessage(role="user", content="Test message")])
         assert "Gemini: API request error" in str(exc_info.value)
@@ -98,7 +98,7 @@ def test_response_format_error(mock_prompt_manager, patch_save_log):
         mock_model.generate_content.return_value = mock_response
         mock_genai.GenerativeModel.return_value = mock_model
 
-        provider = GeminiProvider(api_key="dummy-key")
+        provider = GeminiProvider(api_key="dummy-key", prompt_manager=mock_prompt_manager)
         with pytest.raises(ResponseFormatError) as exc_info:
             provider.chat([ChatMessage(role="user", content="Test message")])
         assert "Gemini: Response format error." in str(exc_info.value)
@@ -122,7 +122,7 @@ def test_empty_response(mock_prompt_manager, patch_save_log):
         mock_model.generate_content.return_value = None
         mock_genai.GenerativeModel.return_value = mock_model
 
-        provider = GeminiProvider(api_key="dummy-key")
+        provider = GeminiProvider(api_key="dummy-key", prompt_manager=mock_prompt_manager)
         with pytest.raises(ResponseFormatError):
             provider.chat([ChatMessage(role="user", content="Test message")])
 
@@ -134,6 +134,6 @@ def test_malformed_response(mock_prompt_manager, patch_save_log):
         mock_model.generate_content.return_value = mock_response
         mock_genai.GenerativeModel.return_value = mock_model
 
-        provider = GeminiProvider(api_key="dummy-key")
+        provider = GeminiProvider(api_key="dummy-key", prompt_manager=mock_prompt_manager)
         with pytest.raises(AIProviderError):
             provider.chat([ChatMessage(role="user", content="Test message")]) 

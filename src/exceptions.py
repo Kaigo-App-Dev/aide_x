@@ -1,8 +1,10 @@
 """
-例外定義
+例外クラス定義
 
-このモジュールは、アプリケーション全体で使用される例外クラスを定義します。
+このモジュールは、AIDE-X全体で使用される例外クラスを提供します。
 """
+
+from typing import List
 
 class PromptError(Exception):
     """プロンプト関連の基本例外クラス"""
@@ -23,8 +25,16 @@ class TemplateFormatError(PromptError):
         self.error = error
         super().__init__(f"Template format error in '{template_name}' for provider '{provider}': {error}")
 
-class ProviderError(Exception):
-    """プロバイダー関連の基本例外クラス"""
+class AIError(Exception):
+    """AI関連の基本例外クラス"""
+    pass
+
+class AIProviderError(AIError):
+    """Raised when the AI provider fails to respond properly."""
+    pass
+
+class ProviderError(AIError):
+    """プロバイダー固有の例外"""
     pass
 
 class ProviderInitializationError(ProviderError):
@@ -36,10 +46,44 @@ class ProviderInitializationError(ProviderError):
 
 class APIKeyMissingError(ProviderError):
     """APIキーが見つからない場合の例外"""
-    def __init__(self, provider: str, env_vars: list[str]):
+    def __init__(self, provider: str, env_vars: List[str]):
         self.provider = provider
         self.env_vars = env_vars
         super().__init__(
             f"API key not found for {provider} provider. "
             f"Please set one of the following environment variables: {', '.join(env_vars)}"
-        ) 
+        )
+
+class ClaudeAPIError(ProviderError):
+    """Claude APIエラー用例外"""
+    pass
+
+class GeminiAPIError(ProviderError):
+    """Gemini APIエラー用例外"""
+    pass
+
+class ChatGPTAPIError(ProviderError):
+    """ChatGPT APIエラー用例外"""
+    pass
+
+class EvaluationError(AIError):
+    """評価関連の例外"""
+    pass
+
+class ResponseFormatError(AIError):
+    """Raised when the AI provider returns an unexpected format."""
+    pass
+
+class APIRequestError(AIError):
+    """Raised when an API request fails."""
+    pass
+
+__all__ = [
+    'AIError',
+    'AIProviderError',
+    'ProviderError',
+    'EvaluationError',
+    'ResponseFormatError',
+    'PromptNotFoundError',
+    'APIRequestError'
+] 

@@ -1,8 +1,8 @@
 """
 OpenAI utilities for AIDE-X
 """
-from typing import Dict, Any
-from src.common.types import LLMResponse
+from typing import Dict, Any, Optional, List
+from src.types import LLMResponse
 
 def generate_improvement(structure: Dict[str, Any]) -> Dict[str, Any]:
     """

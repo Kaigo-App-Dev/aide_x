@@ -5,6 +5,7 @@ Base classes for LLM providers
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
+from src.llm.prompts.manager import PromptManager
 
 @dataclass
 class ChatMessage:
@@ -36,6 +37,7 @@ class BaseLLMProvider(ABC):
     def chat(
         self,
         messages: List[ChatMessage],
+        prompt_manager: Optional['PromptManager'] = None,
         temperature: float = 0.7,
         max_tokens: Optional[int] = None
     ) -> str:
@@ -44,6 +46,7 @@ class BaseLLMProvider(ABC):
         
         Args:
             messages: チャットメッセージのリスト
+            prompt_manager: プロンプト管理インスタンス
             temperature: 生成の多様性を制御するパラメータ（0.0-1.0）
             max_tokens: 生成する最大トークン数
             

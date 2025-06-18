@@ -6,9 +6,10 @@ import os
 from dotenv import load_dotenv
 import logging
 from typing import Dict, Any, Optional, Union, List, cast
-from src.common.types import LLMResponse, ChatMessage, safe_cast_str, safe_cast_dict
+from src.types import LLMResponse, safe_cast_str, safe_cast_dict
 from src.llm.controller import AIController
-from src.common.exceptions import AIProviderError, APIRequestError, ResponseFormatError
+from src.exceptions import AIProviderError, APIRequestError, ResponseFormatError
+from src.llm.providers.base import ChatMessage
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,8 @@
 import os
 import logging
 from typing import Dict, Any, Optional, Union, List
-from src.common.types import LLMResponse, ChatMessage
+from src.llm.providers.base import ChatMessage
+from src.types import LLMResponse
 
 logger = logging.getLogger(__name__)
 

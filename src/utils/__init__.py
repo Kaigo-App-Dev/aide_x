@@ -1,1 +1,1 @@
-"""Utility functions and helpers.""" 
+"""ユーティリティ関数群パッケージ""" 

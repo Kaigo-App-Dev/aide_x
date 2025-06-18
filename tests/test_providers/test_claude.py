@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 from src.llm.providers.claude import ClaudeProvider
 from src.llm.providers.base import ChatMessage
-from src.common.exceptions import PromptNotFoundError, APIRequestError
+from src.exceptions import PromptNotFoundError, APIRequestError
 from src.llm.prompts import prompt_manager, PromptManager
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def mock_prompt_manager():
 
 @pytest.fixture
 def mock_save_log():
-    with patch("src.common.logging_utils.save_log") as mock:
+    with patch("src.logging_utils.save_log") as mock:
         yield mock
 
 def test_message_conversion_and_response(mock_prompt_manager, mock_save_log):
@@ -30,10 +30,10 @@ def test_message_conversion_and_response(mock_prompt_manager, mock_save_log):
         mock_client.messages.create.return_value = mock_response
         mock_anthropic.return_value = mock_client
 
-        provider = ClaudeProvider(api_key="dummy-key")
+        provider = ClaudeProvider(api_key="dummy-key", prompt_manager=mock_prompt_manager)
         result = provider.chat([
             ChatMessage(role="user", content="Test message")
-        ])
+        ], prompt_manager=mock_prompt_manager)
         assert result == "Test response"
         mock_save_log.assert_any_call(
             "claude_request",
@@ -56,10 +56,10 @@ def test_message_conversion_and_response(mock_prompt_manager, mock_save_log):
 
 def test_prompt_not_found(mock_prompt_manager, mock_save_log):
     mock_prompt_manager.get_prompt.return_value = None
-    provider = ClaudeProvider(api_key="dummy-key")
+    provider = ClaudeProvider(api_key="dummy-key", prompt_manager=mock_prompt_manager)
     with pytest.raises(PromptNotFoundError) as exc_info:
-        provider.chat([ChatMessage(role="user", content="Test message")])
-    assert "Claude: Prompt not found." in str(exc_info.value)
+        provider.chat([ChatMessage(role="user", content="Test message")], prompt_manager=mock_prompt_manager)
+    assert "Prompt template 'chat' not found for provider 'claude'" in str(exc_info.value)
     mock_save_log.assert_not_called()  # プロンプトが見つからない場合はログ出力なし
 
 def test_api_error(mock_prompt_manager, mock_save_log):
@@ -68,9 +68,9 @@ def test_api_error(mock_prompt_manager, mock_save_log):
         mock_client.messages.create.side_effect = Exception("API is down")
         mock_anthropic.return_value = mock_client
 
-        provider = ClaudeProvider(api_key="dummy-key")
+        provider = ClaudeProvider(api_key="dummy-key", prompt_manager=mock_prompt_manager)
         with pytest.raises(APIRequestError) as exc_info:
-            provider.chat([ChatMessage(role="user", content="Test message")])
+            provider.chat([ChatMessage(role="user", content="Test message")], prompt_manager=mock_prompt_manager)
         assert "Claude: API request error" in str(exc_info.value)
         mock_save_log.assert_any_call(
             "claude_request",

@@ -47,8 +47,8 @@ from src.structure.ui_generator import (
     call_gemini_ui_generator
 )
 
-from src.common.preview import render_html_from_structure
-from src.common.diff import get_diff_highlighted
+from src.preview import render_html_from_structure
+from src.diff import get_diff_highlighted
 
 from src.structure.evaluation import evaluate_with_claude
 

@@ -1,5 +1,7 @@
 """
-LLM Hub - AIプロバイダの一元管理
+AIモデル呼び出しハブ
+
+このモジュールは、AIモデルの呼び出しを一元管理するハブを提供します。
 """
 
 from typing import Dict, Any, Optional, List, Sequence, cast
@@ -9,9 +11,13 @@ import json
 from .controller import AIController
 from .providers.base import ChatMessage
 from .prompts import prompt_manager, PromptManager
-from src.common.exceptions import AIProviderError, APIRequestError, ResponseFormatError
-from src.common.types import AIProviderResponse
+from src.exceptions import AIProviderError, APIRequestError, ResponseFormatError, PromptNotFoundError
+from src.types import AIProviderResponse
 from datetime import datetime
+from src.llm.providers.base import BaseLLMProvider
+from src.llm.providers.claude import ClaudeProvider
+from src.llm.providers.gemini import GeminiProvider
+from src.utils.logging import save_log
 
 logger = logging.getLogger(__name__)
 
@@ -27,21 +33,29 @@ class LLMHub:
     @staticmethod
     def call_model(
         model_name: str,
-        prompt: str,
-        api_caller: Optional[Any] = None
+        prompt_name: str,
+        prompt_manager: 'PromptManager',
+        **kwargs
     ) -> AIProviderResponse:
         """
         指定されたモデルでプロンプトを実行
         
         Args:
             model_name: モデル名
-            prompt: プロンプト
-            api_caller: API呼び出し用のオブジェクト（テスト用）
+            prompt_name: プロンプト名
+            prompt_manager: プロンプトマネージャ
+            **kwargs: テンプレートに渡すパラメータ
             
         Returns:
             AIProviderResponse: モデルの応答
         """
-        return call_model(model_name, prompt, api_caller)
+        provider = get_provider(model_name)
+        if not provider:
+            raise AIProviderError(f"Provider not found: {model_name}")
+        prompt = prompt_manager.get(model_name, prompt_name)
+        if prompt is None:
+            raise PromptNotFoundError(f"Prompt not found: {model_name}.{prompt_name}")
+        return provider.chat(prompt, model_name, prompt_manager, **kwargs)
     
     @staticmethod
     def chat(
@@ -98,70 +112,41 @@ class LLMHub:
         """
         return generate_structure(provider_name, requirements)
 
-def call_model(
-    model_name: str,
-    prompt: str,
-    api_caller: Optional[Any] = None
-) -> AIProviderResponse:
+def get_provider(provider_name: str) -> Optional[BaseLLMProvider]:
     """
-    指定されたモデルでプロンプトを実行
+    プロバイダ名からプロバイダインスタンスを取得する
     
     Args:
-        model_name: モデル名
-        prompt: プロンプト
-        api_caller: API呼び出し用のオブジェクト（テスト用）
+        provider_name (str): プロバイダ名（"claude" または "gemini"）
         
     Returns:
-        AIProviderResponse: モデルの応答
+        Optional[BaseLLMProvider]: プロバイダインスタンス、存在しない場合はNone
     """
-    # モデル名からプロバイダーを特定
-    provider_name = None
-    if "claude" in model_name.lower():
-        provider_name = "claude"
-    elif "gemini" in model_name.lower():
-        provider_name = "gemini"
-    elif "gpt" in model_name.lower():
-        provider_name = "chatgpt"
-    
-    if not provider_name:
-        raise ValueError(f"Unknown model: {model_name}")
-    
-    try:
-        # テスト用のAPI呼び出し
-        if api_caller:
-            return api_caller(prompt)
-        
-        # 通常のAPI呼び出し
-        messages = [
-            ChatMessage(role="user", content=prompt)
-        ]
-        
-        response = AIController.call(
-            provider=provider_name,
-            messages=messages,
-            model=model_name
-        )
-        
-        return {
-            "content": response.get("content", ""),
-            "provider": provider_name,
-            "raw": response
-        }
-        
-    except (APIRequestError, ResponseFormatError) as e:
-        logger.error(f"Error in model call with {model_name}: {str(e)}")
-        return {
-            "content": "",
-            "provider": provider_name,
-            "error": str(e)
-        }
-    except Exception as e:
-        logger.error(f"Unexpected error in model call with {model_name}: {str(e)}")
-        return {
-            "content": "",
-            "provider": provider_name,
-            "error": str(e)
-        }
+    if provider_name == "claude":
+        return ClaudeProvider(prompt_manager)
+    elif provider_name == "gemini":
+        return GeminiProvider(prompt_manager)
+    return None
+
+def call_model(provider_name: str, model_name: str, prompt_name: str, prompt_manager: 'PromptManager', **kwargs) -> str:
+    """
+    AIモデルを呼び出して応答を取得する
+    Args:
+        provider_name (str): プロバイダ名
+        model_name (str): モデル名
+        prompt_name (str): プロンプト名
+        prompt_manager (PromptManager): プロンプトマネージャ
+        **kwargs: テンプレートに渡すパラメータ
+    Returns:
+        str: 生成された応答
+    """
+    provider = get_provider(provider_name)
+    if not provider:
+        raise AIProviderError(f"Provider not found: {provider_name}")
+    prompt = prompt_manager.get(provider_name, prompt_name)
+    if prompt is None:
+        raise PromptNotFoundError(f"Prompt not found: {provider_name}.{prompt_name}")
+    return provider.chat(prompt, model_name, prompt_manager, **kwargs)
 
 def chat(
     provider_name: str,

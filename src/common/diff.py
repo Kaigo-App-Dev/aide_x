@@ -3,7 +3,7 @@
 """
 import difflib
 from typing import List, Dict, Any, Optional
-from src.common.types import DiffResult, StructureDict
+from src.types import DiffResult, StructureDict
 
 def get_diff_highlighted(original: str, transformed: str) -> str:
     """

@@ -20,8 +20,8 @@ from src.structure.utils import (
 )
 from typing import Dict, Any, Optional
 import logging
-from src.common.exceptions import APIRequestError, ResponseFormatError
-from src.common.types import StructureDict, EvaluationResult
+from src.exceptions import APIRequestError, ResponseFormatError
+from src.types import StructureDict, EvaluationResult
 from src.structure.utils import (
     validate_structure,
     normalize_structure_format,

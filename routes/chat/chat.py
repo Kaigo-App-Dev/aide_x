@@ -13,18 +13,22 @@ import os
 from datetime import datetime
 from typing import Dict, Any, List, Optional, cast
 
-from src.common.exceptions import APIRequestError, ResponseFormatError
-from src.common.types import (
+from src.exceptions import APIRequestError, ResponseFormatError
+from src.types import (
     StructureDict,
     EvaluationResult,
     StructureHistory,
-    LLMResponse
+    LLMResponse,
+    ChatHistory,
+    MessageParam,
+    MessageParamList
 )
 from src.structure.utils import (
     validate_structure,
     normalize_structure_format,
     save_structure,
-    load_structure
+    load_structure,
+    append_structure_log
 )
 from src.llm.providers.claude import call_claude_api as call_claude
 from src.llm.providers.claude import call_claude_evaluation
@@ -38,8 +42,9 @@ from src.llm.hub import safe_generate_and_evaluate
 from src.structure.evaluation import evaluate_with_claude, call_claude_and_gpt
 
 # --- 構成保存・差分処理 ---
-from src.structure.utils import append_structure_log
-from src.common.diff import get_diff_highlighted
+from src.diff import get_diff_highlighted
+
+from src.llm.providers.base import ChatMessage
 
 logger = logging.getLogger(__name__)
 

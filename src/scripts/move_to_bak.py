@@ -9,6 +9,7 @@
 import os
 import shutil
 import logging
+import glob
 from pathlib import Path
 from typing import List, Optional
 
@@ -29,7 +30,31 @@ TARGETS = [
     "app.log",
     "__pycache__",
     ".pytest_cache",
-    ".mypy_cache"
+    ".mypy_cache",
+    "logs/",
+    "uploads/",
+    "data/cache/",
+    "data/temp/",
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    ".coverage",
+    "htmlcov/",
+    ".DS_Store",
+    "Thumbs.db",
+    "*.swp",
+    "*.swo",
+    "*.bak",
+    "*.tmp",
+    "*.temp",
+    "node_modules/",
+    "dist/",
+    "build/",
+    ".env.local",
+    ".env.*.local",
+    "npm-debug.log*",
+    "yarn-debug.log*",
+    "yarn-error.log*"
 ]
 
 def ensure_bak_dir() -> Path:
@@ -48,15 +73,29 @@ def ensure_bak_dir() -> Path:
 def move_to_bak(target: str, bak_dir: Path, overwrite: bool = True) -> bool:
     """
     指定されたファイルまたはディレクトリを.bakディレクトリに移動します。
+    グロブパターンに対応しています。
     
     Args:
-        target (str): 移動対象のパス
+        target (str): 移動対象のパス（グロブパターン可）
         bak_dir (Path): .bakディレクトリのパス
         overwrite (bool): 既存ファイルを上書きするかどうか
         
     Returns:
         bool: 移動が成功したかどうか
     """
+    # グロブパターンの処理
+    if '*' in target:
+        matches = glob.glob(target, recursive=True)
+        if not matches:
+            logger.warning(f"No files found matching pattern: {target}")
+            return False
+        
+        success = True
+        for match in matches:
+            if not move_to_bak(match, bak_dir, overwrite):
+                success = False
+        return success
+    
     source = Path(target)
     if not source.exists():
         logger.warning(f"Source does not exist: {target}")

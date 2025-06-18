@@ -1,5 +1,5 @@
 from typing import List, Dict, Any, Optional
-from src.common.types import StructureDict, EvaluationResult
+from src.types import StructureDict, EvaluationResult
 
 def summarize_user_requirements(chat_history: List[Dict[str, Any]]) -> str:
     """

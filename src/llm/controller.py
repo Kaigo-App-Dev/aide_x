@@ -10,15 +10,19 @@ import os
 from enum import Enum
 from dotenv import load_dotenv
 import json
-from .providers.base import BaseLLMProvider
+from .providers.base import BaseLLMProvider, ChatMessage
 from .providers.chatgpt import ChatGPTProvider
 from .providers.claude import ClaudeProvider
 from .providers.gemini import GeminiProvider
 from .prompts import prompt_manager
-from src.common.exceptions import AIProviderError, ResponseFormatError
+from src.exceptions import AIProviderError, ResponseFormatError
 from src.llm.prompts.manager import PromptManager
+from src.types import LLMResponse, AIProviderResponse, StructureDict, EvaluationResult
 
-from src.common.types import LLMResponse
+# ✅ テスト環境向けダミーAPIキーを未設定時に補完
+os.environ.setdefault("GOOGLE_API_KEY", "dummy_key")
+os.environ.setdefault("CLAUDE_API_KEY", "dummy_key")
+os.environ.setdefault("OPENAI_API_KEY", "dummy_key")
 
 logger = logging.getLogger(__name__)
 
@@ -132,16 +136,21 @@ def create_controller() -> AIController:
 
     controller = AIController(prompt_manager=prompt_manager)
 
+    # AIプロバイダーの初期化
+    chatgpt_provider = ChatGPTProvider(prompt_manager=prompt_manager)
+    claude_provider = ClaudeProvider(prompt_manager=prompt_manager)
+    gemini_provider = GeminiProvider(prompt_manager=prompt_manager)
+
     # ChatGPTプロバイダの登録
     try:
-        controller.register_provider("chatgpt", ChatGPTProvider())
+        controller.register_provider("chatgpt", chatgpt_provider)
     except Exception as e:
         logger.error(f"❌ ChatGPTプロバイダ登録失敗: {str(e)}")
         controller.failed_providers["chatgpt"] = str(e)
 
     # Claudeプロバイダの登録
     try:
-        controller.register_provider("claude", ClaudeProvider(api_key=os.getenv("ANTHROPIC_API_KEY")))
+        controller.register_provider("claude", claude_provider)
     except Exception as e:
         logger.error(f"❌ Claudeプロバイダ登録失敗: {str(e)}")
         controller.failed_providers["claude"] = str(e)
@@ -151,7 +160,7 @@ def create_controller() -> AIController:
         gemini_key = os.getenv("GEMINI_API_KEY")
         if not gemini_key:
             raise ValueError("GEMINI_API_KEYが設定されていません")
-        controller.register_provider("gemini", GeminiProvider(api_key=gemini_key))
+        controller.register_provider("gemini", gemini_provider)
     except Exception as e:
         logger.error(f"❌ Geminiプロバイダ登録失敗: {str(e)}")
         controller.failed_providers["gemini"] = str(e)

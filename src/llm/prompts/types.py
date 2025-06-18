@@ -4,7 +4,15 @@
 このモジュールは、プロンプト管理に使用される型定義を提供します。
 """
 
-from typing import TypedDict, Optional
+from typing import TypedDict, Optional, List
+
+class MessageParam(TypedDict):
+    """メッセージパラメータの型定義"""
+    role: str
+    content: str
+    name: Optional[str]
+
+MessageParamList = List[MessageParam]
 
 class PromptTemplate:
     """プロンプトテンプレートクラス"""

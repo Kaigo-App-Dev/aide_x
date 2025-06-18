@@ -5,26 +5,22 @@ Gemini AIプロバイダー
 """
 
 import logging
-import google.generativeai as genai
-from google.generativeai.types import (
-    GenerateContentResponse,
-    GenerationConfig
-)
-from google.generativeai.client import configure
-from google.generativeai.generative_models import GenerativeModel
+from google import generativeai as genai
 from src.llm.providers.base import BaseLLMProvider, ChatMessage
 from src.llm.providers.types import AIProviderResponse
-from src.common.exceptions import GeminiAPIError, PromptNotFoundError, ResponseFormatError
-from src.common.logging_utils import save_log
+from src.exceptions import GeminiAPIError, PromptNotFoundError, ResponseFormatError, APIRequestError
+from src.utils.logging import save_log
 from src.llm.prompts.manager import PromptManager
+from src.structure_feedback_engine import StructureFeedbackEngine
 import os
 import json
 import requests
 import re
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Dict, Any, Optional, Union, Tuple
 from datetime import datetime
 import yaml
 from src.exceptions import ProviderInitializationError, APIKeyMissingError
+from copy import deepcopy
 
 logger = logging.getLogger(__name__)
 
@@ -41,14 +37,44 @@ def safe_yaml_to_json(yaml_str: str) -> Dict[str, Any]:
         return {}
 
 def fix_unquoted_keys(json_str: str) -> str:
-    """未クオートのJSONキーを修正する"""
+    """
+    未クオートのJSONキーを修正する
+    
+    Args:
+        json_str (str): 修正対象のJSON文字列
+        
+    Returns:
+        str: 修正後のJSON文字列
+    """
+    # 文字列リテラル内のコロンを保護
+    protected_str = re.sub(r'"[^"]*"', lambda m: m.group(0).replace(':', '\\u003A'), json_str)
+    
     # 未クオートのキーを検出して修正
-    pattern = r'([{,])\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:'
-    fixed = re.sub(pattern, r'\1"\2":', json_str)
+    # 1. オブジェクトの開始（{）またはカンマ（,）の後に続く
+    # 2. 任意の空白文字
+    # 3. 有効なキー名（英数字、アンダースコア、ハイフン）
+    # 4. 任意の空白文字
+    # 5. コロン（:）
+    pattern = r'([{,])\s*([a-zA-Z_][a-zA-Z0-9_\-]*)\s*:'
+    
+    # キーをクオートで囲む
+    fixed = re.sub(pattern, r'\1"\2":', protected_str)
+    
+    # 保護した文字列リテラルを元に戻す
+    fixed = fixed.replace('\\u003A', ':')
+    
     return fixed
 
-def extract_json_part(text: str) -> Dict[str, Any]:
-    """テキストからJSON部分を抽出して解析する"""
+def extract_json_part(text: str) -> Tuple[Dict[str, Any], bool]:
+    """
+    テキストからJSON部分を抽出して解析する
+    
+    Args:
+        text (str): 入力テキスト
+        
+    Returns:
+        Tuple[Dict[str, Any], bool]: (抽出されたJSON, 修復が必要だったかどうか)
+    """
     try:
         # JSONブロックを検出
         json_match = re.search(r'```(?:json)?\s*(\{[\s\S]*?\})\s*```', text)
@@ -63,10 +89,10 @@ def extract_json_part(text: str) -> Dict[str, Any]:
         
         try:
             # 修正したJSONをパース
-            return json.loads(fixed_json)
+            return json.loads(fixed_json), True
         except json.JSONDecodeError:
             # YAMLとしてパースを試行
-            return safe_yaml_to_json(json_str)
+            return safe_yaml_to_json(json_str), True
             
     except Exception as e:
         # エラー情報をログに保存
@@ -80,7 +106,7 @@ def extract_json_part(text: str) -> Dict[str, Any]:
         with open(dump_path, "w", encoding="utf-8") as f:
             json.dump(error_dump, f, ensure_ascii=False, indent=2)
         logger.error(f"JSON extraction failed: {e}")
-        return {}
+        return {}, False
 
 class GeminiProvider(BaseLLMProvider):
     """Gemini AIプロバイダークラス"""
@@ -91,7 +117,7 @@ class GeminiProvider(BaseLLMProvider):
         
         Args:
             prompt_manager (PromptManager): プロンプト管理インスタンス（必須）
-            api_key (Optional[str]): Gemini APIキー（環境変数GEMINI_API_KEYまたはGCP_GEMINI_API_KEYからも取得可能）
+            api_key (Optional[str]): Google APIキー（環境変数GOOGLE_API_KEYからも取得可能）
             
         Raises:
             ProviderInitializationError: prompt_managerが指定されていない場合
@@ -103,15 +129,22 @@ class GeminiProvider(BaseLLMProvider):
             raise ProviderInitializationError("gemini", error_msg)
         self.prompt_manager = prompt_manager
         
-        self.api_key = api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GCP_GEMINI_API_KEY")
+        self.api_key = api_key or os.getenv("GOOGLE_API_KEY")
         if not self.api_key:
-            logger.error("GEMINI_API_KEY or GCP_GEMINI_API_KEY environment variable is not set")
-            raise APIKeyMissingError("gemini", ["GEMINI_API_KEY", "GCP_GEMINI_API_KEY"])
+            logger.error("GOOGLE_API_KEY environment variable is not set")
+            raise APIKeyMissingError("gemini", ["GOOGLE_API_KEY"])
         
-        logger.info("GeminiProvider initialized with PromptManager and API Key")
-        super().__init__(model="gemini-pro")
-        genai.configure(api_key=self.api_key)
-        self.model = genai.GenerativeModel(self.model)
+        try:
+            genai.configure(api_key=self.api_key)
+            self.model_name = "gemini-pro"
+            self.model = genai.GenerativeModel(self.model_name)
+            self.feedback_engine = StructureFeedbackEngine()
+            logger.info("GeminiProvider initialized with PromptManager and API Key")
+            super().__init__(model=self.model_name)
+        except Exception as e:
+            error_msg = f"Failed to initialize Gemini model: {str(e)}"
+            logger.error(error_msg)
+            raise ProviderInitializationError("gemini", error_msg)
     
     def generate_response(self, prompt: str, **kwargs) -> str:
         """
@@ -147,7 +180,7 @@ class GeminiProvider(BaseLLMProvider):
                 "Gemini API request",
                 logging.INFO,
                 {
-                    "model": self.model,
+                    "model": self.model_name,
                     "prompt": prompt,
                     "temperature": kwargs.get("temperature", 0.7),
                     "max_tokens": kwargs.get("max_tokens", 1024)
@@ -170,34 +203,48 @@ class GeminiProvider(BaseLLMProvider):
             # JSONレスポンスの処理
             if kwargs.get("expect_json", False):
                 try:
-                    result = json.loads(content)
-                except json.JSONDecodeError:
-                    raise ResponseFormatError("Gemini: Failed to parse JSON response.")
-                
-                # レスポンスログの保存
-                save_log(
-                    "Gemini API response",
-                    logging.INFO,
-                    {
-                        "model": self.model,
-                        "result": result,
-                        "raw": str(response)
-                    }
-                )
-                
-                return AIProviderResponse(
-                    content=json.dumps(result),
-                    raw=response,
-                    provider="gemini",
-                    error=None
-                )
+                    # JSON部分を抽出
+                    extracted_json, was_repaired = extract_json_part(content)
+                    if not extracted_json:
+                        raise ResponseFormatError("Gemini: Failed to extract valid JSON from response.")
+                    
+                    # 構造フィードバックエンジンを使用してJSONを処理
+                    reference_json = kwargs.get("reference_json")
+                    if reference_json:
+                        result = self.feedback_engine.process_structure(
+                            json.dumps(extracted_json),
+                            reference_json
+                        )
+                    else:
+                        result = extracted_json
+                    
+                    # レスポンスログの保存
+                    save_log(
+                        "Gemini API response",
+                        logging.INFO,
+                        {
+                            "model": self.model_name,
+                            "result": result,
+                            "was_repaired": was_repaired,
+                            "raw": str(response)
+                        }
+                    )
+                    
+                    return AIProviderResponse(
+                        content=json.dumps(result),
+                        raw=response,
+                        provider="gemini",
+                        error=None
+                    )
+                except Exception as e:
+                    raise ResponseFormatError(f"Gemini: Failed to process JSON response: {str(e)}")
             
             # 通常レスポンスのログ保存
             save_log(
                 "Gemini API response",
                 logging.INFO,
                 {
-                    "model": self.model,
+                    "model": self.model_name,
                     "result": content,
                     "raw": str(response)
                 }
@@ -215,7 +262,7 @@ class GeminiProvider(BaseLLMProvider):
                 "Gemini API error",
                 logging.ERROR,
                 {
-                    "model": self.model,
+                    "model": self.model_name,
                     "error": error_msg,
                     "prompt": prompt
                 }
@@ -232,7 +279,7 @@ class GeminiProvider(BaseLLMProvider):
                 "Gemini API error",
                 logging.ERROR,
                 {
-                    "model": self.model,
+                    "model": self.model_name,
                     "error": error_msg,
                     "prompt": prompt
                 }
@@ -244,74 +291,66 @@ class GeminiProvider(BaseLLMProvider):
                 error=error_msg
             )
 
-    def chat(self, messages: list[ChatMessage]) -> str:
-        """チャットメッセージを処理して応答を返す"""
+    def chat(self, prompt: 'Prompt', model_name: str, prompt_manager: 'PromptManager', **kwargs) -> str:
+        """
+        Gemini用の統一chatインターフェース
+        Args:
+            prompt (Prompt): プロンプトテンプレート
+            model_name (str): モデル名
+            prompt_manager (PromptManager): プロンプトマネージャ
+            **kwargs: 追加パラメータ
+        Returns:
+            str: 生成された応答
+        """
         try:
-            # プロンプトの取得とレンダリング
-            prompt = self.prompt_manager.get_prompt("gemini", "chat")
-            if not prompt:
-                raise PromptNotFoundError("Gemini: Prompt not found")
-            
-            # メッセージを整形
-            content = "\n".join([f"{m.role}: {m.content}" for m in messages])
-            
-            # プロンプトの置換
-            try:
-                system_prompt = prompt.template.format(user_input=content)
-            except KeyError as e:
-                logger.error(f"Template format error: {str(e)}")
-                raise GeminiAPIError(f"プロンプトのフォーマットエラー: {str(e)}")
-            
-            # リクエストログの保存
+            prompt_str = prompt.format(**kwargs)
             save_log(
-                "Gemini chat request",
+                "Gemini API request",
                 logging.INFO,
                 {
-                    "model": self.model,
-                    "prompt": system_prompt,
-                    "messages": [{"role": m.role, "content": m.content} for m in messages]
+                    "model": model_name,
+                    "prompt": prompt_str
                 }
             )
-            
-            # APIリクエストの実行
             response = self.model.generate_content(
-                system_prompt,
+                prompt_str,
                 generation_config=genai.types.GenerationConfig(
-                    temperature=0.7,
-                    max_output_tokens=1024
+                    temperature=kwargs.get("temperature", 0.7),
+                    max_output_tokens=kwargs.get("max_tokens", 1024)
                 )
             )
-            
-            # レスポンスの検証
-            if not response or not response.text:
-                raise ResponseFormatError("Gemini: Empty response from API")
-            
-            content = response.text
-            
-            # レスポンスログの保存
+            if not response or not getattr(response, "text", None):
+                raise ResponseFormatError("Gemini: Response format error.")
             save_log(
-                "Gemini chat response",
+                "Gemini API response",
                 logging.INFO,
                 {
-                    "model": self.model,
-                    "result": content,
-                    "raw": str(response)
+                    "model": model_name,
+                    "result": response.text
                 }
             )
-            
-            return content
-        except Exception as e:
-            error_msg = f"Gemini: Chat error: {str(e)}"
+            return response.text
+        except ResponseFormatError as e:
             save_log(
-                "Gemini chat error",
+                "Gemini API error",
                 logging.ERROR,
                 {
-                    "model": self.model,
-                    "error": error_msg,
-                    "messages": [{"role": m.role, "content": m.content} for m in messages]
+                    "model": model_name,
+                    "error": str(e)
                 }
             )
-            raise GeminiAPIError(error_msg)
+            raise
+        except Exception as e:
+            error_msg = f"Gemini: API request error: {str(e)}"
+            save_log(
+                "Gemini API error",
+                logging.ERROR,
+                {
+                    "model": model_name,
+                    "error": error_msg
+                }
+            )
+            raise APIRequestError(error_msg)
 
 def call_gemini_api(
     messages: List[Dict[str, str]],

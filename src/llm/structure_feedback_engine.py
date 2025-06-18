@@ -4,9 +4,9 @@ Structure Feedback Engine
 
 import logging
 from typing import Dict, Any, List, Optional
-from src.common.exceptions import AIProviderError
+from src.exceptions import AIProviderError
 from src.llm.controller import AIController
-from src.common.logger import save_log
+from src.logger import save_log
 import json
 import os
 from datetime import datetime

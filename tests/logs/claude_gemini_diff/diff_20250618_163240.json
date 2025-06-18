@@ -1,0 +1,33 @@
+{
+  "timestamp": "20250618_163240",
+  "original": "\n    {\n        title: \"不完全な構造\",\n        content: {\n            section1: {\n                title: \"セクション1\"\n            }\n        }\n    }\n    ",
+  "repaired": {
+    "title": "不完全な構造",
+    "content": {
+      "section1": {
+        "title": "セクション1"
+      }
+    }
+  },
+  "reference": {
+    "title": "テスト構造",
+    "description": "テスト用の構造です",
+    "content": {
+      "section1": {
+        "title": "セクション1",
+        "items": [
+          "item1",
+          "item2"
+        ]
+      },
+      "section2": {
+        "title": "セクション2",
+        "items": [
+          "item3",
+          "item4"
+        ]
+      }
+    }
+  },
+  "diff": "--- \n+++ \n@@ -1,10 +1,8 @@\n-\n-    {\n-        title: \"不完全な構造\",\n-        content: {\n-            section1: {\n-                title: \"セクション1\"\n-            }\n-        }\n+{\n+  \"title\": \"\\u4e0d\\u5b8c\\u5168\\u306a\\u69cb\\u9020\",\n+  \"content\": {\n+    \"section1\": {\n+      \"title\": \"\\u30bb\\u30af\\u30b7\\u30e7\\u30f31\"\n     }\n-    \n+  }\n+}"
+}

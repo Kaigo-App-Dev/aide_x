@@ -8,7 +8,7 @@ from datetime import datetime
 from src.llm.controller import AIController
 from src.llm.providers.claude import ClaudeProvider
 from src.llm.providers.base import ChatMessage
-from src.common.exceptions import AIProviderError, APIRequestError, ResponseFormatError
+from src.exceptions import AIProviderError, APIRequestError, ResponseFormatError
 
 from src.structure.utils import save_structure, append_structure_log
 

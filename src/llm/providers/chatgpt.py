@@ -9,8 +9,8 @@ import openai
 from openai.types.chat import ChatCompletion
 from src.llm.providers.base import BaseLLMProvider, ChatMessage
 from src.llm.providers.types import AIProviderResponse
-from src.common.exceptions import ChatGPTAPIError, PromptNotFoundError, ResponseFormatError
-from src.common.logging_utils import save_log
+from src.exceptions import ChatGPTAPIError, PromptNotFoundError, ResponseFormatError, APIRequestError
+from src.utils.logging import save_log
 from src.llm.prompts.manager import PromptManager
 import os
 import json
@@ -130,6 +130,72 @@ class ChatGPTProvider:
             Optional[str]: テンプレート文字列、存在しない場合はNone
         """
         return self.prompt_manager.get_template("chatgpt", template_name)
+
+    def chat(
+        self,
+        messages: List[ChatMessage],
+        prompt_manager: Optional[PromptManager] = None,
+        temperature: float = 0.7,
+        max_tokens: Optional[int] = None
+    ) -> str:
+        """
+        チャットメッセージを処理して応答を返す
+        
+        Args:
+            messages: チャットメッセージのリスト
+            prompt_manager: プロンプト管理インスタンス（省略時はインスタンス変数を使用）
+            temperature: 生成の多様性を制御するパラメータ（0.0-1.0）
+            max_tokens: 生成する最大トークン数
+            
+        Returns:
+            str: 生成された応答
+            
+        Raises:
+            PromptNotFoundError: プロンプトが見つからない場合
+            APIRequestError: APIリクエストが失敗した場合
+            ResponseFormatError: レスポンスの形式が不正な場合
+        """
+        # プロンプトマネージャーの取得
+        pm = prompt_manager or self.prompt_manager
+        if not pm:
+            raise PromptNotFoundError("chatgpt", "prompt_manager")
+        
+        # メッセージの変換
+        api_messages = []
+        for msg in messages:
+            if msg.role == "system":
+                system_messages = pm.format_messages(
+                    provider="chatgpt",
+                    template_name="system",
+                    content=msg.content
+                )
+                api_messages.extend(system_messages)
+            else:
+                api_messages.append({
+                    "role": msg.role,
+                    "content": msg.content
+                })
+        
+        try:
+            # APIリクエストの送信
+            response = call_chatgpt_api(
+                messages=api_messages,
+                model="gpt-3.5-turbo",
+                temperature=temperature
+            )
+            
+            # レスポンスの検証
+            if not response or "choices" not in response or not response["choices"]:
+                raise ResponseFormatError("ChatGPT: Empty response from API")
+            
+            content = response["choices"][0]["message"]["content"]
+            if not content:
+                raise ResponseFormatError("ChatGPT: Empty content in response")
+            
+            return content
+            
+        except Exception as e:
+            raise APIRequestError(f"ChatGPT: API request error: {str(e)}")
 
 # ✅ 構成改善案の生成
 def generate_improvement(text: str) -> str:

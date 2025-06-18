@@ -1,6 +1,6 @@
 import difflib
 from typing import Optional, List, Dict, Any
-from src.common.types import StructureDict, EvaluationResult
+from src.types import StructureDict, EvaluationResult
 
 # 🧠 指示・誘導メッセージ（ChatGPT向け）
 GUIDED_MESSAGES = {

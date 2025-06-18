@@ -1,27 +1,25 @@
 """
 Claude AIプロバイダー
 
-このモジュールは、AnthropicのClaude AIモデルを使用するためのプロバイダーを提供します。
+このモジュールは、AnthropicのClaudeモデルを使用するためのプロバイダーを提供します。
 """
 
 import logging
-import anthropic
-import requests
-from anthropic.types import Message, ContentBlock
+from anthropic import Anthropic
 from src.llm.providers.base import BaseLLMProvider, ChatMessage
 from src.llm.providers.types import AIProviderResponse
-from src.common.exceptions import ClaudeAPIError, PromptNotFoundError, ResponseFormatError
-from src.common.logging_utils import save_log
+from src.exceptions import ClaudeAPIError, PromptNotFoundError, ResponseFormatError, APIRequestError
+from src.utils.logging import save_log
 from src.llm.prompts.manager import PromptManager
 import os
-import json
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Dict, Any, Optional
 from datetime import datetime
+import json
 from src.exceptions import ProviderInitializationError, APIKeyMissingError
 
 logger = logging.getLogger(__name__)
 
-class ClaudeProvider:
+class ClaudeProvider(BaseLLMProvider):
     """Claude AIプロバイダークラス"""
     
     def __init__(self, prompt_manager: PromptManager, api_key: Optional[str] = None):
@@ -47,7 +45,10 @@ class ClaudeProvider:
             logger.error("ANTHROPIC_API_KEY environment variable is not set")
             raise APIKeyMissingError("claude", ["ANTHROPIC_API_KEY"])
         
+        self.client = Anthropic(api_key=self.api_key)
+        self.model_name = "claude-3-opus-20240229"
         logger.info("ClaudeProvider initialized with PromptManager and API Key")
+        super().__init__(model=self.model_name)
     
     def generate_response(self, prompt: str, **kwargs) -> str:
         """
@@ -60,8 +61,25 @@ class ClaudeProvider:
         Returns:
             str: 生成された応答
         """
-        # TODO: Claude APIの実装
-        return "Claude response placeholder"
+        try:
+            response = self.client.messages.create(
+                model=self.model_name,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=kwargs.get("temperature", 0.7),
+                max_tokens=kwargs.get("max_tokens", 1024)
+            )
+            return response.content[0].text
+        except Exception as e:
+            error_msg = f"Claude: API request error: {str(e)}"
+            save_log(
+                "Claude API error",
+                logging.ERROR,
+                {
+                    "model": self.model_name,
+                    "error": error_msg
+                }
+            )
+            raise APIRequestError(error_msg)
     
     def get_template(self, template_name: str) -> Optional[str]:
         """
@@ -74,6 +92,66 @@ class ClaudeProvider:
             Optional[str]: テンプレート文字列、存在しない場合はNone
         """
         return self.prompt_manager.get_template("claude", template_name)
+
+    def chat(self, prompt: 'Prompt', model_name: str, prompt_manager: 'PromptManager', **kwargs) -> str:
+        """
+        Claude用の統一chatインターフェース
+        Args:
+            prompt (Prompt): プロンプトテンプレート
+            model_name (str): モデル名
+            prompt_manager (PromptManager): プロンプトマネージャ
+            **kwargs: 追加パラメータ
+        Returns:
+            str: 生成された応答
+        """
+        try:
+            prompt_str = prompt.format(**kwargs)
+            save_log(
+                "Claude API request",
+                logging.INFO,
+                {
+                    "model": model_name,
+                    "prompt": prompt_str
+                }
+            )
+            response = self.client.messages.create(
+                model=model_name,
+                messages=[{"role": "user", "content": prompt_str}],
+                temperature=kwargs.get("temperature", 0.7),
+                max_tokens=kwargs.get("max_tokens", 1024)
+            )
+            if not response or not response.content:
+                raise ResponseFormatError("Claude: Response format error.")
+            save_log(
+                "Claude API response",
+                logging.INFO,
+                {
+                    "model": model_name,
+                    "result": response.content[0].text
+                }
+            )
+            return response.content[0].text
+        except ResponseFormatError as e:
+            save_log(
+                "Claude API error",
+                logging.ERROR,
+                {
+                    "model": model_name,
+                    "error": str(e)
+                }
+            )
+            raise
+        except Exception as e:
+            error_msg = f"Claude: API request error: {str(e)}"
+            save_log(
+                "Claude API error",
+                logging.ERROR,
+                {
+                    "model": model_name,
+                    "error": error_msg
+                }
+            )
+            raise APIRequestError(error_msg)
 
 def call_claude_api(
     messages: List[Dict[str, str]],

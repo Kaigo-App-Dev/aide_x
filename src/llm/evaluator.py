@@ -5,9 +5,10 @@
 """
 
 import logging
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, TYPE_CHECKING
 from src.llm.controller import AIController
-from src.llm.evaluators.claude_evaluator import ClaudeEvaluator
+if TYPE_CHECKING:
+    from src.llm.evaluators.claude_evaluator import ClaudeEvaluator
 from src.llm.evaluators.gemini_evaluator import GeminiEvaluator
 from src.exceptions import ProviderError, PromptError
 
@@ -56,7 +57,7 @@ def evaluate_structure_with(
     # 最初のプロバイダーで評価を試みる
     try:
         if provider_name == "claude":
-            evaluator = ClaudeEvaluator()
+            evaluator: 'ClaudeEvaluator' = ClaudeEvaluator()
             result = evaluator.evaluate(structure)
             if result.is_valid:
                 logger.debug(f"[CLAUDE] 評価成功: score={result.score}, valid={result.is_valid}")

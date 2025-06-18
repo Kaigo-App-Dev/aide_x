@@ -4,7 +4,7 @@
 
 import logging
 from typing import Dict, Any, List, Optional
-from src.common.types import EvaluationResult
+from src.types import EvaluationResult
 from src.structure.evaluator import evaluate_structure_with
 from src.llm.providers.claude import call_claude_evaluation, call_claude_api
 from src.llm.providers.gemini import call_gemini_api

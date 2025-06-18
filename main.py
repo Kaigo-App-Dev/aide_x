@@ -19,8 +19,8 @@ from src.routes.edit_routes import edit_bp
 from flask_cors import CORS
 import json
 from datetime import datetime
-from src.common.preview import render_html_from_structure
-from src.common.text import nl2br
+from src.preview import render_html_from_structure
+from src.text import structure_to_text
 from config import get_config
 from extensions import init_extensions
 from error_handlers import register_error_handlers
@@ -33,8 +33,9 @@ from src.llm.prompts.prompt_loader import register_all_yaml_templates
 from src.llm.controller import AIController
 from src.llm.providers import ChatGPTProvider, ClaudeProvider, GeminiProvider
 from src.routes import register_routes
-from src.config import Config
-from src.common.exceptions import AIProviderError, APIRequestError, ResponseFormatError
+from src.config.config import Config
+from src.exceptions import AIProviderError, APIRequestError, ResponseFormatError
+from typing import Dict, Any, Optional, List
 
 # アプリケーション設定
 FLASK_DEBUG = os.getenv("FLASK_DEBUG", "True").lower() == "true"
@@ -71,6 +72,8 @@ logger = logging.getLogger(__name__)
 # 出力バッファのフラッシュ設定
 sys.stdout.reconfigure(line_buffering=True)  # Python 3.7以上
 sys.stderr.reconfigure(line_buffering=True)  # Python 3.7以上
+
+# 標準出力のエンコーディングをUTF-8に設定（必要な場合のみ）
 
 # 環境変数から設定を取得
 config = get_config()

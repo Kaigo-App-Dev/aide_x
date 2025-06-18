@@ -5,7 +5,7 @@ from src.llm.controller import AIController
 from src.llm.providers.base import ChatMessage
 from typing import Dict, Any, Optional, List, cast, TypedDict, Union
 import logging
-from src.common.types import StructureDict, EvaluationResult, LLMResponse
+from src.types import StructureDict, EvaluationResult, LLMResponse
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,5 @@
 from typing import Dict, Any, List, Optional
-from src.common.types import StructureDict, EvaluationResult
+from src.types import StructureDict, EvaluationResult
 
 CURSOR_SYSTEM_PROMPT = """
 あなたは構成テンプレートを評価するAIです。

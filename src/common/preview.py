@@ -1,5 +1,5 @@
 from typing import Dict, Any, Optional, List
-from src.common.types import StructureDict, UIComponent
+from src.types import StructureDict, UIComponent
 
 def render_html_from_structure(structure: StructureDict) -> str:
     """

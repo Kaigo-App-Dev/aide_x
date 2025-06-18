@@ -5,7 +5,7 @@ ChatGPT Provider Tests
 import pytest
 from unittest.mock import patch, MagicMock
 from src.llm.providers.chatgpt import ChatGPTProvider
-from src.common.exceptions import AIProviderError, PromptNotFoundError, APIRequestError, ResponseFormatError
+from src.exceptions import AIProviderError, PromptNotFoundError, APIRequestError, ResponseFormatError
 from src.llm.prompts import prompt_manager, PromptManager
 from src.llm.providers.base import ChatMessage
 
@@ -19,7 +19,7 @@ def mock_prompt_manager():
 
 @pytest.fixture
 def mock_save_log():
-    with patch("src.common.logging_utils.save_log") as mock:
+    with patch("src.logging_utils.save_log") as mock:
         yield mock
 
 @pytest.fixture
@@ -34,10 +34,10 @@ def mock_openai():
 
 def test_chat_success(mock_prompt_manager, mock_save_log, mock_openai):
     """正常系: チャットが成功し、適切なレスポンスとログが返される"""
-    provider = ChatGPTProvider()
+    provider = ChatGPTProvider(prompt_manager=mock_prompt_manager)
     messages = [ChatMessage(role="user", content="Test message")]
     
-    result = provider.chat(messages)
+    result = provider.chat(messages, prompt_manager=mock_prompt_manager)
     
     assert result == "Test response"
     mock_save_log.assert_any_call(
@@ -66,20 +66,20 @@ def test_prompt_not_found(mock_prompt_manager, mock_save_log):
     """異常系: プロンプトが見つからない場合"""
     mock_prompt_manager.get_prompt.return_value = None
     
-    provider = ChatGPTProvider()
+    provider = ChatGPTProvider(prompt_manager=mock_prompt_manager)
     with pytest.raises(PromptNotFoundError) as exc_info:
-        provider.chat([ChatMessage(role="user", content="Test message")])
+        provider.chat([ChatMessage(role="user", content="Test message")], prompt_manager=mock_prompt_manager)
     
-    assert "ChatGPT: Prompt not found" in str(exc_info.value)
+    assert "Prompt template 'chat' not found for provider 'chatgpt'" in str(exc_info.value)
     mock_save_log.assert_not_called()
 
 def test_api_error(mock_prompt_manager, mock_save_log, mock_openai):
     """異常系: APIリクエストが失敗する場合"""
     mock_openai.chat.completions.create.side_effect = Exception("API error")
     
-    provider = ChatGPTProvider()
+    provider = ChatGPTProvider(prompt_manager=mock_prompt_manager)
     with pytest.raises(APIRequestError) as exc_info:
-        provider.chat([ChatMessage(role="user", content="Test message")])
+        provider.chat([ChatMessage(role="user", content="Test message")], prompt_manager=mock_prompt_manager)
     
     assert "ChatGPT: API request error" in str(exc_info.value)
     mock_save_log.assert_called_once()
@@ -88,9 +88,9 @@ def test_empty_response(mock_prompt_manager, mock_save_log, mock_openai):
     """異常系: APIレスポンスが空の場合"""
     mock_openai.chat.completions.create.return_value.choices = []
     
-    provider = ChatGPTProvider()
+    provider = ChatGPTProvider(prompt_manager=mock_prompt_manager)
     with pytest.raises(ResponseFormatError) as exc_info:
-        provider.chat([ChatMessage(role="user", content="Test message")])
+        provider.chat([ChatMessage(role="user", content="Test message")], prompt_manager=mock_prompt_manager)
     
     assert "ChatGPT: Empty response from API" in str(exc_info.value)
     mock_save_log.assert_called_once()
@@ -99,9 +99,9 @@ def test_empty_content(mock_prompt_manager, mock_save_log, mock_openai):
     """異常系: APIレスポンスのcontentが空の場合"""
     mock_openai.chat.completions.create.return_value.choices[0].message.content = ""
     
-    provider = ChatGPTProvider()
+    provider = ChatGPTProvider(prompt_manager=mock_prompt_manager)
     with pytest.raises(ResponseFormatError) as exc_info:
-        provider.chat([ChatMessage(role="user", content="Test message")])
+        provider.chat([ChatMessage(role="user", content="Test message")], prompt_manager=mock_prompt_manager)
     
     assert "ChatGPT: Empty content in response" in str(exc_info.value)
     mock_save_log.assert_called_once() 
