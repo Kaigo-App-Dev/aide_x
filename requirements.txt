@@ -1,3 +1,8 @@
 flask
 pytest
 python-dotenv
+flask-wtf==1.2.1
+flask-sqlalchemy
+flask-migrate
+flask-login
+flask-cors

@@ -1,0 +1,27 @@
+{
+  "name": "aide_x",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kaigo-App-Dev/aide_x.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kaigo-App-Dev/aide_x/issues"
+  },
+  "homepage": "https://github.com/Kaigo-App-Dev/aide_x#readme",
+  "description": "",
+  "devDependencies": {
+    "@types/react": "^19.1.7",
+    "@types/react-dom": "^19.1.6"
+  }
+}

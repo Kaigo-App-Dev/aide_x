@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>⚠ 改善提案</h2>
+
+<p><strong>構成名：</strong> {{ structure.title }}</p>
+
+<h3>Claude による改善コメント</h3>
+<p style="background-color: #f9f9f9; padding: 10px; border-left: 4px solid orange;">
+  {{ evaluation.intent_reason }}
+</p>
+
+<h4>スコア</h4>
+<ul>
+  <li>意図一致度：{{ evaluation.intent_match }} / 100</li>
+  <li>品質スコア：{{ evaluation.quality_score }} / 100</li>
+</ul>
+
+<div style="margin-top: 20px;">
+  <a href="{{ url_for('structure.edit_structure', structure_id=structure.id) }}">← 編集に戻る</a>
+</div>
+{% endblock %}

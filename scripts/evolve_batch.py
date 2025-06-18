@@ -1,13 +1,16 @@
-import sys
+"""
+Batch evolution script
+"""
+
 import os
+import json
 import logging
+from typing import Dict, Any, List, Optional
+from src.structure.utils import get_candidates_for_evolution, save_structure
+from src.llm.providers.openai import generate_improvement
+from src.llm.providers.claude import get_claude_intent_reason
 
-# 親ディレクトリをモジュール検索パスに追加
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from utils.structure_utils import get_candidates_for_evolution, save_structure
-from utils.chatgpt_utils import generate_improvement
-from utils.claude_utils import get_claude_intent_reason
+logger = logging.getLogger(__name__)
 
 # ログ設定
 LOG_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs'))
@@ -28,7 +31,7 @@ def run_evolution_loop(threshold=0.85):
     logging.info("自動進化ループ開始")
 
     candidates = get_candidates_for_evolution(threshold=threshold)
-    print(f"🧠 対象テンプレート数: {len(candidates)} 件")
+    print(f"[CHECK] 対象テンプレート数: {len(candidates)} 件")
     logging.info(f"対象テンプレート数: {len(candidates)} 件")
 
     for item in candidates:
@@ -48,7 +51,7 @@ def run_evolution_loop(threshold=0.85):
 
             save_structure(new_id, improved)
 
-            print(f"✅ {new_id} 保存・評価完了\n")
+            print(f"[OK] {new_id} 保存・評価完了\n")
             logging.info(f"{new_id} 保存・評価完了")
 
             # intent_match が一定以上なら元構成に自動採用（上書き）
@@ -61,7 +64,7 @@ def run_evolution_loop(threshold=0.85):
 
         except Exception as e:
             err_msg = f"処理失敗: {id} → {str(e)}"
-            print(f"❌ {err_msg}")
+            print(f"[ERROR] {err_msg}")
             logging.error(err_msg)
 
     print("🎉 自動進化ループ完了")

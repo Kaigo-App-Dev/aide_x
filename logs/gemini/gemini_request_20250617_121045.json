@@ -1,0 +1,24 @@
+{
+  "model": "gemini-pro",
+  "prompt": [
+    {
+      "role": "system",
+      "parts": [
+        {
+          "text": "あなたは構成テンプレートを評価するAIです。\n以下の構成に対して、以下の観点で評価を行ってください：\n\n1. 意図一致度（0-100点）\n2. 品質スコア（0-100点）\n3. 評価理由\n4. 改善提案\n\n評価結果は以下のJSON形式で返してください：\n{\n    \"intent_match\": 0.9,\n    \"quality_score\": 0.85,\n    \"intent_reason\": \"ユーザーの意図をよく理解し、適切な構成になっています\",\n    \"improvement_suggestions\": [\n        \"より詳細な説明を追加することを推奨します\",\n        \"セクションの階層構造を整理すると良いでしょう\"\n    ]\n}\n\n注意：\n- intent_match と quality_score は 0.0 から 1.0 の間の数値で返してください\n- improvement_suggestions は配列形式で、具体的な改善提案をリストアップしてください\n- 必ず有効なJSON形式で返してください"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "Test message"
+        }
+      ]
+    }
+  ],
+  "temperature": 0.7,
+  "max_tokens": 1024,
+  "timestamp": "2025-06-17T12:10:45.330591"
+}

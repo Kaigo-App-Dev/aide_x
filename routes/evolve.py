@@ -3,6 +3,10 @@ import scripts.evolve_batch as evolve_batch_module
 
 evolve_bp = Blueprint('evolve', __name__, url_prefix='/evolve')
 
+@evolve_bp.route('/')
+def index():
+    return render_template("evolve/index.html")
+
 @evolve_bp.route('/start')
 def start_evolution():
     try:

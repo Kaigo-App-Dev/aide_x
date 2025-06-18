@@ -1,87 +1,480 @@
 {% extends "base.html" %}
+
 {% block content %}
-<h2>テンプレート編集</h2>
+<div class="container mt-4">
+    <h1>構成テンプレートの編集</h1>
+    
+    <!-- テンプレート一覧 -->
+    <div class="mb-4">
+        <h2>利用可能なテンプレート</h2>
+        <div class="row">
+            {% for provider in ['claude', 'gemini', 'chatgpt'] %}
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">{{ provider|title }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            {% for template_type in ['evaluation', 'generation', 'system'] %}
+                            <li class="list-group-item">
+                                {{ template_type|title }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    {% if structure %}
+        <form method="POST" class="mt-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="mb-3">
+                <label for="title" class="form-label">タイトル</label>
+                <input type="text" class="form-control" id="title" name="title" 
+                       value="{{ structure.get('title', '') }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="description" class="form-label">説明</label>
+                <textarea class="form-control" id="description" name="description" 
+                          rows="3">{{ structure.get('description', '') }}</textarea>
+            </div>
 
-<!-- バリデーションエラー表示 -->
-{% if errors %}
-<div style="color: red; border: 1px solid red; padding: 10px; margin-bottom: 15px;">
-  <strong>⚠ 入力エラーがあります：</strong>
-  <ul>
-    {% for e in errors %}
-    <li>{{ e }}</li>
-    {% endfor %}
-  </ul>
-</div>
-{% endif %}
+            <div class="mb-3">
+                <label for="content" class="form-label">構成内容 (JSON)</label>
+                <textarea class="form-control" id="content" name="content" 
+                          rows="10" required>{{ structure.get('content', '{}') }}</textarea>
+            </div>
 
-<form method="post">
-  <label for="title">タイトル：</label><br>
-  <input type="text" name="title" id="title" value="{{ structure.title }}"><br><br>
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="is_final" name="is_final">
+                    <label class="form-check-label" for="is_final">
+                        最終版として保存
+                    </label>
+                </div>
+            </div>
 
-  <label for="description">説明：</label><br>
-  <textarea name="description" id="description" rows="3" cols="50">{{ structure.description }}</textarea><br><br>
+            <button type="submit" class="btn btn-primary" id="save_button">保存</button>
+            <button type="button" class="btn btn-success" onclick="saveStructureAjax()">Ajax保存</button>
+        </form>
 
-  <label for="content">構成内容（JSON）：</label><br>
-  <textarea name="content" id="content" rows="15" cols="80">{{ structure.content }}</textarea><br><br>
+        <!-- 評価結果表示エリア -->
+        <div id="evaluation_result" class="mt-4" style="display: none;">
+            <h2>評価結果</h2>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>スコア</h5>
+                            <div class="progress mb-3">
+                                <div id="evaluation_score" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>フィードバック</h5>
+                            <p id="evaluation_feedback"></p>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h5>詳細</h5>
+                            <div id="evaluation_details"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  <div style="margin-top: 10px;">
-    <label>
-      <input type="checkbox" name="is_final" {% if structure.is_final %}checked{% endif %}>
-      最終確定テンプレートとする
-    </label>
-  </div>
-
-  <div style="margin-top: 15px;">
-     <button type="submit" class="btn btn-success">💾 保存</button>
-     <a href="{{ url_for('preview.preview_structure', structure_id=structure.id) }}"
-        class="btn btn-info ms-2">👁 プレビュー</a>
-     <a href="{{ url_for('structure.list_structures') }}" class="btn btn-secondary ms-2">← 一覧に戻る</a>
-  </div>
-</form>
-
-<form method="get" action="{{ url_for('structure.evaluate_structure', structure_id=structure.id) }}" style="margin-top: 10px;">
-  <button type="submit" class="btn btn-warning">🧪 構成整合性チェック</button>
-</form>
-
-<form method="post" action="{{ url_for('structure.decide_structure', structure_id=structure.id) }}" style="margin-top: 10px;">
-  <button type="submit">✅ これで決定</button>
-</form>
-
-{% if structure.is_final %}
-  <p style="color: green;"><strong>✅ この構成は採用済みです。</strong></p>
-{% endif %}
-
-{% if structure.history %}
-  <hr>
-  <h3>🕓 履歴ログ</h3>
-  <table border="1" cellpadding="6" cellspacing="0">
-    <thead>
-      <tr>
-        <th>日時</th>
-        <th>操作</th>
-        <th>詳細</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for entry in structure.history|sort(attribute='timestamp', reverse=True) %}
-      <tr>
-        <td>{{ entry.timestamp[:19]|replace("T", " ") }}</td>
-        <td>{{ entry.action }}</td>
-        <td>
-          {{ entry.detail }}
-          {% if entry.snapshot %}
-            <form method="post" action="{{ url_for('structure.restore_from_history', structure_id=structure.id) }}" style="display:inline;">
-              <input type="hidden" name="timestamp" value="{{ entry.timestamp }}">
-              <button type="submit" style="margin-left: 10px;">🔄 この時点に戻す</button>
+        <!-- Gemini UI生成フォーム -->
+        <div class="mt-4">
+            <form method="post" action="{{ url_for('structure.gemini_generate_ui_from_button', structure_id=structure.id) }}" class="mb-3">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-info" id="generateUiBtn">
+                    <i class="fas fa-magic"></i> GeminiでUI構成を生成
+                </button>
             </form>
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-{% else %}
-  <p><small>履歴はまだ記録されていません。</small></p>
-{% endif %}
+            <div id="gemini_ui" class="mt-3">
+                {% if structure.get('ui_content') %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Gemini UI提案</h5>
+                        </div>
+                        <div class="card-body">
+                            {{ structure.get('ui_content') | safe }}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div id="gemini_error" class="alert alert-danger mt-3" style="display: none;"></div>
+        </div>
 
+        {% if structure.get('sections') %}
+        <div class="mt-4">
+            <h2>セクション一覧</h2>
+            <div class="list-group">
+                {% for section in structure.get('sections', []) %}
+                    <div class="list-group-item">
+                        <h5 class="mb-1">{{ section.get('title', '無題') }}</h5>
+                        <p class="mb-1">{{ section.get('description', '') }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if structure.get('pages') %}
+        <div class="mt-4">
+            <h2>ページ一覧</h2>
+            <div class="list-group">
+                {% for page in structure.get('pages', []) %}
+                    <div class="list-group-item">
+                        <h5 class="mb-1">{{ page.get('title', '無題') }}</h5>
+                        <p class="mb-1">{{ page.get('description', '') }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if structure.get('ui_content') %}
+        <div class="mt-4">
+            <h2>UIプレビュー</h2>
+            <div class="border p-3">
+                {{ structure.get('ui_content') | safe }}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if structure.get('evaluation') %}
+        <div class="mt-4">
+            <h2>評価結果</h2>
+            <div class="card">
+                <div class="card-body">
+                    {{ structure.get('evaluation') | safe }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if logs %}
+        <div class="mt-4">
+            <h2>履歴</h2>
+            <div class="list-group">
+                {% for log in logs %}
+                    <div class="list-group-item">
+                        <small class="text-muted">{{ log.get('timestamp', '') }}</small>
+                        <p class="mb-1">{{ log.get('message', '') }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-danger">
+            構成テンプレートが見つかりませんでした。
+        </div>
+    {% endif %}
+</div>
+
+<!-- CSRFトークンをJavaScriptで使用できるようにする -->
+<script>
+    const csrfToken = "{{ csrf_token() }}";
+
+    // UI生成ボタンのクリックイベント
+    document.querySelector('form[action*="gemini_generate_ui"]').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('generateUiBtn');
+        const errorDiv = document.getElementById('gemini_error');
+        const uiDiv = document.getElementById('gemini_ui');
+        
+        // ボタンを無効化
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
+        errorDiv.style.display = 'none';
+        
+        // フォームデータの送信
+        fetch(this.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                // UI提案の表示
+                uiDiv.innerHTML = `
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Gemini UI提案</h5>
+                        </div>
+                        <div class="card-body">
+                            ${result.ui_content}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // エラーメッセージの表示
+                errorDiv.textContent = result.message || 'UI生成に失敗しました';
+                errorDiv.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            errorDiv.textContent = 'エラーが発生しました: ' + error.message;
+            errorDiv.style.display = 'block';
+        })
+        .finally(() => {
+            // ボタンを元に戻す
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-magic"></i> GeminiでUI構成を生成';
+        });
+    });
+
+    function saveStructureAjax() {
+        const structureId = "{{ structure.id }}";
+        const data = {
+            title: document.getElementById("title").value,
+            description: document.getElementById("description").value,
+            content: document.getElementById("content").value,
+            is_final: document.getElementById("is_final").checked
+        };
+
+        fetch(`/structure/ajax_save/${structureId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                // 評価結果の表示
+                if (result.evaluation) {
+                    const evaluationDiv = document.getElementById('evaluation_result');
+                    const scoreDiv = document.getElementById('evaluation_score');
+                    const feedbackP = document.getElementById('evaluation_feedback');
+                    const detailsDiv = document.getElementById('evaluation_details');
+                    
+                    // スコアの表示
+                    const score = result.evaluation.score * 100;
+                    scoreDiv.style.width = `${score}%`;
+                    scoreDiv.textContent = `${score.toFixed(1)}%`;
+                    
+                    // フィードバックの表示
+                    feedbackP.textContent = result.evaluation.feedback;
+                    
+                    // 詳細の表示
+                    detailsDiv.innerHTML = '';
+                    for (const [key, value] of Object.entries(result.evaluation.details)) {
+                        const detailItem = document.createElement('div');
+                        detailItem.className = 'mb-2';
+                        detailItem.innerHTML = `<strong>${key}:</strong> ${value}`;
+                        detailsDiv.appendChild(detailItem);
+                    }
+                    
+                    evaluationDiv.style.display = 'block';
+                }
+
+                // UIプレビューの更新
+                if (result.ui_content) {
+                    const uiHtml = `
+                        <h2>UIプレビュー</h2>
+                        <div class="border p-3">
+                            ${result.ui_content}
+                        </div>
+                    `;
+                    document.querySelector('.mt-4:nth-last-child(3)').innerHTML = uiHtml;
+                }
+
+                alert("保存が完了しました");
+            } else {
+                alert("保存に失敗しました: " + result.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("エラーが発生しました: " + error.message);
+        });
+    }
+
+    function ajax_save_structure() {
+        const structureId = document.getElementById('structure_id').value;
+        const title = document.getElementById('title').value;
+        const description = document.getElementById('description').value;
+        const content = document.getElementById('content').value;
+        const isFinal = document.getElementById('is_final').checked;
+
+        // 保存中の表示
+        const saveButton = document.getElementById('save_button');
+        const originalText = saveButton.innerHTML;
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+        saveButton.disabled = true;
+
+        // エラーメッセージのクリア
+        clearErrorMessages();
+
+        // CSRFトークンの取得
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch(`/structure/ajax_save/${structureId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                title: title,
+                description: description,
+                content: content,
+                is_final: isFinal
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 成功メッセージの表示
+                showSuccessMessage('構成を保存しました');
+
+                // 評価結果の表示
+                if (data.evaluation) {
+                    if (data.evaluation.error) {
+                        showErrorMessage('評価エラー', data.evaluation.error);
+                    } else {
+                        updateEvaluationDisplay(data.evaluation);
+                    }
+                }
+
+                // UI生成結果の表示
+                if (data.ui_content) {
+                    if (data.ui_content.error) {
+                        showErrorMessage('UI生成エラー', data.ui_content.error);
+                    } else {
+                        updateUIDisplay(data.ui_content);
+                    }
+                }
+
+                // 差分の表示
+                if (data.diff) {
+                    if (data.diff.error) {
+                        showErrorMessage('差分生成エラー', data.diff.error);
+                    } else {
+                        updateDiffDisplay(data.diff);
+                    }
+                }
+
+                // ログの更新
+                if (data.logs) {
+                    updateLogsDisplay(data.logs);
+                }
+
+            } else {
+                // エラーメッセージの表示
+                showErrorMessage('保存エラー', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorMessage('通信エラー', 'サーバーとの通信中にエラーが発生しました');
+        })
+        .finally(() => {
+            // ボタンの状態を元に戻す
+            saveButton.innerHTML = originalText;
+            saveButton.disabled = false;
+        });
+    }
+
+    function showSuccessMessage(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.getElementById('alert_container').appendChild(alertDiv);
+    }
+
+    function showErrorMessage(title, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+        alertDiv.innerHTML = `
+            <strong>${title}:</strong> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.getElementById('alert_container').appendChild(alertDiv);
+    }
+
+    function clearErrorMessages() {
+        const alertContainer = document.getElementById('alert_container');
+        alertContainer.innerHTML = '';
+    }
+
+    function updateEvaluationDisplay(evaluation) {
+        const evaluationContainer = document.getElementById('evaluation_container');
+        if (evaluationContainer) {
+            evaluationContainer.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">評価結果</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="mb-0">${JSON.stringify(evaluation, null, 2)}</pre>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    function updateUIDisplay(uiContent) {
+        const uiContainer = document.getElementById('ui_container');
+        if (uiContainer) {
+            uiContainer.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">UI提案</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="mb-0">${JSON.stringify(uiContent, null, 2)}</pre>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    function updateDiffDisplay(diff) {
+        const diffContainer = document.getElementById('diff_container');
+        if (diffContainer) {
+            diffContainer.innerHTML = diff;
+        }
+    }
+
+    function updateLogsDisplay(logs) {
+        const logsContainer = document.getElementById('logs_container');
+        if (logsContainer) {
+            const logsList = logs.map(log => `
+                <li class="list-group-item">
+                    <small class="text-muted">${new Date(log.timestamp).toLocaleString()}</small>
+                    <div>${log.message}</div>
+                </li>
+            `).join('');
+            logsContainer.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">操作ログ</h5>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        ${logsList}
+                    </ul>
+                </div>
+            `;
+        }
+    }
+</script>
 {% endblock %}

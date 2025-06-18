@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>📈 評価スコア推移：{{ title }}</h2>
+
+<canvas id="scoreChart" width="800" height="400"></canvas>
+
+<!-- JSONデータ埋め込み -->
+<script id="evaluation-data" type="application/json">
+  {{ history | tojson | safe }}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const rawJson = document.getElementById("evaluation-data").textContent;
+  const evaluationHistory = JSON.parse(rawJson);
+  const labels = [...new Set(evaluationHistory.map(h => h.timestamp))];
+
+  const claudeData = evaluationHistory.filter(h => h.model === "claude");
+  const chatgptData = evaluationHistory.filter(h => h.model === "chatgpt");
+
+  const chartData = {
+    labels: labels,
+    datasets: [
+      {
+        label: "Claude - intent_match",
+        data: labels.map(ts => {
+          const item = claudeData.find(h => h.timestamp === ts);
+          return item ? item.intent_match : null;
+        }),
+        borderColor: "blue",
+        fill: false
+      },
+      {
+        label: "ChatGPT - intent_match",
+        data: labels.map(ts => {
+          const item = chatgptData.find(h => h.timestamp === ts);
+          return item ? item.intent_match : null;
+        }),
+        borderColor: "green",
+        fill: false
+      },
+      {
+        label: "Claude - quality_score",
+        data: labels.map(ts => {
+          const item = claudeData.find(h => h.timestamp === ts);
+          return item ? item.quality_score : null;
+        }),
+        borderColor: "purple",
+        borderDash: [5, 5],
+        fill: false
+      },
+      {
+        label: "ChatGPT - quality_score",
+        data: labels.map(ts => {
+          const item = chatgptData.find(h => h.timestamp === ts);
+          return item ? item.quality_score : null;
+        }),
+        borderColor: "orange",
+        borderDash: [5, 5],
+        fill: false
+      }
+    ]
+  };
+
+  new Chart(document.getElementById("scoreChart"), {
+    type: 'line',
+    data: chartData,
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true, max: 1.0 }
+      }
+    }
+  });
+</script>

@@ -1,0 +1,13 @@
+- name: chatgpt.structure_evaluation
+  provider: chatgpt
+  description: 構成評価プロンプト
+  template: |
+    次の構成を評価してください：
+    {user_input}
+
+- name: chatgpt.chat
+  provider: chatgpt
+  description: チャットプロンプト
+  template: |
+    以下の会話を続けてください：
+    {user_input} 

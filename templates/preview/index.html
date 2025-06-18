@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}プレビュー - AIDE-X{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>プレビュー</h1>
+    
+    <div class="preview-container">
+        <div class="preview-sidebar">
+            <h3>保存済み構成</h3>
+            {% if structures %}
+            <div class="structure-list">
+                {% for structure in structures %}
+                <div class="structure-item">
+                    <h4>{{ structure.title }}</h4>
+                    <p class="structure-description">{{ structure.description }}</p>
+                    <button class="btn btn-primary preview-btn" data-structure-id="{{ structure.id }}">
+                        プレビュー表示
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>保存された構成はありません。</p>
+            {% endif %}
+        </div>
+        
+        <div class="preview-content">
+            <div id="preview-area">
+                <p class="text-muted">左側の構成を選択してプレビューを表示してください。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.preview-container {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.preview-sidebar {
+    flex: 0 0 300px;
+    border-right: 1px solid #ddd;
+    padding-right: 1rem;
+}
+
+.preview-content {
+    flex: 1;
+    min-height: 500px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 1rem;
+    background-color: #fff;
+}
+
+.structure-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #fff;
+}
+
+.structure-description {
+    color: #666;
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.preview-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const previewButtons = document.querySelectorAll('.preview-btn');
+    const previewArea = document.getElementById('preview-area');
+    
+    previewButtons.forEach(button => {
+        button.addEventListener('click', async function() {
+            const structureId = this.dataset.structureId;
+            try {
+                const response = await fetch(`/preview/${structureId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    previewArea.innerHTML = data.html;
+                } else {
+                    previewArea.innerHTML = '<p class="text-danger">プレビューの取得に失敗しました。</p>';
+                }
+            } catch (error) {
+                previewArea.innerHTML = '<p class="text-danger">エラーが発生しました。</p>';
+                console.error('Preview error:', error);
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

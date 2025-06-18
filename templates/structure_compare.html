@@ -23,6 +23,7 @@
 <!-- ✅ 採用 -->
 {% if modified_structure and original_structure %}
   <form method="post" action="{{ url_for('structure.adopt_structure', improved_id=modified_structure.id, original_id=original_structure.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button type="submit" style="margin-top: 20px; background: #4CAF50; color: white;">
       ✅ この改善案を正式に採用する
     </button>
@@ -32,6 +33,7 @@
 <!-- ❌ 不採用 -->
 {% if modified_structure %}
   <form method="post" action="{{ url_for('structure.discard_structure', improved_id=modified_structure.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button type="submit" style="margin-top: 10px; background: #e53935; color: white;">
       ❌ この改善案は不採用にする
     </button>
@@ -41,6 +43,7 @@
 <!-- 📄 別テンプレートとして保存 -->
 {% if modified_structure %}
   <form method="post" action="{{ url_for('structure.save_as_new_structure', improved_id=modified_structure.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button type="submit" style="margin-top: 10px; background: #1976D2; color: white;">
       📄 改善案を別テンプレートとして保存
     </button>

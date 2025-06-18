@@ -1,0 +1,12 @@
+<!-- 🕒 履歴ログ（Ajax更新対応・外部から include 可能） -->
+<h3>🕒 履歴ログ</h3>
+
+{% if logs %}
+<ul>
+  {% for log in logs %}
+  <li><pre>{{ log.timestamp }} - {{ log.content }}</pre></li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>ログはまだありません。</p>
+{% endif %}

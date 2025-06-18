@@ -6,8 +6,8 @@
 
 <h3>🧠 ChatGPT 評価スコア</h3>
 <ul>
-  <li><strong>intent_match：</strong> {{ result.intent_match }} / 100</li>
-  <li><strong>quality_score：</strong> {{ result.quality_score }} / 100</li>
+  <li><strong>intent_match：</strong> {{ (result.intent_match * 100) | round(1) }} / 100</li>
+  <li><strong>quality_score：</strong> {{ (result.quality_score * 100) | round(1) }} / 100</li>
 </ul>
 
 <h3>✨ Claude による構成の意図</h3>

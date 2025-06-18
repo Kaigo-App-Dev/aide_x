@@ -1,29 +1,83 @@
 {% extends "base.html" %}
 {% block content %}
+
 <h2>🧠 構成共創チャット（ChatGPT）</h2>
 
-<div style="border: 1px solid #ccc; padding: 10px; max-height: 400px; overflow-y: auto;">
+<!-- チャット履歴の表示 -->
+<div class="chat-box">
   {% for message in chat_history %}
-    <p><strong>{{ message.role }}:</strong> {{ message.content }}</p>
+    <div class="chat-message {{ message.role }}">
+      {% if message.role == "user" %}
+        <strong>👤 あなた：</strong>
+      {% elif message.role == "assistant" %}
+        <strong>🤖 AIDE-X：</strong>
+      {% elif message.role == "analyzer" %}
+        <strong>💬 AIDE-X（分析）：</strong>
+      {% endif %}
+      <span class="chat-bubble {{ message.role }}">{{ message.content }}</span>
+    </div>
   {% endfor %}
 </div>
 
-<form method="post" style="margin-top: 15px;">
-  <textarea name="message" rows="3" cols="80" placeholder="構成について聞いてみましょう..."></textarea><br>
-  <button type="submit">送信</button>
-  <a href="{{ url_for('chat.chat_prompt') }}?save=1">
-    💾 この応答をテンプレートとして保存
-  <a href="{{ url_for('chat.chat_prompt') }}?save=1">
-    💾 ChatGPT応答を保存
-  </a>
-  &nbsp;&nbsp;
-  <a href="{{ url_for('chat.chat_prompt') }}?claude_save=1">
-    🤖 Claudeで整形して保存
-  </a>
-  <a href="{{ url_for('chat.compare_structures') }}">
-    🆚 Claudeとの構成比較を見る
-  </a>
-
-
+<!-- 入力フォーム -->
+<form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="text" name="message" placeholder="質問や要望を入力..." class="form-control" required>
+  <button type="submit" class="btn btn-primary mt-2">送信</button>
 </form>
+
+<!-- ✅ ステージが "suggest" のときにナビゲーションを表示 -->
+{% if stage == "suggest" %}
+<hr>
+<h4>💡 そろそろ構成を出してみましょうか？</h4>
+<div class="btn-group" role="group">
+  <form method="post" style="display:inline;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" name="message" value="構成を見せて" class="btn btn-success">▶ 構成を見てみる</button>
+  </form>
+  <form method="post" style="display:inline;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" name="message" value="まだ話す" class="btn btn-secondary">▶ 話を続ける</button>
+  </form>
+  <form method="post" style="display:inline;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" name="message" value="条件だけまとめて" class="btn btn-info">▶ 条件だけまとめる</button>
+  </form>
+</div>
+{% endif %}
+
+<!-- アクションメニュー -->
+<div class="mt-3">
+  <a href="{{ url_for('chat.chat_prompt') }}?confirm=1" class="btn btn-success">✅ この構成で進める</a>
+  <a href="{{ url_for('chat.chat_reset') }}" class="btn btn-secondary">♻️ 初期化</a>
+</div>
+
+<!-- ✅ Claude評価後の出力誘導UI -->
+{% if stage == "confirmed" and user_requirements %}
+<hr>
+<h4>🛠 次のステップを選んでください：</h4>
+<div class="btn-group" role="group">
+  <a href="{{ url_for('preview.preview_structure', structure_id=user_requirements['id']) }}" class="btn btn-success">
+    ✅ 出力に進む
+  </a>
+  <a href="{{ url_for('structure.edit_structure', structure_id=user_requirements['id']) }}" class="btn btn-warning">
+    ✏️ 修正する
+  </a>
+  <form method="post" action="{{ url_for('chat.save_structure_route') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="chat_history_json" value='{{ user_requirements | tojson | safe }}'>
+    <button type="submit" class="btn btn-primary">💾 保存する</button>
+  </form>
+</div>
+{% endif %}
+
+<!-- ✅ 構成プレビュー表示 -->
+{% if structure %}
+<hr>
+<h4>🧩 生成された構成プレビュー</h4>
+<pre style="background-color:#f8f9fa; padding:1em; border-radius:8px; overflow-x:auto;">
+{{ structure | tojson(indent=2) }}
+</pre>
+{% endif %}
+
 {% endblock %}

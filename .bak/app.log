@@ -1,0 +1,877 @@
+import os
+import sys
+
+os.environ['FLASK_DEBUG'] = '1'
+os.environ['LOG_LEVEL'] = 'DEBUG'
+
+sys.stdout.reconfigure(line_buffering=True)
+sys.stderr.reconfigure(line_buffering=True)
+
+2025-06-10 20:43:55,739 [INFO] main: üîç ÁôªÈå≤„É´„Éº„Éà‰∏ÄË¶ßÔºö
+2025-06-10 20:43:55,740 [INFO] main:   /static/<path:filename>
+2025-06-10 20:43:55,740 [INFO] main:   /chat/prompt
+2025-06-10 20:43:55,741 [INFO] main:   /chat/reset
+2025-06-10 20:43:55,741 [INFO] main:   /chat/claude_test
+2025-06-10 20:43:55,741 [INFO] main:   /chat/compare
+2025-06-10 20:43:55,741 [INFO] main:   /chat/chat/save
+2025-06-10 20:43:55,741 [INFO] main:   /structure/test
+2025-06-10 20:43:55,742 [INFO] main:   /structure/list
+2025-06-10 20:43:55,742 [INFO] main:   /structure/new
+2025-06-10 20:43:55,742 [INFO] main:   /structure/edit/<structure_id>
+2025-06-10 20:43:55,742 [INFO] main:   /structure/gemini_generate_ui/<structure_id>
+2025-06-10 20:43:55,742 [INFO] main:   /structure/export/<structure_id>
+2025-06-10 20:43:55,744 [INFO] main:   /structure/export/start/<structure_id>
+2025-06-10 20:43:55,744 [INFO] main:   /structure/repair/<structure_id>
+2025-06-10 20:43:55,744 [INFO] main:   /structure/evaluate/<structure_id>
+2025-06-10 20:43:55,744 [INFO] main:   /structure/improve/<structure_id>
+2025-06-10 20:43:55,744 [INFO] main:   /structure/delete/<structure_id>
+2025-06-10 20:43:55,744 [INFO] main:   /structure/ajax_save/<structure_id>
+2025-06-10 20:43:55,744 [INFO] main:   /evolve/start
+2025-06-10 20:43:55,745 [INFO] main:   /preview/<structure_id>
+2025-06-10 20:43:55,745 [INFO] main:   /preview/submit/<structure_id>
+2025-06-10 20:43:55,745 [INFO] main:   /
+2025-06-10 20:43:55,745 [INFO] main: üöÄ „É≠„Éº„Ç´„É´„Çµ„Éº„Éê„ÉºËµ∑Âãï: http://127.0.0.1:5000
+2025-06-10 20:43:55,764 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-06-10 20:43:55,764 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-06-10 20:45:40,695 [INFO] main: üîç ÁôªÈå≤„É´„Éº„Éà‰∏ÄË¶ßÔºö
+2025-06-10 20:45:40,695 [INFO] main:   /static/<path:filename>
+2025-06-10 20:45:40,696 [INFO] main:   /chat/prompt
+2025-06-10 20:45:40,696 [INFO] main:   /chat/reset
+2025-06-10 20:45:40,696 [INFO] main:   /chat/claude_test
+2025-06-10 20:45:40,697 [INFO] main:   /chat/compare
+2025-06-10 20:45:40,697 [INFO] main:   /chat/chat/save
+2025-06-10 20:45:40,697 [INFO] main:   /structure/test
+2025-06-10 20:45:40,697 [INFO] main:   /structure/list
+2025-06-10 20:45:40,697 [INFO] main:   /structure/new
+2025-06-10 20:45:40,697 [INFO] main:   /structure/edit/<structure_id>
+2025-06-10 20:45:40,698 [INFO] main:   /structure/gemini_generate_ui/<structure_id>
+2025-06-10 20:45:40,698 [INFO] main:   /structure/export/<structure_id>
+2025-06-10 20:45:40,698 [INFO] main:   /structure/export/start/<structure_id>
+2025-06-10 20:45:40,698 [INFO] main:   /structure/repair/<structure_id>
+2025-06-10 20:45:40,698 [INFO] main:   /structure/evaluate/<structure_id>
+2025-06-10 20:45:40,698 [INFO] main:   /structure/improve/<structure_id>
+2025-06-10 20:45:40,698 [INFO] main:   /structure/delete/<structure_id>
+2025-06-10 20:45:40,699 [INFO] main:   /structure/ajax_save/<structure_id>
+2025-06-10 20:45:40,699 [INFO] main:   /evolve/start
+2025-06-10 20:45:40,699 [INFO] main:   /preview/<structure_id>
+2025-06-10 20:45:40,699 [INFO] main:   /preview/submit/<structure_id>
+2025-06-10 20:45:40,699 [INFO] main:   /
+2025-06-10 20:45:40,700 [INFO] main: üöÄ „É≠„Éº„Ç´„É´„Çµ„Éº„Éê„ÉºËµ∑Âãï: http://127.0.0.1:5000
+2025-06-10 20:45:40,717 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-06-10 20:45:40,717 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+
+app.run(host='127.0.0.1', port=5000, debug=True, use_reloader=False)
+2025-06-10 20:49:34,124 [INFO] main: üîç ÁôªÈå≤„É´„Éº„Éà‰∏ÄË¶ßÔºö
+2025-06-10 20:49:34,125 [INFO] main:   /static/<path:filename>
+2025-06-10 20:49:34,125 [INFO] main:   /chat/prompt
+2025-06-10 20:49:34,125 [INFO] main:   /chat/reset
+2025-06-10 20:49:34,125 [INFO] main:   /chat/claude_test
+2025-06-10 20:49:34,126 [INFO] main:   /chat/compare
+2025-06-10 20:49:34,126 [INFO] main:   /chat/chat/save
+2025-06-10 20:49:34,126 [INFO] main:   /structure/test
+2025-06-10 20:49:34,126 [INFO] main:   /structure/list
+2025-06-10 20:49:34,126 [INFO] main:   /structure/new
+2025-06-10 20:49:34,126 [INFO] main:   /structure/edit/<structure_id>
+2025-06-10 20:49:34,126 [INFO] main:   /structure/gemini_generate_ui/<structure_id>
+2025-06-10 20:49:34,127 [INFO] main:   /structure/export/<structure_id>
+2025-06-10 20:49:34,127 [INFO] main:   /structure/export/start/<structure_id>
+2025-06-10 20:49:34,127 [INFO] main:   /structure/repair/<structure_id>
+2025-06-10 20:49:34,127 [INFO] main:   /structure/evaluate/<structure_id>
+2025-06-10 20:49:34,127 [INFO] main:   /structure/improve/<structure_id>
+2025-06-10 20:49:34,127 [INFO] main:   /structure/delete/<structure_id>
+2025-06-10 20:49:34,127 [INFO] main:   /structure/ajax_save/<structure_id>
+2025-06-10 20:49:34,127 [INFO] main:   /evolve/start
+2025-06-10 20:49:34,127 [INFO] main:   /preview/<structure_id>
+2025-06-10 20:49:34,127 [INFO] main:   /preview/submit/<structure_id>
+2025-06-10 20:49:34,128 [INFO] main:   /
+2025-06-10 20:49:34,128 [INFO] main: üöÄ „É≠„Éº„Ç´„É´„Çµ„Éº„Éê„ÉºËµ∑Âãï: http://127.0.0.1:5000
+2025-06-10 20:49:34,145 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-06-10 20:49:34,145 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+
+GEMINI_API_KEY=your_api_key_here
+2025-06-10 20:53:09,940 [INFO] main: üîç ÁôªÈå≤„É´„Éº„Éà‰∏ÄË¶ßÔºö
+2025-06-10 20:53:09,941 [INFO] main:   /static/<path:filename>
+2025-06-10 20:53:09,941 [INFO] main:   /chat/prompt
+2025-06-10 20:53:09,941 [INFO] main:   /chat/reset
+2025-06-10 20:53:09,941 [INFO] main:   /chat/claude_test
+2025-06-10 20:53:09,941 [INFO] main:   /chat/compare
+2025-06-10 20:53:09,942 [INFO] main:   /chat/chat/save
+2025-06-10 20:53:09,942 [INFO] main:   /structure/test
+2025-06-10 20:53:09,942 [INFO] main:   /structure/list
+2025-06-10 20:53:09,942 [INFO] main:   /structure/new
+2025-06-10 20:53:09,942 [INFO] main:   /structure/edit/<structure_id>
+2025-06-10 20:53:09,942 [INFO] main:   /structure/gemini_generate_ui/<structure_id>
+2025-06-10 20:53:09,942 [INFO] main:   /structure/export/<structure_id>
+2025-06-10 20:53:09,942 [INFO] main:   /structure/export/start/<structure_id>
+2025-06-10 20:53:09,943 [INFO] main:   /structure/repair/<structure_id>
+2025-06-10 20:53:09,943 [INFO] main:   /structure/evaluate/<structure_id>
+2025-06-10 20:53:09,943 [INFO] main:   /structure/improve/<structure_id>
+2025-06-10 20:53:09,943 [INFO] main:   /structure/delete/<structure_id>
+2025-06-10 20:53:09,943 [INFO] main:   /structure/ajax_save/<structure_id>
+2025-06-10 20:53:09,943 [INFO] main:   /evolve/start
+2025-06-10 20:53:09,943 [INFO] main:   /preview/<structure_id>
+2025-06-10 20:53:09,943 [INFO] main:   /preview/submit/<structure_id>
+2025-06-10 20:53:09,943 [INFO] main:   /
+2025-06-10 20:53:09,943 [INFO] main: üöÄ „É≠„Éº„Ç´„É´„Çµ„Éº„Éê„ÉºËµ∑Âãï: http://127.0.0.1:5000
+2025-06-10 20:53:09,962 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-06-10 20:53:09,963 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-06-10 20:56:41,463 [INFO] main: üîç ÁôªÈå≤„É´„Éº„Éà‰∏ÄË¶ßÔºö
+2025-06-10 20:56:41,464 [INFO] main:   /static/<path:filename>
+2025-06-10 20:56:41,464 [INFO] main:   /chat/prompt
+2025-06-10 20:56:41,465 [INFO] main:   /chat/reset
+2025-06-10 20:56:41,465 [INFO] main:   /chat/claude_test
+2025-06-10 20:56:41,465 [INFO] main:   /chat/compare
+2025-06-10 20:56:41,465 [INFO] main:   /chat/chat/save
+2025-06-10 20:56:41,465 [INFO] main:   /structure/test
+2025-06-10 20:56:41,466 [INFO] main:   /structure/list
+2025-06-10 20:56:41,466 [INFO] main:   /structure/new
+2025-06-10 20:56:41,466 [INFO] main:   /structure/edit/<structure_id>
+2025-06-10 20:56:41,466 [INFO] main:   /structure/gemini_generate_ui/<structure_id>
+2025-06-10 20:56:41,466 [INFO] main:   /structure/export/<structure_id>
+2025-06-10 20:56:41,466 [INFO] main:   /structure/export/start/<structure_id>
+2025-06-10 20:56:41,466 [INFO] main:   /structure/repair/<structure_id>
+2025-06-10 20:56:41,467 [INFO] main:   /structure/evaluate/<structure_id>
+2025-06-10 20:56:41,467 [INFO] main:   /structure/improve/<structure_id>
+2025-06-10 20:56:41,467 [INFO] main:   /structure/delete/<structure_id>
+2025-06-10 20:56:41,467 [INFO] main:   /structure/ajax_save/<structure_id>
+2025-06-10 20:56:41,467 [INFO] main:   /evolve/start
+2025-06-10 20:56:41,467 [INFO] main:   /preview/<structure_id>
+2025-06-10 20:56:41,467 [INFO] main:   /preview/submit/<structure_id>
+2025-06-10 20:56:41,467 [INFO] main:   /
+2025-06-10 20:56:41,467 [INFO] main: üöÄ „É≠„Éº„Ç´„É´„Çµ„Éº„Éê„ÉºËµ∑Âãï: http://127.0.0.1:5000
+2025-06-10 20:56:41,485 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-06-10 20:56:41,485 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-06-18 12:47:52,146 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 12:47:52,149 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 12:47:52,149 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 12:47:52,149 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 12:47:52,149 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 12:47:52,151 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 12:47:52,151 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 12:47:52,151 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 12:47:52,151 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager
+2025-06-18 12:51:17,992 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 12:51:17,994 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 12:51:17,994 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 12:51:17,994 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 12:51:17,994 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 12:51:17,994 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 12:51:17,994 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 12:51:17,996 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 12:51:17,996 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 12:51:17,996 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 12:51:17,996 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager
+2025-06-18 12:51:17,996 - main - INFO - AI providers initialized
+2025-06-18 12:53:50,064 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 12:53:50,064 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 12:53:50,064 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 12:53:50,064 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 12:53:50,064 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 12:53:50,064 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 12:53:50,064 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 12:53:50,064 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 12:53:50,064 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 12:53:50,064 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 12:53:50,064 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 12:53:50,064 - main - INFO - AI providers initialized
+2025-06-18 12:53:50,087 - main - INFO - AI controller initialized
+2025-06-18 12:53:50,358 - src.llm.hub - ERROR - Unexpected error in model call with claude-3-opus-20240229: ÉvÉçÉoÉCÉ_ 'claude' ÇÕèâä˙âªÇ…é∏îsÇµÇƒÇ¢Ç‹Ç∑: ClaudeProvider.__init__() missing 1 required positional argument: 'prompt_manager'
+2025-06-18 12:53:50,358 - src.llm.hub - ERROR - Unexpected error in model call with gemini-1.5-flash: ÉvÉçÉoÉCÉ_ 'gemini' ÇÕèâä˙âªÇ…é∏îsÇµÇƒÇ¢Ç‹Ç∑: GeminiProvider.__init__() missing 1 required positional argument: 'prompt_manager'
+2025-06-18 12:53:50,374 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 12:53:50,374 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 12:53:50,374 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.chat for provider chatgpt
+2025-06-18 12:53:50,374 - src.llm.prompts.manager - DEBUG - Created new provider entry: chatgpt
+2025-06-18 12:53:50,374 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 12:53:50,374 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 12:53:50,374 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 12:53:50,374 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 12:53:50,374 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.structure_evaluation for provider claude
+2025-06-18 12:53:50,374 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.chat for provider claude
+2025-06-18 12:53:50,374 - src.llm.prompts.manager - DEBUG - Created new provider entry: claude
+2025-06-18 12:53:50,374 - src.llm.prompts.manager - DEBUG - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 12:53:50,374 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 12:53:50,374 - src.llm.prompts.manager - DEBUG - Registered template: claude.chat for provider claude
+2025-06-18 12:53:50,374 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 12:53:50,374 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.structure_evaluation for provider gemini
+2025-06-18 12:53:50,374 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.chat for provider gemini
+2025-06-18 12:53:50,374 - src.llm.prompts.manager - DEBUG - Created new provider entry: gemini
+2025-06-18 12:53:50,374 - src.llm.prompts.manager - DEBUG - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 12:53:50,374 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 12:53:50,374 - src.llm.prompts.manager - DEBUG - Registered template: gemini.chat for provider gemini
+2025-06-18 12:53:50,374 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 12:53:50,374 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 12:53:50,374 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 12:53:50,374 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 12:53:50,374 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 12:53:50,374 - main - INFO - AI providers initialized
+2025-06-18 12:53:50,390 - main - INFO - AI controller initialized
+2025-06-18 12:53:50,390 - main - INFO - Headers: User-Agent: Werkzeug/3.1.3
+Host: localhost
+
+
+2025-06-18 12:53:50,390 - main - INFO - Body: b''
+2025-06-18 12:53:50,390 - main - ERROR - Unhandled error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-06-18 12:53:50,390 - main - INFO - Response: b'{\n  "error": "404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",\n  "type": "NotFound"\n}\n'
+2025-06-18 12:53:50,390 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 12:53:50,390 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 12:53:50,390 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.chat for provider chatgpt
+2025-06-18 12:53:50,390 - src.llm.prompts.manager - DEBUG - Created new provider entry: chatgpt
+2025-06-18 12:53:50,390 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 12:53:50,390 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 12:53:50,390 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 12:53:50,390 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 12:53:50,390 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.structure_evaluation for provider claude
+2025-06-18 12:53:50,390 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.chat for provider claude
+2025-06-18 12:53:50,390 - src.llm.prompts.manager - DEBUG - Created new provider entry: claude
+2025-06-18 12:53:50,390 - src.llm.prompts.manager - DEBUG - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 12:53:50,390 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 12:53:50,390 - src.llm.prompts.manager - DEBUG - Registered template: claude.chat for provider claude
+2025-06-18 12:53:50,390 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 12:53:50,390 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.structure_evaluation for provider gemini
+2025-06-18 12:53:50,390 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.chat for provider gemini
+2025-06-18 12:53:50,390 - src.llm.prompts.manager - DEBUG - Created new provider entry: gemini
+2025-06-18 12:53:50,390 - src.llm.prompts.manager - DEBUG - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 12:53:50,390 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 12:53:50,390 - src.llm.prompts.manager - DEBUG - Registered template: gemini.chat for provider gemini
+2025-06-18 12:53:50,390 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 12:53:50,390 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 12:53:50,390 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 12:53:50,390 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 12:53:50,390 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 12:53:50,390 - main - INFO - AI providers initialized
+2025-06-18 12:53:50,390 - main - INFO - AI controller initialized
+2025-06-18 12:53:50,390 - main - INFO - Headers: User-Agent: Werkzeug/3.1.3
+Host: localhost
+
+
+2025-06-18 12:53:50,390 - main - INFO - Body: b''
+2025-06-18 12:53:50,390 - main - ERROR - Unhandled error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-06-18 12:53:50,390 - main - INFO - Response: b'{\n  "error": "404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",\n  "type": "NotFound"\n}\n'
+2025-06-18 12:53:50,406 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 12:53:50,406 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 12:53:50,406 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.chat for provider chatgpt
+2025-06-18 12:53:50,406 - src.llm.prompts.manager - DEBUG - Created new provider entry: chatgpt
+2025-06-18 12:53:50,406 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 12:53:50,406 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 12:53:50,406 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 12:53:50,406 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 12:53:50,406 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.structure_evaluation for provider claude
+2025-06-18 12:53:50,406 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.chat for provider claude
+2025-06-18 12:53:50,406 - src.llm.prompts.manager - DEBUG - Created new provider entry: claude
+2025-06-18 12:53:50,406 - src.llm.prompts.manager - DEBUG - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 12:53:50,406 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 12:53:50,406 - src.llm.prompts.manager - DEBUG - Registered template: claude.chat for provider claude
+2025-06-18 12:53:50,406 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 12:53:50,406 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.structure_evaluation for provider gemini
+2025-06-18 12:53:50,406 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.chat for provider gemini
+2025-06-18 12:53:50,406 - src.llm.prompts.manager - DEBUG - Created new provider entry: gemini
+2025-06-18 12:53:50,406 - src.llm.prompts.manager - DEBUG - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 12:53:50,406 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 12:53:50,406 - src.llm.prompts.manager - DEBUG - Registered template: gemini.chat for provider gemini
+2025-06-18 12:53:50,406 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 12:53:50,406 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 12:53:50,406 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 12:53:50,406 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 12:53:50,406 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 12:53:50,406 - main - INFO - AI providers initialized
+2025-06-18 12:53:50,406 - main - INFO - AI controller initialized
+2025-06-18 12:53:50,406 - main - INFO - Headers: User-Agent: Werkzeug/3.1.3
+Host: localhost
+
+
+2025-06-18 12:53:50,406 - main - INFO - Body: b''
+2025-06-18 12:53:50,406 - main - ERROR - Unhandled error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-06-18 12:53:50,406 - main - INFO - Response: b'{\n  "error": "404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",\n  "type": "NotFound"\n}\n'
+2025-06-18 13:16:46,326 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:16:46,342 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:16:46,342 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:16:46,342 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:16:46,342 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 13:16:46,342 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:16:46,342 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 13:16:46,342 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 13:16:46,342 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 13:16:46,342 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 13:16:46,342 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 13:16:46,342 - main - INFO - AI providers initialized
+2025-06-18 13:16:46,342 - main - INFO - AI controller initialized
+2025-06-18 13:16:46,609 - src.llm.hub - ERROR - Unexpected error in model call with claude-3-opus-20240229: ÉvÉçÉoÉCÉ_ 'claude' ÇÕèâä˙âªÇ…é∏îsÇµÇƒÇ¢Ç‹Ç∑: ClaudeProvider.__init__() missing 1 required positional argument: 'prompt_manager'
+2025-06-18 13:16:46,612 - src.llm.hub - ERROR - Unexpected error in model call with gemini-1.5-flash: ÉvÉçÉoÉCÉ_ 'gemini' ÇÕèâä˙âªÇ…é∏îsÇµÇƒÇ¢Ç‹Ç∑: GeminiProvider.__init__() missing 1 required positional argument: 'prompt_manager'
+2025-06-18 13:16:46,622 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:16:46,622 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:16:46,622 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.chat for provider chatgpt
+2025-06-18 13:16:46,622 - src.llm.prompts.manager - DEBUG - Created new provider entry: chatgpt
+2025-06-18 13:16:46,622 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:16:46,622 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:16:46,622 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:16:46,622 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:16:46,622 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.structure_evaluation for provider claude
+2025-06-18 13:16:46,622 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.chat for provider claude
+2025-06-18 13:16:46,622 - src.llm.prompts.manager - DEBUG - Created new provider entry: claude
+2025-06-18 13:16:46,622 - src.llm.prompts.manager - DEBUG - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:16:46,622 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:16:46,622 - src.llm.prompts.manager - DEBUG - Registered template: claude.chat for provider claude
+2025-06-18 13:16:46,622 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 13:16:46,622 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:16:46,622 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.chat for provider gemini
+2025-06-18 13:16:46,622 - src.llm.prompts.manager - DEBUG - Created new provider entry: gemini
+2025-06-18 13:16:46,622 - src.llm.prompts.manager - DEBUG - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:16:46,622 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:16:46,622 - src.llm.prompts.manager - DEBUG - Registered template: gemini.chat for provider gemini
+2025-06-18 13:16:46,622 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 13:16:46,622 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 13:16:46,622 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 13:16:46,622 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 13:16:46,622 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 13:16:46,622 - main - INFO - AI providers initialized
+2025-06-18 13:16:46,622 - main - INFO - AI controller initialized
+2025-06-18 13:16:46,622 - main - INFO - Headers: User-Agent: Werkzeug/3.1.3
+Host: localhost
+
+
+2025-06-18 13:16:46,622 - main - INFO - Body: b''
+2025-06-18 13:16:46,622 - main - ERROR - Unhandled error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-06-18 13:16:46,635 - main - INFO - Response: b'{\n  "error": "404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",\n  "type": "NotFound"\n}\n'
+2025-06-18 13:16:46,638 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:16:46,638 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:16:46,638 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.chat for provider chatgpt
+2025-06-18 13:16:46,638 - src.llm.prompts.manager - DEBUG - Created new provider entry: chatgpt
+2025-06-18 13:16:46,638 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:16:46,638 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:16:46,638 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:16:46,638 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:16:46,638 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.structure_evaluation for provider claude
+2025-06-18 13:16:46,638 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.chat for provider claude
+2025-06-18 13:16:46,638 - src.llm.prompts.manager - DEBUG - Created new provider entry: claude
+2025-06-18 13:16:46,638 - src.llm.prompts.manager - DEBUG - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:16:46,638 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:16:46,638 - src.llm.prompts.manager - DEBUG - Registered template: claude.chat for provider claude
+2025-06-18 13:16:46,638 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 13:16:46,638 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:16:46,638 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.chat for provider gemini
+2025-06-18 13:16:46,638 - src.llm.prompts.manager - DEBUG - Created new provider entry: gemini
+2025-06-18 13:16:46,638 - src.llm.prompts.manager - DEBUG - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:16:46,638 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:16:46,638 - src.llm.prompts.manager - DEBUG - Registered template: gemini.chat for provider gemini
+2025-06-18 13:16:46,638 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 13:16:46,638 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 13:16:46,638 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 13:16:46,638 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 13:16:46,638 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 13:16:46,638 - main - INFO - AI providers initialized
+2025-06-18 13:16:46,638 - main - INFO - AI controller initialized
+2025-06-18 13:16:46,638 - main - INFO - Headers: User-Agent: Werkzeug/3.1.3
+Host: localhost
+
+
+2025-06-18 13:16:46,638 - main - INFO - Body: b''
+2025-06-18 13:16:46,638 - main - ERROR - Unhandled error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-06-18 13:16:46,645 - main - INFO - Response: b'{\n  "error": "404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",\n  "type": "NotFound"\n}\n'
+2025-06-18 13:16:46,647 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:16:46,647 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:16:46,647 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.chat for provider chatgpt
+2025-06-18 13:16:46,647 - src.llm.prompts.manager - DEBUG - Created new provider entry: chatgpt
+2025-06-18 13:16:46,647 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:16:46,647 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:16:46,647 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:16:46,647 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:16:46,647 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.structure_evaluation for provider claude
+2025-06-18 13:16:46,647 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.chat for provider claude
+2025-06-18 13:16:46,647 - src.llm.prompts.manager - DEBUG - Created new provider entry: claude
+2025-06-18 13:16:46,647 - src.llm.prompts.manager - DEBUG - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:16:46,647 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:16:46,647 - src.llm.prompts.manager - DEBUG - Registered template: claude.chat for provider claude
+2025-06-18 13:16:46,647 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 13:16:46,647 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:16:46,647 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.chat for provider gemini
+2025-06-18 13:16:46,647 - src.llm.prompts.manager - DEBUG - Created new provider entry: gemini
+2025-06-18 13:16:46,647 - src.llm.prompts.manager - DEBUG - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:16:46,647 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:16:46,647 - src.llm.prompts.manager - DEBUG - Registered template: gemini.chat for provider gemini
+2025-06-18 13:16:46,647 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 13:16:46,647 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 13:16:46,647 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 13:16:46,647 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 13:16:46,647 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 13:16:46,647 - main - INFO - AI providers initialized
+2025-06-18 13:16:46,647 - main - INFO - AI controller initialized
+2025-06-18 13:16:46,654 - main - INFO - Headers: User-Agent: Werkzeug/3.1.3
+Host: localhost
+
+
+2025-06-18 13:16:46,654 - main - INFO - Body: b''
+2025-06-18 13:16:46,654 - main - ERROR - Unhandled error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-06-18 13:16:46,654 - main - INFO - Response: b'{\n  "error": "404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",\n  "type": "NotFound"\n}\n'
+2025-06-18 13:20:15,413 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,415 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:20:15,415 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:20:15,417 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:20:15,417 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 13:20:15,417 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:20:15,417 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 13:20:15,417 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 13:20:15,417 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 13:20:15,417 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 13:20:15,417 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 13:20:15,417 - main - INFO - AI providers initialized
+2025-06-18 13:20:15,421 - main - INFO - AI controller initialized
+2025-06-18 13:20:15,724 - src.llm.hub - ERROR - Unexpected error in model call with claude-3-opus-20240229: ÉvÉçÉoÉCÉ_ 'claude' ÇÕèâä˙âªÇ…é∏îsÇµÇƒÇ¢Ç‹Ç∑: ClaudeProvider.__init__() missing 1 required positional argument: 'prompt_manager'
+2025-06-18 13:20:15,724 - src.llm.hub - ERROR - Unexpected error in model call with gemini-1.5-flash: ÉvÉçÉoÉCÉ_ 'gemini' ÇÕèâä˙âªÇ…é∏îsÇµÇƒÇ¢Ç‹Ç∑: GeminiProvider.__init__() missing 1 required positional argument: 'prompt_manager'
+2025-06-18 13:20:15,724 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,724 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:20:15,740 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,740 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:20:15,740 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,740 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:20:15,756 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,756 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:20:15,756 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,756 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:20:15,772 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,772 - src.llm.prompts.manager - ERROR - Failed to register template: expected '}' before end of string
+2025-06-18 13:20:15,772 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,772 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:20:15,772 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,772 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:20:15,788 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,788 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:20:15,788 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,788 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:20:15,804 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,804 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:20:15,804 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,804 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:20:15,820 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,820 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:20:15,820 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.chat for provider chatgpt
+2025-06-18 13:20:15,820 - src.llm.prompts.manager - DEBUG - Created new provider entry: chatgpt
+2025-06-18 13:20:15,820 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:20:15,820 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:20:15,820 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:20:15,820 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:20:15,820 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.structure_evaluation for provider claude
+2025-06-18 13:20:15,820 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.chat for provider claude
+2025-06-18 13:20:15,820 - src.llm.prompts.manager - DEBUG - Created new provider entry: claude
+2025-06-18 13:20:15,820 - src.llm.prompts.manager - DEBUG - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:20:15,820 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:20:15,820 - src.llm.prompts.manager - DEBUG - Registered template: claude.chat for provider claude
+2025-06-18 13:20:15,820 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 13:20:15,820 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:20:15,820 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.chat for provider gemini
+2025-06-18 13:20:15,820 - src.llm.prompts.manager - DEBUG - Created new provider entry: gemini
+2025-06-18 13:20:15,820 - src.llm.prompts.manager - DEBUG - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:20:15,820 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:20:15,820 - src.llm.prompts.manager - DEBUG - Registered template: gemini.chat for provider gemini
+2025-06-18 13:20:15,820 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 13:20:15,820 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 13:20:15,820 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 13:20:15,820 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 13:20:15,820 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 13:20:15,820 - main - INFO - AI providers initialized
+2025-06-18 13:20:15,820 - main - INFO - AI controller initialized
+2025-06-18 13:20:15,820 - main - INFO - Headers: User-Agent: Werkzeug/3.1.3
+Host: localhost
+
+
+2025-06-18 13:20:15,820 - main - INFO - Body: b''
+2025-06-18 13:20:15,820 - main - ERROR - Unhandled error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-06-18 13:20:15,835 - main - INFO - Response: b'{\n  "error": "404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",\n  "type": "NotFound"\n}\n'
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.chat for provider chatgpt
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Created new provider entry: chatgpt
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.structure_evaluation for provider claude
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.chat for provider claude
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Created new provider entry: claude
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Registered template: claude.chat for provider claude
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.chat for provider gemini
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Created new provider entry: gemini
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Registered template: gemini.chat for provider gemini
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 13:20:15,835 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 13:20:15,835 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 13:20:15,835 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 13:20:15,835 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 13:20:15,835 - main - INFO - AI providers initialized
+2025-06-18 13:20:15,835 - main - INFO - AI controller initialized
+2025-06-18 13:20:15,835 - main - INFO - Headers: User-Agent: Werkzeug/3.1.3
+Host: localhost
+
+
+2025-06-18 13:20:15,835 - main - INFO - Body: b''
+2025-06-18 13:20:15,835 - main - ERROR - Unhandled error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-06-18 13:20:15,835 - main - INFO - Response: b'{\n  "error": "404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",\n  "type": "NotFound"\n}\n'
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.chat for provider chatgpt
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Created new provider entry: chatgpt
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.structure_evaluation for provider claude
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.chat for provider claude
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Created new provider entry: claude
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Registered template: claude.chat for provider claude
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:20:15,835 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.chat for provider gemini
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Created new provider entry: gemini
+2025-06-18 13:20:15,835 - src.llm.prompts.manager - DEBUG - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:20:15,851 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:20:15,851 - src.llm.prompts.manager - DEBUG - Registered template: gemini.chat for provider gemini
+2025-06-18 13:20:15,851 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 13:20:15,851 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 13:20:15,851 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 13:20:15,851 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 13:20:15,851 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 13:20:15,851 - main - INFO - AI providers initialized
+2025-06-18 13:20:15,851 - main - INFO - AI controller initialized
+2025-06-18 13:20:15,851 - main - INFO - Headers: User-Agent: Werkzeug/3.1.3
+Host: localhost
+
+
+2025-06-18 13:20:15,851 - main - INFO - Body: b''
+2025-06-18 13:20:15,851 - main - ERROR - Unhandled error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-06-18 13:20:15,851 - main - INFO - Response: b'{\n  "error": "404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",\n  "type": "NotFound"\n}\n'
+2025-06-18 13:28:32,244 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,259 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:28:32,259 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:28:32,259 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:28:32,259 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 13:28:32,259 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:28:32,259 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 13:28:32,259 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 13:28:32,259 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 13:28:32,259 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 13:28:32,259 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 13:28:32,259 - main - INFO - AI providers initialized
+2025-06-18 13:28:32,259 - main - INFO - AI controller initialized
+2025-06-18 13:28:32,825 - src.llm.hub - ERROR - Unexpected error in model call with claude-3-opus-20240229: ÉvÉçÉoÉCÉ_ 'claude' ÇÕèâä˙âªÇ…é∏îsÇµÇƒÇ¢Ç‹Ç∑: ClaudeProvider.__init__() missing 1 required positional argument: 'prompt_manager'
+2025-06-18 13:28:32,825 - src.llm.hub - ERROR - Unexpected error in model call with gemini-1.5-flash: ÉvÉçÉoÉCÉ_ 'gemini' ÇÕèâä˙âªÇ…é∏îsÇµÇƒÇ¢Ç‹Ç∑: GeminiProvider.__init__() missing 1 required positional argument: 'prompt_manager'
+2025-06-18 13:28:32,825 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,825 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:28:32,841 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,841 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:28:32,857 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,857 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:28:32,857 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,857 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:28:32,873 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,873 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:28:32,873 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,873 - src.llm.prompts.manager - ERROR - Failed to register template: expected '}' before end of string
+2025-06-18 13:28:32,873 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,873 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:28:32,888 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,888 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:28:32,888 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,888 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:28:32,904 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,904 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:28:32,904 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,904 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:28:32,927 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,927 - src.llm.prompts.manager - ERROR - Invalid template format: 'name'
+2025-06-18 13:28:32,937 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,938 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:28:32,938 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.chat for provider chatgpt
+2025-06-18 13:28:32,938 - src.llm.prompts.manager - DEBUG - Created new provider entry: chatgpt
+2025-06-18 13:28:32,938 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:28:32,938 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:28:32,938 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:28:32,938 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:28:32,939 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.structure_evaluation for provider claude
+2025-06-18 13:28:32,939 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.chat for provider claude
+2025-06-18 13:28:32,940 - src.llm.prompts.manager - DEBUG - Created new provider entry: claude
+2025-06-18 13:28:32,940 - src.llm.prompts.manager - DEBUG - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:28:32,940 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:28:32,940 - src.llm.prompts.manager - DEBUG - Registered template: claude.chat for provider claude
+2025-06-18 13:28:32,940 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 13:28:32,940 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:28:32,941 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.chat for provider gemini
+2025-06-18 13:28:32,941 - src.llm.prompts.manager - DEBUG - Created new provider entry: gemini
+2025-06-18 13:28:32,941 - src.llm.prompts.manager - DEBUG - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:28:32,941 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:28:32,941 - src.llm.prompts.manager - DEBUG - Registered template: gemini.chat for provider gemini
+2025-06-18 13:28:32,941 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 13:28:32,941 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 13:28:32,941 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 13:28:32,941 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 13:28:32,941 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 13:28:32,941 - main - INFO - AI providers initialized
+2025-06-18 13:28:32,943 - main - INFO - AI controller initialized
+2025-06-18 13:28:32,945 - main - INFO - Headers: User-Agent: Werkzeug/3.1.3
+Host: localhost
+
+
+2025-06-18 13:28:32,945 - main - INFO - Body: b''
+2025-06-18 13:28:32,945 - main - ERROR - Unhandled error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-06-18 13:28:32,947 - main - INFO - Response: b'{\n  "error": "404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",\n  "type": "NotFound"\n}\n'
+2025-06-18 13:28:32,950 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,951 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:28:32,951 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.chat for provider chatgpt
+2025-06-18 13:28:32,951 - src.llm.prompts.manager - DEBUG - Created new provider entry: chatgpt
+2025-06-18 13:28:32,952 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:28:32,952 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:28:32,952 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:28:32,952 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:28:32,952 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.structure_evaluation for provider claude
+2025-06-18 13:28:32,952 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.chat for provider claude
+2025-06-18 13:28:32,953 - src.llm.prompts.manager - DEBUG - Created new provider entry: claude
+2025-06-18 13:28:32,953 - src.llm.prompts.manager - DEBUG - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:28:32,953 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:28:32,953 - src.llm.prompts.manager - DEBUG - Registered template: claude.chat for provider claude
+2025-06-18 13:28:32,953 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 13:28:32,953 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:28:32,954 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.chat for provider gemini
+2025-06-18 13:28:32,954 - src.llm.prompts.manager - DEBUG - Created new provider entry: gemini
+2025-06-18 13:28:32,954 - src.llm.prompts.manager - DEBUG - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:28:32,954 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:28:32,954 - src.llm.prompts.manager - DEBUG - Registered template: gemini.chat for provider gemini
+2025-06-18 13:28:32,954 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 13:28:32,954 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 13:28:32,954 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 13:28:32,954 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 13:28:32,954 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 13:28:32,954 - main - INFO - AI providers initialized
+2025-06-18 13:28:32,955 - main - INFO - AI controller initialized
+2025-06-18 13:28:32,957 - main - INFO - Headers: User-Agent: Werkzeug/3.1.3
+Host: localhost
+
+
+2025-06-18 13:28:32,957 - main - INFO - Body: b''
+2025-06-18 13:28:32,957 - main - ERROR - Unhandled error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-06-18 13:28:32,958 - main - INFO - Response: b'{\n  "error": "404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",\n  "type": "NotFound"\n}\n'
+2025-06-18 13:28:32,960 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-18 13:28:32,961 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:28:32,961 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: chatgpt.chat for provider chatgpt
+2025-06-18 13:28:32,961 - src.llm.prompts.manager - DEBUG - Created new provider entry: chatgpt
+2025-06-18 13:28:32,962 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:28:32,962 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.structure_evaluation for provider chatgpt
+2025-06-18 13:28:32,962 - src.llm.prompts.manager - DEBUG - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:28:32,962 - src.llm.prompts.prompt_loader - INFO - Registered template: chatgpt.chat for provider chatgpt
+2025-06-18 13:28:32,962 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.structure_evaluation for provider claude
+2025-06-18 13:28:32,962 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: claude.chat for provider claude
+2025-06-18 13:28:32,962 - src.llm.prompts.manager - DEBUG - Created new provider entry: claude
+2025-06-18 13:28:32,962 - src.llm.prompts.manager - DEBUG - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:28:32,962 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.structure_evaluation for provider claude
+2025-06-18 13:28:32,962 - src.llm.prompts.manager - DEBUG - Registered template: claude.chat for provider claude
+2025-06-18 13:28:32,962 - src.llm.prompts.prompt_loader - INFO - Registered template: claude.chat for provider claude
+2025-06-18 13:28:32,964 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:28:32,964 - src.llm.prompts.prompt_loader - DEBUG - Loaded prompt template: gemini.chat for provider gemini
+2025-06-18 13:28:32,964 - src.llm.prompts.manager - DEBUG - Created new provider entry: gemini
+2025-06-18 13:28:32,964 - src.llm.prompts.manager - DEBUG - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:28:32,964 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.structure_evaluation for provider gemini
+2025-06-18 13:28:32,964 - src.llm.prompts.manager - DEBUG - Registered template: gemini.chat for provider gemini
+2025-06-18 13:28:32,964 - src.llm.prompts.prompt_loader - INFO - Registered template: gemini.chat for provider gemini
+2025-06-18 13:28:32,964 - main - INFO - PromptManager initialized and templates registered
+2025-06-18 13:28:32,964 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-18 13:28:32,964 - src.llm.providers.claude - INFO - ClaudeProvider initialized with PromptManager and API Key
+2025-06-18 13:28:32,964 - src.llm.providers.gemini - INFO - GeminiProvider initialized with PromptManager and API Key
+2025-06-18 13:28:32,964 - main - INFO - AI providers initialized
+2025-06-18 13:28:32,965 - main - INFO - AI controller initialized
+2025-06-18 13:28:32,967 - main - INFO - Headers: User-Agent: Werkzeug/3.1.3
+Host: localhost
+
+
+2025-06-18 13:28:32,967 - main - INFO - Body: b''
+2025-06-18 13:28:32,967 - main - ERROR - Unhandled error: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\aide_x\venv\Lib\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-06-18 13:28:32,968 - main - INFO - Response: b'{\n  "error": "404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",\n  "type": "NotFound"\n}\n'

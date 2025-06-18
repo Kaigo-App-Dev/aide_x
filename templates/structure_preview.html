@@ -15,7 +15,7 @@
   <!-- タイトル -->
   <h2>🔍 プレビュー: {{ structure.title }}</h2>
 
-  <!-- 評価結果 -->
+  <!-- Claude 評価結果 -->
   {% if structure.evaluation %}
     <div class="alert alert-info mt-3">
       <strong>🧠 評価結果：</strong><br>
@@ -24,58 +24,125 @@
     </div>
   {% endif %}
 
-  <!-- プレビュー用フォーム -->
-  <form method="post" action="{{ url_for('preview.submit_structure', structure_id=structure.id) }}">
-  {% for section in structure.sections %}
-    <div class="mb-3">
-      <label class="form-label">{{ section.label }}</label>
+  <!-- ✅ pages 対応（タブ切り替え UI） -->
+  {% if structure.pages %}
+    <h3>🗂 ページ別構成プレビュー</h3>
 
-      {% if section.type == "text" %}
-        <input type="text" class="form-control" name="{{ section.name }}">
+    <!-- Bootstrapタブ切替 -->
+    <ul class="nav nav-tabs mt-3" id="pageTabs">
+      {% for page in structure.pages %}
+        <li class="nav-item">
+          <a class="nav-link {% if loop.first %}active{% endif %}" 
+             data-bs-toggle="tab" 
+             href="#tab{{ loop.index }}">
+             {{ page.title or "ページ" ~ loop.index }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
 
-      {% elif section.type == "textarea" %}
-        <textarea class="form-control" name="{{ section.name }}"></textarea>
-
-      {% elif section.type == "radio" %}
-        {% for option in section.options %}
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="{{ section.name }}" id="{{ section.name }}_{{ loop.index }}" value="{{ option }}">
-            <label class="form-check-label" for="{{ section.name }}_{{ loop.index }}">{{ option }}</label>
-          </div>
-        {% endfor %}
-
-      {% elif section.type == "select" %}
-        <select class="form-select" name="{{ section.name }}">
-          {% for option in section.options %}
-            <option value="{{ option }}">{{ option }}</option>
-          {% endfor %}
-        </select>
-
-      {% elif section.type == "checkbox" %}
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" name="{{ section.name }}" id="{{ section.name }}">
-          <label class="form-check-label" for="{{ section.name }}">{{ section.label }}</label>
+    <div class="tab-content border p-3 mt-2 bg-light">
+      {% for page in structure.pages %}
+        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="tab{{ loop.index }}">
+          {{ render_html_from_structure({"pages": [page]}) | safe }}
         </div>
-
-      {% elif section.type == "date" %}
-        <input type="date" class="form-control" name="{{ section.name }}">
-
-      {% elif section.type == "number" %}
-        <input type="number" class="form-control" name="{{ section.name }}">
-
-      {% elif section.type == "file" %}
-        <input type="file" class="form-control" name="{{ section.name }}">
-
-      {% else %}
-        <input type="text" class="form-control" name="{{ section.name }}">
-      {% endif %}
+      {% endfor %}
     </div>
-  {% endfor %}
 
-  <!-- 🔽 ここが新たに追加される送信ボタン -->
-  <button type="submit" class="btn btn-primary mt-3">✅ 入力を送信</button>
-</form>
+  {% elif structure.sections %}
+    <!-- ✅ sections 対応（フォーム構成） -->
+    <form method="post" action="{{ url_for('preview.submit_structure', structure_id=structure.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <h3>📝 構成セクション（入力可能）</h3>
+      {% for section in structure.sections %}
+        <div class="mb-3">
+          <label class="form-label">{{ section.label }}</label>
 
-  <a href="{{ url_for('structure.edit_structure', structure_id=structure.id) }}" class="btn btn-secondary mt-3">← 編集画面に戻る</a>
+          {% if section.type == "text" %}
+            <input type="text" class="form-control" name="{{ section.name }}">
+
+          {% elif section.type == "textarea" %}
+            <textarea class="form-control" name="{{ section.name }}"></textarea>
+
+          {% elif section.type == "radio" %}
+            {% for option in section.options %}
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="{{ section.name }}" id="{{ section.name }}_{{ loop.index }}" value="{{ option }}">
+                <label class="form-check-label" for="{{ section.name }}_{{ loop.index }}">{{ option }}</label>
+              </div>
+            {% endfor %}
+
+          {% elif section.type == "select" %}
+            <select class="form-select" name="{{ section.name }}">
+              {% for option in section.options %}
+                <option value="{{ option }}">{{ option }}</option>
+              {% endfor %}
+            </select>
+
+          {% elif section.type == "checkbox" %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="{{ section.name }}" id="{{ section.name }}">
+              <label class="form-check-label" for="{{ section.name }}">{{ section.label }}</label>
+            </div>
+
+          {% elif section.type == "date" %}
+            <input type="date" class="form-control" name="{{ section.name }}">
+
+          {% elif section.type == "number" %}
+            <input type="number" class="form-control" name="{{ section.name }}">
+
+          {% elif section.type == "file" %}
+            <input type="file" class="form-control" name="{{ section.name }}">
+
+          {% else %}
+            <input type="text" class="form-control" name="{{ section.name }}">
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="btn btn-primary mt-3">✅ 入力を送信</button>
+    </form>
+  {% endif %}
+
+  <!-- 🔽 自動生成プレビュー（rendered_html がある場合） -->
+  {% if rendered_html %}
+    <hr>
+    <h3>📦 自動生成ビュー（全体構成の参考表示）</h3>
+    <div style="border: 1px solid #ccc; padding: 15px; background-color: #fdfdfd;">
+      {{ rendered_html | safe }}
+    </div>
+  {% endif %}
+
+  {# ✅ 操作ボタン（後日実装予定：保存・再評価・出力） #}
+  {#
+  <hr class="mt-4">
+  <div class="d-flex flex-wrap gap-3">
+    <form method="post" action="{{ url_for('structure.save_structure', structure_id=structure.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-success">✅ 構成を保存</button>
+    </form>
+
+    <form method="post" action="{{ url_for('evaluation.re_evaluate_structure', structure_id=structure.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-info">🧠 Claude再評価</button>
+    </form>
+
+    <form method="get" action="{{ url_for('structure.view_structure_diff', structure_id=structure.id, timestamp=structure.history[-1].timestamp) }}">
+      <button type="submit" class="btn btn-warning">📄 差分を見る</button>
+    </form>
+
+    <form method="get" action="{{ url_for('structure.export_structure', structure_id=structure.id) }}">
+      <button type="submit" class="btn btn-outline-primary">📤 出力形式を選ぶ</button>
+    </form>
+  </div>
+  #}
+
+  <!-- 戻る -->
+  <a href="{{ url_for('structure.edit_structure', structure_id=structure.id) }}" class="btn btn-secondary mt-4">← 編集画面に戻る</a>
 </div>
+
+<!-- ✅ Bootstrapが必要 -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 {% endblock %}

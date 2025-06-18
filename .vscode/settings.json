@@ -1,0 +1,9 @@
+{
+    "python.analysis.extraPaths": [
+        "./",
+        "./utils"
+    ],
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.autoImportCompletions": true
+} 

@@ -11,5 +11,10 @@
 <h3>🟡 差分ハイライト</h3>
 <pre style="background:#fff8e1; padding:10px;">{{ diff_html | safe }}</pre>
 
+<form action="{{ url_for('structure.restore_from_history', structure_id=structure_id) }}" method="post">
+  <input type="hidden" name="timestamp" value="{{ timestamp }}">
+  <button type="submit">🔁 この状態に復元する</button>
+</form>
+
 <a href="{{ url_for('structure.list_structures') }}">← 戻る</a>
 {% endblock %}

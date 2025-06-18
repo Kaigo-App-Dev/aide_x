@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-content">
+        <h1 class="error-title">{% block error_title %}{% endblock %}</h1>
+        <div class="error-message">
+            {% block error_message %}{% endblock %}
+        </div>
+        <div class="error-actions">
+            {% block error_actions %}
+            <a href="{{ url_for('index') }}" class="btn btn-primary">トップページに戻る</a>
+            {% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .error-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 60vh;
+        padding: 2rem;
+    }
+    
+    .error-content {
+        text-align: center;
+        max-width: 600px;
+    }
+    
+    .error-title {
+        font-size: 2.5rem;
+        color: #dc3545;
+        margin-bottom: 1rem;
+    }
+    
+    .error-message {
+        font-size: 1.2rem;
+        color: #6c757d;
+        margin-bottom: 2rem;
+    }
+    
+    .error-actions {
+        margin-top: 2rem;
+    }
+    
+    .btn {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+</style>
+{% endblock %} 

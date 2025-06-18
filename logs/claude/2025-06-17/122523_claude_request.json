@@ -1,0 +1,16 @@
+{
+  "model": "claude-3-opus-20240229",
+  "prompt": [
+    {
+      "role": "system",
+      "content": "Test system prompt"
+    },
+    {
+      "role": "user",
+      "content": "Test message"
+    }
+  ],
+  "temperature": 0.7,
+  "max_tokens": 1024,
+  "timestamp": "2025-06-17T12:25:23.356351"
+}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>🚀 出力形式を選択してください</h2>
+  <form method="post" action="{{ url_for('structure.start_export', structure_id=structure.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="mb-3">
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="format" id="flask" value="flask" checked>
+        <label class="form-check-label" for="flask">🌐 Webアプリ（Flask）</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="format" id="exe" value="exe">
+        <label class="form-check-label" for="exe">💻 スタンドアロン（PyWebView / EXE）</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="format" id="zip" value="zip">
+        <label class="form-check-label" for="zip">📦 コードのみ（ZIP出力）</label>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-success mt-3">✅ 出力を開始</button>
+    <a href="{{ url_for('structure.edit_structure', structure_id=structure.id) }}" class="btn btn-secondary mt-3">← 戻る</a>
+  </form>
+</div>
+{% endblock %}

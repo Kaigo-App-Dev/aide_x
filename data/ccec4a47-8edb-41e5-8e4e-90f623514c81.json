@@ -1,7 +1,0 @@
-{
-  "id": "ccec4a47-8edb-41e5-8e4e-90f623514c81",
-  "title": "テストフォーム",
-  "description": "自動テスト用",
-  "content": "{\"title\": \"\\u30c6\\u30b9\\u30c8\\u30d5\\u30a9\\u30fc\\u30e0\", \"sections\": [{\"name\": \"\\u540d\\u524d\", \"type\": \"text\", \"label\": \"\\u6c0f\\u540d\"}, {\"name\": \"\\u6027\\u5225\", \"type\": \"select\", \"label\": \"\\u6027\\u5225\", \"options\": [\"\\u7537\\u6027\", \"\\u5973\\u6027\"]}]}",
-  "is_final": false
-}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>🛠 修復案レビュー</h2>
+
+<h3>差分ハイライト</h3>
+<div style="background: #f9f9f9; padding: 10px; border: 1px solid #ccc;">
+  {{ diff_html|safe }}
+</div>
+
+<h3>🧠 修復案の評価スコア</h3>
+<ul>
+  <li><strong>Intent Match:</strong> {{ repaired.evaluations.claude.intent_match }}</li>
+  <li><strong>Quality Score:</strong> {{ repaired.evaluations.claude.quality_score }}</li>
+  <li><strong>理由:</strong> {{ repaired.evaluations.claude.intent_reason }}</li>
+</ul>
+
+<form method="post" action="{{ url_for('structure.adopt_structure', improved_id=repaired.id, original_id=original.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button class="btn btn-success">✅ 修復案を採用する</button>
+</form>
+
+<form method="post" action="{{ url_for('structure.save_as_new_structure', improved_id=repaired.id) }}" style="margin-top: 8px;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button class="btn btn-primary">📄 別テンプレートとして保存</button>
+</form>
+
+<form method="post" action="{{ url_for('structure.discard_structure', improved_id=repaired.id) }}" style="margin-top: 8px;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button class="btn btn-danger">🗑 修復案を破棄する</button>
+</form>
+
+{% endblock %}

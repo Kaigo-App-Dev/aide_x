@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>🧠 構成評価の詳細</h2>
+
+  <p><strong>タイトル：</strong> {{ structure.title }}</p>
+
+  {% if structure.evaluation %}
+    <div class="alert alert-info">
+      <strong>一致度：</strong> {{ structure.evaluation.intent_match * 100 | round(1) }}%<br>
+      <strong>品質スコア：</strong> {{ structure.evaluation.quality_score * 100 | round(1) }}%<br>
+      <strong>コメント：</strong> {{ structure.evaluation.intent_reason }}
+    </div>
+  {% else %}
+    <p>📭 評価データが存在しません。</p>
+  {% endif %}
+
+  <a href="{{ url_for('structure.edit_structure', structure_id=structure.id) }}" class="btn btn-secondary mt-3">← 編集に戻る</a>
+</div>
+{% endblock %}

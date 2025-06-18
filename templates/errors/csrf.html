@@ -1,0 +1,13 @@
+{% extends "errors/base_error.html" %}
+
+{% block error_title %}CSRFエラー{% endblock %}
+
+{% block error_message %}
+セキュリティトークンが無効または期限切れです。<br>
+ページを再読み込みして、もう一度お試しください。
+{% endblock %}
+
+{% block error_actions %}
+<a href="{{ url_for('index') }}" class="btn btn-primary">トップページに戻る</a>
+<button onclick="window.location.reload()" class="btn btn-secondary">ページを再読み込み</button>
+{% endblock %} 

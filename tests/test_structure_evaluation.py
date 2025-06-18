@@ -1,36 +1,28 @@
+"""
+test_structure_evaluation.py: 構成全体に対する評価フローの統合テスト
+
+このテストファイルは、構成評価の統合フローをテストします：
+1. 新規構成の作成
+2. 構成の整合性評価
+3. 評価結果の表示
+
+テストは実際のHTTPリクエストを使用し、
+エンドツーエンドの評価フローが正しく機能することを確認します。
+"""
+
 import sys
 import os
 import json
 import pytest
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from main import create_app
+from urllib.parse import urlparse
 
-@pytest.fixture
-def client():
-    app = create_app()
-    app.config["TESTING"] = True
-    with app.test_client() as client:
-        yield client
-
-def test_structure_evaluation(client):
-    # 異常構成テンプレートを登録
-    structure_data = {
-        "title": "評価用テンプレート",
-        "description": "整合性チェックテスト",
-        "content": json.dumps({
-            "sections": [
-                { "name": "名前", "type": "text" },
-                { "name": "不明", "type": "unknown_type" }  # ← 整合性エラー対象
-            ]
-        })
-    }
-
-    res = client.post("/structure/new", data=structure_data, follow_redirects=True)
+def test_structure_evaluation(client, test_structure_data):
+    # 新規構成テンプレートを登録
+    res = client.post("/structure/new", data=test_structure_data, follow_redirects=True)
     assert res.status_code == 200
-    assert "評価用テンプレート" in res.data.decode("utf-8")
+    assert test_structure_data["title"] in res.data.decode("utf-8")
 
     # ID取得
-    from urllib.parse import urlparse
     created_id = res.request.path.split("/")[-1]
     assert created_id
 
@@ -39,3 +31,6 @@ def test_structure_evaluation(client):
     body = res2.data.decode("utf-8")
     assert res2.status_code == 200
     assert "intent_match" in body or "一致" in body  # スコアが表示されていればOK
+
+if __name__ == "__main__":
+    pytest.main([__file__])

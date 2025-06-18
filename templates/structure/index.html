@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}保存済み構成 - AIDE-X{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>保存済み構成</h1>
+    
+    {% if structures %}
+    <div class="structure-list">
+        {% for structure in structures %}
+        <div class="structure-item">
+            <h3>{{ structure.title }}</h3>
+            <p class="structure-description">{{ structure.description }}</p>
+            <div class="structure-actions">
+                <a href="{{ url_for('structure.view', structure_id=structure.id) }}" class="btn btn-primary">詳細</a>
+                <a href="{{ url_for('structure.edit', structure_id=structure.id) }}" class="btn btn-secondary">編集</a>
+                <form action="{{ url_for('structure.delete', structure_id=structure.id) }}" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('本当に削除しますか？')">削除</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>保存された構成はありません。</p>
+    {% endif %}
+    
+    <div class="mt-4">
+        <a href="{{ url_for('structure.new_structure') }}" class="btn btn-success">新規作成</a>
+    </div>
+</div>
+
+<style>
+.structure-list {
+    margin-top: 2rem;
+}
+
+.structure-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #fff;
+}
+
+.structure-description {
+    color: #666;
+    margin: 0.5rem 0;
+}
+
+.structure-actions {
+    margin-top: 1rem;
+}
+
+.structure-actions .btn {
+    margin-right: 0.5rem;
+}
+</style>
+{% endblock %} 

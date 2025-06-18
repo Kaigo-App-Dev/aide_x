@@ -1,0 +1,13 @@
+- name: claude.structure_evaluation
+  provider: claude
+  description: 構成評価プロンプト
+  template: |
+    次の構成を評価してください：
+    {user_input}
+
+- name: claude.chat
+  provider: claude
+  description: チャットプロンプト
+  template: |
+    以下の会話を続けてください：
+    {user_input} 

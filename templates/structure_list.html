@@ -33,7 +33,7 @@
         {% endif %}
       </td>
       <td>
-        {% if s.intent_match is defined %}
+        {% if s.intent_match is defined and s.intent_match is not none %}
           {{ '%.0f' % s.intent_match }}<br>
           <progress value="{{ s.intent_match }}" max="100" style="width: 80px;"></progress>
         {% else %}
@@ -41,7 +41,7 @@
         {% endif %}
       </td>
       <td>
-        {% if s.quality_score is defined %}
+        {% if s.quality_score is defined and s.quality_score is not none %}
           {{ '%.0f' % s.quality_score }}<br>
           <progress value="{{ s.quality_score }}" max="100" style="width: 80px;"></progress>
         {% else %}
@@ -50,9 +50,10 @@
       </td>
       <td>
         <a href="{{ url_for('structure.edit_structure', structure_id=s.id) }}">✏ 編集</a> |
+        <a href="#" class="btn btn-info" style="opacity: 0.5; pointer-events: none;">プレビュー</a>
         <a href="{{ url_for('structure.evaluate_structure', structure_id=s.id) }}">🧠 診断</a><br>
 
-        {% if s.intent_match is defined and s.intent_match < 70 %}
+        {% if s.intent_match is defined and s.intent_match is not none and s.intent_match < 70 %}
           <a href="{{ url_for('structure.improve_structure', structure_id=s.id) }}" style="color: red;">⚠ 改善提案へ</a><br>
         {% endif %}
 

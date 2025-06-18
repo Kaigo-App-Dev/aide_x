@@ -1,0 +1,24 @@
+{
+  "model": "gemini-pro",
+  "prompt": [
+    {
+      "role": "system",
+      "parts": [
+        {
+          "text": "Test system prompt\nTest message"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "Test message"
+        }
+      ]
+    }
+  ],
+  "temperature": 0.7,
+  "max_tokens": 1024,
+  "timestamp": "2025-06-17T13:00:38.726838"
+}

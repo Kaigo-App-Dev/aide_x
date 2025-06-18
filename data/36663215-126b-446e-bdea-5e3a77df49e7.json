@@ -1,7 +1,0 @@
-{
-  "id": "36663215-126b-446e-bdea-5e3a77df49e7",
-  "title": "テストフォーム",
-  "description": "自動テスト用",
-  "content": "{\"sections\": [{\"name\": \"\\u540d\\u524d\", \"type\": \"text\", \"label\": \"\\u6c0f\\u540d\"}, {\"name\": \"\\u6027\\u5225\", \"type\": \"select\", \"label\": \"\\u6027\\u5225\", \"options\": [\"\\u7537\\u6027\", \"\\u5973\\u6027\"]}]}",
-  "is_final": false
-}
