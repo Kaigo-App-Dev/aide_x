@@ -1,0 +1,65 @@
+=== Claude Evaluation Prompt ===
+Timestamp: 2025-06-22T09:14:08.278829
+Provider: claude
+Structure ID: test-004
+Structure Title: テスト構造
+Structure Content Type: <class 'dict'>
+
+--- Structure JSON ---
+{
+  "title": "テスト構造",
+  "content": {
+    "sections": [
+      {
+        "title": "項目1",
+        "content": "項目1の内容"
+      },
+      {
+        "title": "項目2",
+        "content": "項目2の内容"
+      }
+    ]
+  }
+}
+
+--- Formatted Prompt ---
+以下の構成を評価してください。
+
+構成データ:
+{
+  "title": "テスト構造",
+  "content": {
+    "sections": [
+      {
+        "title": "項目1",
+        "content": "項目1の内容"
+      },
+      {
+        "title": "項目2",
+        "content": "項目2の内容"
+      }
+    ]
+  }
+}
+
+この構成の妥当性を0.0-1.0のスコアで評価し、改善すべき点と理由を述べてください。
+
+構成が未記入、または構成が存在しない場合は、
+「構成が未入力のため、評価できません」とだけ返答してください。
+
+評価結果は以下のJSON形式で返してください：
+{
+  "is_valid": true,
+  "score": 0.85,
+  "feedback": "構成は概ね妥当ですが、目的の記載が不足しています。",
+  "details": {
+    "intent_match": "意図との一致度に関する詳細",
+    "clarity": "構造の明確さに関する詳細",
+    "implementation": "実装の容易さに関する詳細",
+    "strengths": ["強み1", "強み2"],
+    "weaknesses": ["弱み1", "弱み2"],
+    "suggestions": ["改善提案1", "改善提案2"]
+  }
+}
+
+--- End of Prompt ---

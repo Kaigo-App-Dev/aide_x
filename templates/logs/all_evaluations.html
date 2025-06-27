@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>評価履歴一覧</title>
+    <style>
+        body { background: #1e1e1e; color: #ccc; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        .container { max-width: 1400px; margin: 40px auto; background: #252526; border-radius: 8px; padding: 32px; }
+        h1 { color: #4ec9b0; margin-bottom: 8px; }
+        .back-link { color: #4ec9b0; text-decoration: none; margin-bottom: 24px; display: inline-block; }
+        .back-link:hover { text-decoration: underline; }
+        .stats { background: #2d2d30; padding: 16px; border-radius: 6px; margin-bottom: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #4ec9b0; }
+        .stat-label { color: #888; font-size: 12px; margin-top: 4px; }
+        .filters { background: #2d2d30; padding: 16px; border-radius: 6px; margin-bottom: 20px; }
+        .filter-row { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; }
+        .filter-row:last-child { margin-bottom: 0; }
+        .filter-group { display: flex; align-items: center; gap: 8px; }
+        .filter-label { color: #ccc; font-size: 14px; min-width: 80px; }
+        .filter-input { background: #1e1e1e; border: 1px solid #3c3c3c; color: #ccc; padding: 6px 12px; border-radius: 4px; }
+        .filter-input:focus { outline: none; border-color: #4ec9b0; }
+        .filter-button { background: #4ec9b0; color: #1e1e1e; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; }
+        .filter-button:hover { background: #45b8a0; }
+        .filter-button.active { background: #c586c0; }
+        .search-box { flex: 1; }
+        .search-input { width: 100%; background: #1e1e1e; border: 1px solid #3c3c3c; color: #ccc; padding: 8px 12px; border-radius: 4px; }
+        .search-input:focus { outline: none; border-color: #4ec9b0; }
+        .table-container { background: #1e1e1e; border-radius: 6px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #2d2d30; color: #4ec9b0; padding: 12px; text-align: left; font-weight: bold; }
+        td { padding: 12px; border-bottom: 1px solid #3c3c3c; }
+        tr:hover { background: #2d2d30; }
+        .title-link { color: #4ec9b0; text-decoration: none; }
+        .title-link:hover { text-decoration: underline; }
+        .count-badge { background: #4ec9b0; color: #1e1e1e; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-left: 8px; }
+        .count-badge:hover { background: #45b8a0; cursor: pointer; }
+        .compare-link { color: #c586c0; text-decoration: none; font-size: 12px; }
+        .compare-link:hover { text-decoration: underline; }
+        .empty-message { text-align: center; color: #888; padding: 40px; font-style: italic; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/unified" class="back-link">← 統合インターフェース</a>
+    <h1>🧠 評価履歴一覧</h1>
+    
+    <!-- 統計情報 -->
+    <div class="stats">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">総件数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="structureCount">0</div>
+                <div class="stat-label">構成数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="avgScore">0.0</div>
+                <div class="stat-label">平均スコア</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="medianScore">0.0</div>
+                <div class="stat-label">中央値スコア</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- フィルタ -->
+    <div class="filters">
+        <div class="filter-row">
+            <div class="filter-group">
+                <span class="filter-label">表示:</span>
+                <button class="filter-button active" data-filter="all">すべて</button>
+                <button class="filter-button" data-filter="recent">最近</button>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">並び順:</span>
+                <button class="filter-button active" data-sort="desc">新しい順</button>
+                <button class="filter-button" data-sort="asc">古い順</button>
+            </div>
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="タイトルで検索..." id="searchInput">
+            </div>
+        </div>
+        <div class="filter-row">
+            <div class="filter-group">
+                <span class="filter-label">スコア範囲:</span>
+                <input type="number" class="filter-input" id="minScore" min="0" max="100" placeholder="最小">
+                <span style="color: #888;">〜</span>
+                <input type="number" class="filter-input" id="maxScore" min="0" max="100" placeholder="最大">
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">日付範囲:</span>
+                <input type="date" class="filter-input" id="fromDate">
+                <span style="color: #888;">〜</span>
+                <input type="date" class="filter-input" id="toDate">
+                <button class="filter-button" onclick="applyDateFilter()">適用</button>
+                <button class="filter-button" onclick="clearDateFilter()">クリア</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- テーブル -->
+    <div class="table-container">
+        <table id="evaluationsTable">
+            <thead>
+                <tr>
+                    <th>構成タイトル</th>
+                    <th>スコア</th>
+                    <th>フィードバック</th>
+                    <th>日時</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="evaluationsTableBody">
+                {% for evaluation in evaluations %}
+                <tr data-title="{{ evaluation.title.lower() }}" data-timestamp="{{ evaluation.timestamp }}" data-score="{{ (evaluation.score * 100)|round(1) if evaluation.score is not none else 0 }}">
+                    <td>
+                        <a href="/unified/{{ evaluation.structure_id }}" class="title-link">
+                            {{ evaluation.title or '無題' }}
+                        </a>
+                        <span class="count-badge" onclick="filterByStructure('{{ evaluation.structure_id }}')">1</span>
+                    </td>
+                    <td>{{ (evaluation.score * 100)|round(1) if evaluation.score is not none else 'N/A' }}</td>
+                    <td>
+                        <div style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            {{ evaluation.feedback or 'フィードバックなし' }}
+                        </div>
+                    </td>
+                    <td>{{ evaluation.timestamp }}</td>
+                    <td>
+                        <a href="/compare/{{ evaluation.structure_id }}/{{ evaluation.timestamp }}" class="compare-link">比較</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div id="emptyMessage" class="empty-message hidden">
+            評価履歴が見つかりませんでした。
+        </div>
+    </div>
+</div>
+
+<script>
+// データ
+let allEvaluations = {{ evaluations | tojson | safe }};
+let filteredEvaluations = [...allEvaluations];
+let currentSort = 'desc';
+let currentFilter = 'all';
+
+// 初期化
+document.addEventListener('DOMContentLoaded', function() {
+    updateStats();
+    updateTable();
+    
+    // イベントリスナー
+    document.getElementById('searchInput').addEventListener('input', filterByTitle);
+    
+    // フィルタボタン
+    document.querySelectorAll('[data-filter]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.filter;
+            applyFilters();
+        });
+    });
+    
+    // ソートボタン
+    document.querySelectorAll('[data-sort]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-sort]').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentSort = this.dataset.sort;
+            applyFilters();
+        });
+    });
+});
+
+// 統計更新
+function updateStats() {
+    const totalCount = filteredEvaluations.length;
+    const structureIds = new Set(filteredEvaluations.map(e => e.structure_id));
+    const structureCount = structureIds.size;
+    
+    // スコア計算
+    const scores = filteredEvaluations.map(e => e.score !== undefined && e.score !== null ? e.score * 100 : null).filter(s => s !== null);
+    const avgScore = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : '0.0';
+    const medianScore = scores.length > 0 ? calculateMedian(scores).toFixed(1) : '0.0';
+    
+    document.getElementById('totalCount').textContent = totalCount;
+    document.getElementById('structureCount').textContent = structureCount;
+    document.getElementById('avgScore').textContent = avgScore;
+    document.getElementById('medianScore').textContent = medianScore;
+}
+
+// 中央値計算
+function calculateMedian(arr) {
+    const sorted = arr.slice().sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+}
+
+// タイトルフィルタ
+function filterByTitle() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    filteredEvaluations = allEvaluations.filter(e => 
+        e.title && e.title.toLowerCase().includes(searchTerm)
+    );
+    applyFilters();
+}
+
+// 構成IDフィルタ
+function filterByStructure(structureId) {
+    filteredEvaluations = allEvaluations.filter(e => e.structure_id === structureId);
+    applyFilters();
+}
+
+// スコア範囲フィルタ
+function applyScoreFilter() {
+    const minScore = parseFloat(document.getElementById('minScore').value) || 0;
+    const maxScore = parseFloat(document.getElementById('maxScore').value) || 100;
+    filteredEvaluations = filteredEvaluations.filter(e => {
+        const score = e.score !== undefined && e.score !== null ? e.score * 100 : 0;
+        return score >= minScore && score <= maxScore;
+    });
+    applyFilters();
+}
+
+// 日付フィルタ
+function applyDateFilter() {
+    const fromDate = document.getElementById('fromDate').value;
+    const toDate = document.getElementById('toDate').value;
+    
+    filteredEvaluations = allEvaluations.filter(e => {
+        const timestamp = e.timestamp;
+        if (fromDate && timestamp < fromDate) return false;
+        if (toDate && timestamp > toDate) return false;
+        return true;
+    });
+    applyFilters();
+}
+
+// 日付フィルタクリア
+function clearDateFilter() {
+    document.getElementById('fromDate').value = '';
+    document.getElementById('toDate').value = '';
+    filteredEvaluations = [...allEvaluations];
+    applyFilters();
+}
+
+// フィルタ適用
+function applyFilters() {
+    // 表示フィルタ
+    if (currentFilter === 'recent') {
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        filteredEvaluations = filteredEvaluations.filter(e => new Date(e.timestamp) > oneWeekAgo);
+    }
+    // スコア範囲
+    const minScore = parseFloat(document.getElementById('minScore').value) || 0;
+    const maxScore = parseFloat(document.getElementById('maxScore').value) || 100;
+    filteredEvaluations = filteredEvaluations.filter(e => {
+        const score = e.score !== undefined && e.score !== null ? e.score * 100 : 0;
+        return score >= minScore && score <= maxScore;
+    });
+    // ソート
+    filteredEvaluations.sort((a, b) => {
+        const comparison = a.timestamp.localeCompare(b.timestamp);
+        return currentSort === 'desc' ? -comparison : comparison;
+    });
+    updateStats();
+    updateTable();
+}
+
+// テーブル更新
+function updateTable() {
+    const tbody = document.getElementById('evaluationsTableBody');
+    const emptyMessage = document.getElementById('emptyMessage');
+    
+    if (filteredEvaluations.length === 0) {
+        tbody.innerHTML = '';
+        emptyMessage.classList.remove('hidden');
+        return;
+    }
+    
+    emptyMessage.classList.add('hidden');
+    
+    tbody.innerHTML = filteredEvaluations.map(evaluation => `
+        <tr data-title="${evaluation.title ? evaluation.title.toLowerCase() : ''}" data-timestamp="${evaluation.timestamp}" data-score="${evaluation.score !== undefined && evaluation.score !== null ? (evaluation.score * 100).toFixed(1) : 0}">
+            <td>
+                <a href="/unified/${evaluation.structure_id}" class="title-link">
+                    ${evaluation.title || '無題'}
+                </a>
+                <span class="count-badge" onclick="filterByStructure('${evaluation.structure_id}')">1</span>
+            </td>
+            <td>${evaluation.score !== undefined && evaluation.score !== null ? (evaluation.score * 100).toFixed(1) : 'N/A'}</td>
+            <td>
+                <div style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${evaluation.feedback || 'フィードバックなし'}
+                </div>
+            </td>
+            <td>${evaluation.timestamp}</td>
+            <td>
+                <a href="/compare/${evaluation.structure_id}/${evaluation.timestamp}" class="compare-link">比較</a>
+            </td>
+        </tr>
+    `).join('');
+}
+</script>
+</body>
+</html> 

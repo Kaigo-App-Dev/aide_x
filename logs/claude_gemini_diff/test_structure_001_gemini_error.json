@@ -1,0 +1,15 @@
+{
+  "structure_id": "test_structure_001",
+  "timestamp": "2025-06-22T14:34:50.567776",
+  "error_type": "gemini_syntax_error",
+  "error_message": "Invalid JSON format: Expecting value: line 1 column 12 (char 11)",
+  "gemini_raw_response": "invalid json: { title: unquoted_key }",
+  "original_content": {
+    "test": "data"
+  },
+  "claude_repair_attempted": true,
+  "claude_repair_result": {
+    "title": "quoted_key",
+    "content": "valid_json"
+  }
+}

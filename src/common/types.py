@@ -6,13 +6,14 @@
 
 from typing import TypedDict, List, Optional, Dict, Any, Union, Literal, Protocol, Callable
 from datetime import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing_extensions import Required
 
 # メッセージ関連の型定義
-class MessageParam(TypedDict):
+class MessageParam(TypedDict, total=False):
     """AIプロバイダーのメッセージパラメータ"""
-    role: str
-    content: str
+    role: Required[str]
+    content: Required[str]
     name: Optional[str]
 
 MessageParamList = List[MessageParam]
@@ -24,6 +25,8 @@ class AIProviderResponse(TypedDict, total=False):
     raw: Optional[Dict[str, Any]]  # 元のレスポンス全文（任意）
     provider: Optional[str]  # "claude", "gemini", "chatgpt" など
     error: Optional[str]  # エラーメッセージ（任意）
+    model: Optional[str]  # 使用したモデル名
+    usage: Optional[Dict[str, Any]]  # トークン数やコスト情報
 
 class AIProvider(Protocol):
     """AIプロバイダーのインターフェース"""
@@ -36,12 +39,14 @@ class AIProvider(Protocol):
         ...
 
 # 構成テンプレート関連の型定義
-class StructureDict(TypedDict):
+class StructureDict(TypedDict, total=False):
     """構成テンプレートの型定義"""
-    title: str
-    description: str
-    content: Dict[str, Any]
-    metadata: Dict[str, Any]
+    id: Required[str]
+    title: Required[str]
+    description: Required[str]
+    content: Required[Dict[str, Any]]
+    metadata: Optional[Dict[str, Any]]
+    history: Optional[List['StructureHistory']]
 
 # 評価結果関連の型定義
 @dataclass
@@ -49,8 +54,12 @@ class EvaluationResult:
     """評価結果の型定義"""
     score: float
     feedback: str
-    details: Dict[str, Any]
+    details: Dict[str, Any] = field(default_factory=dict)
     is_valid: bool = True  # デフォルトでTrue
+
+    def __str__(self) -> str:
+        """評価結果を文字列形式で返す"""
+        return f"[評価結果]\n- 妥当性: {self.is_valid}\n- スコア: {self.score:.2f}\n- コメント: {self.feedback}"
 
 # 評価関数の型定義
 EvaluationFunction = Callable[[str, Optional[Any]], EvaluationResult]

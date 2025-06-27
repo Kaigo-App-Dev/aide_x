@@ -8,8 +8,11 @@ from src.types import EvaluationResult
 from src.structure.evaluator import evaluate_structure_with
 from src.llm.providers.claude import call_claude_evaluation, call_claude_api
 from src.llm.providers.gemini import call_gemini_api
+from src.llm.providers.chatgpt import call_chatgpt_api
 import difflib
 import html
+import json
+from src.structure.history_manager import save_structure_history
 
 logger = logging.getLogger(__name__)
 
@@ -188,6 +191,16 @@ def call_gemini_ui_generator(structure: Dict[str, Any]) -> str:
         if not response:
             logger.warning("Empty response from Gemini API")
             return ""
+        
+        # 履歴を保存
+        structure_id = structure.get("id", "unknown")
+        save_structure_history(
+            structure_id=structure_id,
+            role="gemini",
+            source="structure_completion",
+            content=response,
+            module_id=structure.get("module_id", "")
+        )
             
         return response
         
@@ -278,7 +291,6 @@ def call_claude_and_gpt(structure: Dict[str, Any]) -> Dict[str, str]:
 
     # Claude結果をChatGPTに再評価させるなどの連携が想定される
     try:
-        from src.llm.providers.chatgpt import call_chatgpt_api
         prompt = f"次のClaude出力をもとに、構成として完成させてください：\n{claude_result}"
         gpt_result = call_chatgpt_api(prompt, model="gpt-4", temperature=0.2)
         return {"claude": claude_result, "gpt": gpt_result or ""}

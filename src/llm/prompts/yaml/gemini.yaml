@@ -10,4 +10,41 @@
   description: チャットプロンプト
   template: |
     以下の会話を続けてください：
-    {user_input} 
+    {user_input}
+
+- name: gemini.completion
+  provider: gemini
+  description: Gemini補完プロンプト
+  template: |
+    以下の構成を基に、より詳細で実装可能な構成に補完してください。
+
+    元の構成:
+    {structure}
+
+    Claude評価フィードバック:
+    {claude_feedback}
+
+    補完の要件:
+    1. 元の構成の意図を保持する
+    2. より具体的で実装可能な内容に拡張する
+    3. モジュール構造を明確にする
+    4. 各セクションの詳細を充実させる
+
+    補完結果は以下のJSON形式で返してください:
+    {{
+      "title": "構成タイトル",
+      "description": "構成の説明",
+      "modules": {{
+        "module1": {{
+          "title": "モジュール1のタイトル",
+          "description": "モジュール1の説明",
+          "sections": {{
+            "section1": {{
+              "title": "セクション1のタイトル",
+              "content": "セクション1の詳細内容",
+              "implementation": "実装のポイント"
+            }}
+          }}
+        }}
+      }}
+    }} 

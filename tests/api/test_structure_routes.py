@@ -3,7 +3,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import pytest
-from main import create_app
+from src.app import create_app
 from src.structure.utils import save_structure, StructureDict
 from uuid import uuid4
 

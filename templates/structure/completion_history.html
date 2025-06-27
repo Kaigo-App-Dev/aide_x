@@ -1,0 +1,272 @@
+{% extends "base_layout.html" %}
+
+{% block title %}AIDE-X - 補完履歴 ({{ structure_id }}){% endblock %}
+
+{% block head %}
+    <style>
+        .history-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #3c3c3c;
+        }
+        
+        .history-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007acc;
+            margin: 0;
+        }
+        
+        .back-btn {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .back-btn:hover {
+            background: #005a9e;
+        }
+        
+        .completion-table {
+            background: #252526;
+            border: 1px solid #3c3c3c;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        
+        .table-header {
+            background: #2d2d30;
+            padding: 16px 20px;
+            border-bottom: 1px solid #3c3c3c;
+        }
+        
+        .table-title {
+            font-size: 1.2rem;
+            color: #4ec9b0;
+            margin: 0;
+        }
+        
+        .completion-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .completion-item {
+            padding: 20px;
+            border-bottom: 1px solid #3c3c3c;
+            transition: background-color 0.2s;
+        }
+        
+        .completion-item:hover {
+            background: #2d2d30;
+        }
+        
+        .completion-item:last-child {
+            border-bottom: none;
+        }
+        
+        .completion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .ai-badge {
+            background: #4285f4;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .timestamp {
+            color: #858585;
+            font-size: 0.9rem;
+        }
+        
+        .completion-content {
+            background: #1e1e1e;
+            border: 1px solid #3c3c3c;
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 12px;
+            color: #cccccc;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .completion-preview {
+            background: #1e1e1e;
+            border: 1px solid #3c3c3c;
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 12px;
+            color: #cccccc;
+            line-height: 1.6;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .completion-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.2s;
+        }
+        
+        .action-btn:hover {
+            background: #005a9e;
+        }
+        
+        .action-btn.secondary {
+            background: #6c757d;
+        }
+        
+        .action-btn.secondary:hover {
+            background: #545b62;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #858585;
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .empty-title {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: #cccccc;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <div class="history-header">
+        <h1 class="history-title">🔁 補完履歴</h1>
+        <a href="{{ url_for('unified.unified_interface', structure_id=structure_id) }}" class="back-btn">
+            ◀ 構成画面に戻る
+        </a>
+    </div>
+    
+    <div class="completion-table">
+        <div class="table-header">
+            <h2 class="table-title">補完履歴一覧</h2>
+        </div>
+        
+        {% if completions %}
+        <div class="completion-list">
+            {% for completion in completions|sort(attribute='timestamp', reverse=true) %}
+            <div class="completion-item">
+                <div class="completion-header">
+                    <div>
+                        <span class="ai-badge">
+                            🤖 {{ completion.provider|capitalize if completion.provider else 'Gemini' }}
+                        </span>
+                        <span class="timestamp">
+                            {{ completion.timestamp[:16].replace('T', ' ') if completion.timestamp else '日時不明' }}
+                        </span>
+                    </div>
+                </div>
+                
+                {% if completion.content %}
+                <details>
+                    <summary style="cursor: pointer; color: #007acc; margin-bottom: 8px;">
+                        補完内容を表示/非表示
+                    </summary>
+                    <div class="completion-content">
+                        <pre>{{ completion.content }}</pre>
+                    </div>
+                </details>
+                
+                <div class="completion-preview">
+                    <strong>プレビュー:</strong><br>
+                    {{ completion.content[:500] }}{% if completion.content|length > 500 %}...{% endif %}
+                </div>
+                
+                <div class="completion-actions">
+                    <button class="action-btn" onclick="applyCompletion('{{ loop.index0 }}')">
+                        ✅ 採用する
+                    </button>
+                    <button class="action-btn secondary" onclick="viewFullCompletion('{{ loop.index0 }}')">
+                        👁️ 全体を見る
+                    </button>
+                    <button class="action-btn secondary" onclick="askAboutCompletion('{{ loop.index0 }}')">
+                        💬 質問する
+                    </button>
+                </div>
+                {% else %}
+                <div class="completion-content">
+                    <p style="color: #858585; font-style: italic;">補完内容がありません</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🔁</div>
+            <h3 class="empty-title">補完履歴がありません</h3>
+            <p>まだ補完が実行されていません。構成画面でGemini補完を実行してください。</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function applyCompletion(index) {
+    console.log('補完を採用:', index);
+    // ここに補完採用のロジックを実装
+}
+
+function viewFullCompletion(index) {
+    console.log('全体を表示:', index);
+    // ここに全体表示のロジックを実装
+}
+
+function askAboutCompletion(index) {
+    console.log('補完について質問:', index);
+    // ここに質問のロジックを実装
+}
+</script>
+{% endblock %} 

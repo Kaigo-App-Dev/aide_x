@@ -117,12 +117,15 @@ def get_provider(provider_name: str) -> Optional[BaseLLMProvider]:
     プロバイダ名からプロバイダインスタンスを取得する
     
     Args:
-        provider_name (str): プロバイダ名（"claude" または "gemini"）
+        provider_name (str): プロバイダ名（"chatgpt", "claude", "gemini"）
         
     Returns:
         Optional[BaseLLMProvider]: プロバイダインスタンス、存在しない場合はNone
     """
-    if provider_name == "claude":
+    if provider_name == "chatgpt":
+        from .providers.chatgpt import ChatGPTProvider
+        return ChatGPTProvider(prompt_manager)
+    elif provider_name == "claude":
         return ClaudeProvider(prompt_manager)
     elif provider_name == "gemini":
         return GeminiProvider(prompt_manager)
@@ -140,13 +143,47 @@ def call_model(provider_name: str, model_name: str, prompt_name: str, prompt_man
     Returns:
         str: 生成された応答
     """
+    # デバッグ情報を追加
+    logger.info(f"🔍 call_model - provider_name: {provider_name}, prompt_name: {prompt_name}")
+    logger.info(f"🔍 prompt_manager.prompts keys: {list(prompt_manager.prompts.keys())}")
+    
     provider = get_provider(provider_name)
     if not provider:
         raise AIProviderError(f"Provider not found: {provider_name}")
-    prompt = prompt_manager.get(provider_name, prompt_name)
+    
+    prompt = prompt_manager.get_prompt(provider_name, prompt_name)
     if prompt is None:
-        raise PromptNotFoundError(f"Prompt not found: {provider_name}.{prompt_name}")
-    return provider.chat(prompt, model_name, prompt_manager, **kwargs)
+        logger.error(f"❌ Prompt not found - provider: {provider_name}, prompt_name: {prompt_name}")
+        logger.error(f"❌ Available prompts: {list(prompt_manager.prompts.keys())}")
+        raise PromptNotFoundError(provider_name, prompt_name)
+    
+    logger.info(f"✅ Prompt found: {prompt_name}")
+    
+    # プロンプトをフォーマット
+    try:
+        logger.info(f"🔍 プロンプトフォーマット - kwargs: {kwargs}")
+        if 'structure' in kwargs and isinstance(kwargs['structure'], str):
+            logger.info(f"🔍 structureパラメータを検出: {len(kwargs['structure'])} 文字")
+        formatted_content = prompt.format(**kwargs)
+        logger.info(f"✅ Prompt formatted successfully")
+        logger.info(f"🔍 フォーマット結果（最初の200文字）: {formatted_content[:200]}...")
+        logger.debug(f"Claude最終プロンプト全文:\n{formatted_content}")
+    except Exception as e:
+        logger.error(f"❌ Prompt formatting failed: {str(e)}")
+        logger.error(f"❌ kwargs: {kwargs}")
+        logger.error(f"❌ prompt template: {prompt.template[:200]}...")
+        raise PromptNotFoundError(provider_name, prompt_name)
+    
+    # メッセージ形式に変換
+    messages = [ChatMessage(role="user", content=formatted_content)]
+    
+    # chatメソッドを呼び出し
+    if provider_name == "claude":
+        # ClaudeProviderは異なる引数形式を期待
+        return provider.chat(prompt, model_name, prompt_manager)
+    else:
+        # その他のプロバイダーは標準的な形式
+        return provider.chat(messages, prompt_manager)
 
 def chat(
     provider_name: str,
@@ -199,6 +236,7 @@ def evaluate_structure(
     """
     try:
         prompt_manager.register_builtin_templates()
+        # TODO: Unused template - review/delete - evaluation_template is not registered in templates
         evaluation_template = prompt_manager.get_prompt(provider_name, "evaluation_template")
         if not evaluation_template:
             raise ValueError(f"Evaluation template not found for {provider_name}")
@@ -244,6 +282,7 @@ def generate_structure(
     """
     try:
         prompt_manager.register_builtin_templates()
+        # TODO: Unused template - review/delete - generation_template is not registered in templates
         generation_template = prompt_manager.get_prompt(provider_name, "generation_template")
         if not generation_template:
             raise ValueError(f"Generation template not found for {provider_name}")

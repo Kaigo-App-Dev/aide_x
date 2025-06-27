@@ -1,0 +1,142 @@
+<!-- 構成エディタパネル -->
+<div class="aide-editor-panel">
+    <div class="aide-form-group">
+        <label class="aide-form-label" for="title">タイトル</label>
+        <input type="text" class="aide-form-control" id="title" value="{{ structure.title }}" placeholder="構成のタイトルを入力">
+    </div>
+    
+    <div class="aide-form-group">
+        <label class="aide-form-label" for="description">説明</label>
+        <textarea class="aide-form-control" id="description" rows="3" placeholder="構成の説明を入力">{{ structure.description }}</textarea>
+    </div>
+    
+    <div class="aide-form-group">
+        <label class="aide-form-label" for="content">内容</label>
+        <textarea class="aide-editor-textarea" id="content" placeholder="構成の内容を入力">{{ structure.content }}</textarea>
+    </div>
+    
+    <div class="aide-form-group">
+        <div class="aide-form-check">
+            <input class="aide-form-check-input" type="checkbox" id="is_final" {% if structure.get('is_final') %}checked{% endif %}>
+            <label class="aide-form-check-label" for="is_final">
+                最終版として保存
+            </label>
+        </div>
+    </div>
+    
+    <div class="aide-editor-actions">
+        <button class="aide-btn aide-btn-primary" id="saveBtn">
+            💾 構成を保存
+        </button>
+        <button class="aide-btn aide-btn-info" id="generateUiBtn">
+            🎨 GeminiでUI生成
+        </button>
+    </div>
+    
+    <!-- UI生成結果表示エリア -->
+    <div id="gemini_ui" class="aide-ui-result" style="display: none;">
+        <div class="aide-card">
+            <div class="aide-card-header">
+                <h5 class="aide-card-title">Gemini UI提案</h5>
+            </div>
+            <div class="aide-card-body" id="gemini_ui_content">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// エディタパネル用のJavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const structureId = '{{ structure.id }}';
+    const saveBtn = document.getElementById('saveBtn');
+    const generateUiBtn = document.getElementById('generateUiBtn');
+    
+    // 保存機能
+    saveBtn.addEventListener('click', function() {
+        const title = document.getElementById('title').value;
+        const description = document.getElementById('description').value;
+        const content = document.getElementById('content').value;
+        const isFinal = document.getElementById('is_final').checked;
+        
+        if (!title.trim()) {
+            alert('タイトルを入力してください');
+            return;
+        }
+        
+        saveBtn.disabled = true;
+        saveBtn.textContent = '保存中...';
+        
+        fetch(`/unified/${structureId}/save`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                title: title,
+                description: description,
+                content: content,
+                is_final: isFinal
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('構成が正常に保存されました！');
+            } else {
+                alert('保存中にエラーが発生しました: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('通信エラーが発生しました');
+            console.error('Error:', error);
+        })
+        .finally(() => {
+            saveBtn.disabled = false;
+            saveBtn.textContent = '💾 構成を保存';
+        });
+    });
+    
+    // UI生成機能
+    generateUiBtn.addEventListener('click', function() {
+        const content = document.getElementById('content').value;
+        
+        if (!content.trim()) {
+            alert('内容を入力してください');
+            return;
+        }
+        
+        generateUiBtn.disabled = true;
+        generateUiBtn.textContent = '生成中...';
+        
+        fetch(`/unified/${structureId}/generate-ui`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                content: content
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const uiResult = document.getElementById('gemini_ui');
+                const uiContent = document.getElementById('gemini_ui_content');
+                uiContent.innerHTML = data.ui_html;
+                uiResult.style.display = 'block';
+            } else {
+                alert('UI生成中にエラーが発生しました: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('通信エラーが発生しました');
+            console.error('Error:', error);
+        })
+        .finally(() => {
+            generateUiBtn.disabled = false;
+            generateUiBtn.textContent = '🎨 GeminiでUI生成';
+        });
+    });
+});
+</script> 

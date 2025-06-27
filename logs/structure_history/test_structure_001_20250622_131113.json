@@ -1,0 +1,27 @@
+{
+  "structure_id": "test_structure_001",
+  "timestamp": "2025-06-22T13:11:13.182659",
+  "evaluations": [
+    {
+      "provider": "claude",
+      "score": 0.85,
+      "feedback": "良い構造です。改善の余地があります。",
+      "details": {
+        "intent_match": 0.9,
+        "clarity": 0.8,
+        "suggestions": [
+          "モジュール名をより具体的にしてください"
+        ]
+      },
+      "timestamp": "2025-06-22T10:30:00",
+      "structure_id": "test_structure_001"
+    }
+  ],
+  "completions": [
+    {
+      "provider": "gemini",
+      "content": "改善された構造:\n- module1: 具体的なモジュール名\n- module2: 詳細な説明付き",
+      "timestamp": "2025-06-22T10:35:00"
+    }
+  ]
+}

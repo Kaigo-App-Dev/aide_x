@@ -12,5 +12,13 @@
     ]
   },
   "metadata": null,
-  "history": null
+  "history": null,
+  "messages": [
+    {
+      "role": "user",
+      "content": "構成の目的は〇〇です",
+      "timestamp": "2025-06-23T10:20:00",
+      "source": "chat"
+    }
+  ]
 }

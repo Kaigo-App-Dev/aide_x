@@ -1,0 +1,18 @@
+{
+  "timestamp": "2025-06-22T11:45:35.172427",
+  "provider": "gemini",
+  "structure_id": "test-structure-001",
+  "structure_title": "テストWebアプリ",
+  "structure_content": {
+    "機能": {
+      "ユーザー登録": "新規ユーザーの登録機能",
+      "ログイン": "既存ユーザーの認証機能",
+      "プロフィール管理": "ユーザー情報の編集機能"
+    },
+    "技術要件": {
+      "フロントエンド": "React.js",
+      "バックエンド": "Python Flask",
+      "データベース": "SQLite"
+    }
+  }
+}

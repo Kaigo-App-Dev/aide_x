@@ -1,0 +1,63 @@
+=== Claude Evaluation Prompt ===
+Timestamp: 2025-06-22T10:08:12.448470
+Provider: claude
+Structure ID: test_unified_001
+Structure Title: テスト統合インターフェース
+Structure Content Type: <class 'dict'>
+
+--- Structure JSON ---
+{
+  "title": "テスト構成",
+  "description": "テスト用の構成です",
+  "content": {
+    "セクション1": {
+      "項目1": "説明1",
+      "項目2": "説明2"
+    },
+    "セクション2": {
+      "項目3": "説明3",
+      "項目4": "説明4"
+    }
+  }
+}
+
+--- Formatted Prompt ---
+以下の構成を評価してください。
+
+構成データ:
+{
+  "title": "テスト構成",
+  "description": "テスト用の構成です",
+  "content": {
+    "セクション1": {
+      "項目1": "説明1",
+      "項目2": "説明2"
+    },
+    "セクション2": {
+      "項目3": "説明3",
+      "項目4": "説明4"
+    }
+  }
+}
+
+この構成の妥当性を0.0-1.0のスコアで評価し、改善すべき点と理由を述べてください。
+
+構成が未記入、または構成が存在しない場合は、
+「構成が未入力のため、評価できません」とだけ返答してください。
+
+評価結果は以下のJSON形式で返してください：
+{
+  "is_valid": true,
+  "score": 0.85,
+  "feedback": "構成は概ね妥当ですが、目的の記載が不足しています。",
+  "details": {
+    "intent_match": "意図との一致度に関する詳細",
+    "clarity": "構造の明確さに関する詳細",
+    "implementation": "実装の容易さに関する詳細",
+    "strengths": ["強み1", "強み2"],
+    "weaknesses": ["弱み1", "弱み2"],
+    "suggestions": ["改善提案1", "改善提案2"]
+  }
+}
+
+--- End of Prompt ---

@@ -1,0 +1,494 @@
+{% extends "base_layout.html" %}
+
+{% block title %}AIDE-X - 評価履歴 ({{ structure_id }}){% endblock %}
+
+{% block head %}
+    <style>
+        .history-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #3c3c3c;
+        }
+        
+        .history-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007acc;
+            margin: 0;
+        }
+        
+        .back-btn {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .back-btn:hover {
+            background: #005a9e;
+        }
+        
+        .history-stats {
+            background: #252526;
+            border: 1px solid #3c3c3c;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4ec9b0;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            color: #858585;
+            font-size: 0.9rem;
+        }
+        
+        .evaluation-table {
+            background: #252526;
+            border: 1px solid #3c3c3c;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        
+        .table-header {
+            background: #2d2d30;
+            padding: 16px 20px;
+            border-bottom: 1px solid #3c3c3c;
+        }
+        
+        .table-title {
+            font-size: 1.2rem;
+            color: #4ec9b0;
+            margin: 0;
+        }
+        
+        .evaluation-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .evaluation-item {
+            padding: 20px;
+            border-bottom: 1px solid #3c3c3c;
+            transition: background-color 0.2s;
+        }
+        
+        .evaluation-item:hover {
+            background: #2d2d30;
+        }
+        
+        .evaluation-item:last-child {
+            border-bottom: none;
+        }
+        
+        .evaluation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .evaluation-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .ai-badge {
+            background: #007acc;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .ai-badge.claude {
+            background: #ff6b35;
+        }
+        
+        .ai-badge.gemini {
+            background: #4285f4;
+        }
+        
+        .score-badge {
+            background: #4ec9b0;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .timestamp {
+            color: #858585;
+            font-size: 0.9rem;
+        }
+        
+        .evaluation-content {
+            margin-top: 16px;
+        }
+        
+        .evaluation-feedback {
+            background: #1e1e1e;
+            border: 1px solid #3c3c3c;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 12px;
+            color: #cccccc;
+            line-height: 1.6;
+        }
+        
+        .evaluation-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .detail-item {
+            background: #2d2d30;
+            border: 1px solid #3c3c3c;
+            border-radius: 4px;
+            padding: 12px;
+        }
+        
+        .detail-label {
+            color: #858585;
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            color: #cccccc;
+            font-weight: bold;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #858585;
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .empty-title {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: #cccccc;
+        }
+        
+        .empty-description {
+            font-size: 1rem;
+            margin-bottom: 24px;
+        }
+        
+        .filter-controls {
+            background: #252526;
+            border: 1px solid #3c3c3c;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-label {
+            color: #cccccc;
+            font-size: 0.9rem;
+        }
+        
+        .filter-select {
+            background: #1e1e1e;
+            border: 1px solid #3c3c3c;
+            color: #cccccc;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: #007acc;
+        }
+        
+        @media (max-width: 768px) {
+            .history-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            
+            .evaluation-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .evaluation-meta {
+                flex-wrap: wrap;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <div class="history-header">
+        <h1 class="history-title">📊 評価履歴</h1>
+        <a href="{{ url_for('unified.unified_interface', structure_id=structure_id) }}" class="back-btn">
+            ◀ 構成画面に戻る
+        </a>
+    </div>
+    
+    <!-- 統計情報 -->
+    <div class="history-stats">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">{{ evaluations|length }}</div>
+                <div class="stat-label">総評価数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">
+                    {% set claude_count = evaluations|selectattr('provider', 'equalto', 'claude')|list|length %}
+                    {{ claude_count }}
+                </div>
+                <div class="stat-label">Claude評価</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">
+                    {% set gemini_count = evaluations|selectattr('provider', 'equalto', 'gemini')|list|length %}
+                    {{ gemini_count }}
+                </div>
+                <div class="stat-label">Gemini評価</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">
+                    {% if evaluations %}
+                        {% set avg_score = (evaluations|sum(attribute='score') / evaluations|length) | round(1) %}
+                        {{ avg_score }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
+                <div class="stat-label">平均スコア</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- フィルター -->
+    <div class="filter-controls">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label class="filter-label">AI:</label>
+                <select class="filter-select" id="aiFilter">
+                    <option value="">すべて</option>
+                    <option value="claude">Claude</option>
+                    <option value="gemini">Gemini</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">並び順:</label>
+                <select class="filter-select" id="sortFilter">
+                    <option value="newest">新しい順</option>
+                    <option value="oldest">古い順</option>
+                    <option value="score-high">スコア高い順</option>
+                    <option value="score-low">スコア低い順</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 評価履歴テーブル -->
+    <div class="evaluation-table">
+        <div class="table-header">
+            <h2 class="table-title">評価履歴一覧</h2>
+        </div>
+        
+        {% if evaluations %}
+        <div class="evaluation-list" id="evaluationList">
+            {% for evaluation in evaluations|sort(attribute='timestamp', reverse=true) %}
+            <div class="evaluation-item" data-ai="{{ evaluation.provider or 'unknown' }}" data-score="{{ evaluation.score or 0 }}">
+                <div class="evaluation-header">
+                    <div class="evaluation-meta">
+                        <span class="ai-badge {{ evaluation.provider or 'unknown' }}">
+                            {% if evaluation.provider == 'claude' %}
+                                🤖 Claude
+                            {% elif evaluation.provider == 'gemini' %}
+                                🤖 Gemini
+                            {% else %}
+                                🤖 AI
+                            {% endif %}
+                        </span>
+                        <span class="timestamp">
+                            {{ evaluation.timestamp[:16].replace('T', ' ') if evaluation.timestamp else '日時不明' }}
+                        </span>
+                    </div>
+                    {% if evaluation.score %}
+                    <div class="score-badge">
+                        {{ evaluation.score }}/100
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="evaluation-content">
+                    {% if evaluation.feedback %}
+                    <div class="evaluation-feedback">
+                        {{ evaluation.feedback | safe }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if evaluation.details %}
+                    <div class="evaluation-details">
+                        {% if evaluation.details.overall_score %}
+                        <div class="detail-item">
+                            <div class="detail-label">総合スコア</div>
+                            <div class="detail-value">{{ evaluation.details.overall_score }}/100</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if evaluation.details.criteria_scores %}
+                        <div class="detail-item">
+                            <div class="detail-label">評価項目</div>
+                            <div class="detail-value">
+                                {% for criterion, score in evaluation.details.criteria_scores.items() %}
+                                <div>{{ criterion }}: {{ score }}/100</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if evaluation.details.suggestions %}
+                        <div class="detail-item">
+                            <div class="detail-label">改善提案</div>
+                            <div class="detail-value">
+                                <ul style="margin: 0; padding-left: 16px;">
+                                    {% for suggestion in evaluation.details.suggestions %}
+                                    <li>{{ suggestion }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <h3 class="empty-title">評価履歴がありません</h3>
+            <p class="empty-description">
+                まだ評価が実行されていません。<br>
+                構成画面で評価を実行してください。
+            </p>
+            <a href="{{ url_for('unified.unified_interface', structure_id=structure_id) }}" class="back-btn">
+                構成画面に戻る
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// フィルター機能
+document.getElementById('aiFilter').addEventListener('change', filterEvaluations);
+document.getElementById('sortFilter').addEventListener('change', sortEvaluations);
+
+function filterEvaluations() {
+    const aiFilter = document.getElementById('aiFilter').value;
+    const items = document.querySelectorAll('.evaluation-item');
+    
+    items.forEach(item => {
+        const ai = item.dataset.ai;
+        if (!aiFilter || ai === aiFilter) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function sortEvaluations() {
+    const sortBy = document.getElementById('sortFilter').value;
+    const container = document.getElementById('evaluationList');
+    const items = Array.from(container.children);
+    
+    items.sort((a, b) => {
+        switch (sortBy) {
+            case 'newest':
+                return 0; // 既に新しい順で表示されている
+            case 'oldest':
+                return 0; // 順序を逆にする必要がある場合は実装
+            case 'score-high':
+                return (b.dataset.score || 0) - (a.dataset.score || 0);
+            case 'score-low':
+                return (a.dataset.score || 0) - (b.dataset.score || 0);
+            default:
+                return 0;
+        }
+    });
+    
+    // 古い順の場合は配列を逆にする
+    if (sortBy === 'oldest') {
+        items.reverse();
+    }
+    
+    // DOMを更新
+    items.forEach(item => container.appendChild(item));
+}
+</script>
+{% endblock %} 

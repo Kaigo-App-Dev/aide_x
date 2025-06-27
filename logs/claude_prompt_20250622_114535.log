@@ -1,0 +1,53 @@
+=== Claude Evaluation Prompt ===
+Timestamp: 2025-06-22T11:45:35.171497
+Provider: gemini
+Structure ID: test-structure-001
+Structure Title: テストWebアプリ
+Structure Content Type: <class 'dict'>
+
+--- Structure JSON ---
+{
+  "id": "test-structure-001",
+  "title": "テストWebアプリ",
+  "description": "ユーザー管理機能を持つシンプルなWebアプリケーション",
+  "content": {
+    "機能": {
+      "ユーザー登録": "新規ユーザーの登録機能",
+      "ログイン": "既存ユーザーの認証機能",
+      "プロフィール管理": "ユーザー情報の編集機能"
+    },
+    "技術要件": {
+      "フロントエンド": "React.js",
+      "バックエンド": "Python Flask",
+      "データベース": "SQLite"
+    }
+  },
+  "user_requirements": "ユーザー管理機能を持つWebアプリを作成したい",
+  "generated_at": "2024-01-01T00:00:00Z",
+  "provider": "manual"
+}
+
+--- Formatted Prompt ---
+以下の構成を評価してください。
+
+構成:
+{'id': 'test-structure-001', 'title': 'テストWebアプリ', 'description': 'ユーザー管理機能を持つシンプルなWebアプリケーション', 'content': {'機能': {'ユーザー登録': '新規ユーザーの登録機能', 'ログイン': '既存ユーザーの認証機能', 'プロフィール管理': 'ユーザー情報の編集機能'}, '技術要件': {'フロントエンド': 'React.js', 'バックエンド': 'Python Flask', 'データベース': 'SQLite'}}, 'user_requirements': 'ユーザー管理機能を持つWebアプリを作成したい', 'generated_at': '2024-01-01T00:00:00Z', 'provider': 'manual'}
+
+この構成の妥当性を0.0-1.0のスコアで評価し、改善すべき点と理由を述べてください。
+
+評価結果は以下のJSON形式で返してください:
+{
+  "score": 0.0-1.0の数値,
+  "feedback": "評価の詳細な説明",
+  "details": {
+    "intent_match": "意図との一致度に関する詳細",
+    "clarity": "構造の明確さに関する詳細",
+    "implementation": "実装の容易さに関する詳細",
+    "strengths": ["強み1", "強み2"],
+    "weaknesses": ["弱み1", "弱み2"],
+    "suggestions": ["改善提案1", "改善提案2"]
+  },
+  "is_valid": true/false
+}
+
+--- End of Prompt ---

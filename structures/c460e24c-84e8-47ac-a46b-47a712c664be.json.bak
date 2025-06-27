@@ -1,0 +1,16 @@
+{
+  "id": "c460e24c-84e8-47ac-a46b-47a712c664be",
+  "title": "テスト構造",
+  "description": "これはテスト用の構造です",
+  "content": {
+    "sections": [
+      {
+        "title": "テストセクション",
+        "description": "これは評価テストです。",
+        "components": []
+      }
+    ]
+  },
+  "metadata": null,
+  "history": null
+}

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AIDE-X{% endblock %}</title>
+    
+    <!-- VSCode風メニューバーのスタイル -->
+    <style>
+        /* メニューバー */
+        .menu-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #1e1e1e;
+            color: #cccccc;
+            border-bottom: 1px solid #3c3c3c;
+            z-index: 1000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 13px;
+        }
+        
+        .menu-bar nav {
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            height: 30px;
+        }
+        
+        .menu-bar .logo {
+            font-weight: bold;
+            font-size: 14px;
+            margin-right: 24px;
+            color: #007acc;
+        }
+        
+        .menu-bar .menu-item {
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+            user-select: none;
+        }
+        
+        .menu-bar .menu-item:hover {
+            background-color: #2a2d2e;
+        }
+        
+        .menu-bar .menu-item:active {
+            background-color: #094771;
+        }
+        
+        .menu-bar .menu-separator {
+            width: 1px;
+            height: 16px;
+            background-color: #3c3c3c;
+            margin: 0 8px;
+        }
+        
+        /* メインコンテンツエリア */
+        .main-content {
+            margin-top: 30px; /* メニューバーの高さ分 */
+            min-height: calc(100vh - 30px);
+        }
+        
+        /* ドロップダウンメニュー */
+        .menu-dropdown {
+            position: absolute;
+            top: 30px;
+            background: #252526;
+            border: 1px solid #3c3c3c;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            min-width: 160px;
+            padding: 4px 0;
+        }
+        
+        .menu-dropdown-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #cccccc;
+            transition: background-color 0.2s;
+        }
+        
+        .menu-dropdown-item:hover {
+            background-color: #094771;
+        }
+        
+        .menu-separator-horizontal {
+            height: 1px;
+            background-color: #3c3c3c;
+            margin: 4px 0;
+        }
+        
+        /* 履歴欄の表示切替 */
+        .history-panel {
+            transition: width 0.3s ease;
+        }
+        
+        .history-panel.collapsed {
+            width: 0 !important;
+            overflow: hidden;
+        }
+        
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .menu-bar nav {
+                padding: 0 8px;
+            }
+            
+            .menu-bar .menu-item {
+                padding: 4px 6px;
+                font-size: 12px;
+            }
+            
+            .menu-bar .logo {
+                margin-right: 16px;
+                font-size: 13px;
+            }
+            
+            .menu-dropdown {
+                min-width: 140px;
+            }
+        }
+    </style>
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- VSCode風メニューバー -->
+    <header class="menu-bar">
+        <nav>
+            <div class="logo">🧠 AIDE-X</div>
+            
+            <!-- ファイルメニュー -->
+            <div class="menu-item" onclick="toggleFileMenu()">
+                ファイル ▾
+            </div>
+            <div id="fileMenu" class="menu-dropdown" style="display: none;">
+                <div class="menu-dropdown-item" onclick="window.location.href='/unified/new'">新規構成</div>
+                <div class="menu-dropdown-item" onclick="saveStructure()">保存</div>
+                <div class="menu-dropdown-item" onclick="exportStructure()">エクスポート</div>
+                <div class="menu-separator-horizontal"></div>
+                <div class="menu-dropdown-item" onclick="window.close()">終了</div>
+            </div>
+            
+            <!-- 編集メニュー -->
+            <div class="menu-item" onclick="toggleEditMenu()">
+                編集 ▾
+            </div>
+            <div id="editMenu" class="menu-dropdown" style="display: none;">
+                <div class="menu-dropdown-item" onclick="undoAction()">元に戻す</div>
+                <div class="menu-dropdown-item" onclick="redoAction()">やり直し</div>
+                <div class="menu-separator-horizontal"></div>
+                <div class="menu-dropdown-item" onclick="clearHistory()">履歴をクリア</div>
+            </div>
+            
+            <!-- 表示メニュー -->
+            <div class="menu-item" onclick="toggleViewMenu()">
+                表示 ▾
+            </div>
+            <div id="viewMenu" class="menu-dropdown" style="display: none;">
+                <div class="menu-dropdown-item" onclick="toggleHistoryPanel()">
+                    <span id="historyToggleText">履歴欄を表示</span>
+                </div>
+                <div class="menu-dropdown-item" onclick="toggleEvaluationPanel()">
+                    <span id="evaluationToggleText">評価欄を表示</span>
+                </div>
+                <div class="menu-separator-horizontal"></div>
+                <div class="menu-dropdown-item" onclick="openEvaluationHistory()">評価履歴ページ</div>
+                <div class="menu-dropdown-item" onclick="openCompletionHistory()">補完履歴ページ</div>
+                <div class="menu-separator-horizontal"></div>
+                <div class="menu-dropdown-item" onclick="resetLayout()">レイアウトをリセット</div>
+            </div>
+            
+            <!-- 評価メニュー -->
+            <div class="menu-item" onclick="toggleEvaluationMenu()">
+                評価 ▾
+            </div>
+            <div id="evaluationMenu" class="menu-dropdown" style="display: none;">
+                <div class="menu-dropdown-item" onclick="evaluateWithClaude()">Claudeで評価</div>
+                <div class="menu-dropdown-item" onclick="evaluateWithGemini()">Geminiで評価</div>
+                <div class="menu-separator-horizontal"></div>
+                <div class="menu-dropdown-item" onclick="viewEvaluationHistory()">評価履歴</div>
+            </div>
+            
+            <div class="menu-separator"></div>
+            
+            <!-- ヘルプメニュー -->
+            <div class="menu-item" onclick="toggleHelpMenu()">
+                ヘルプ ▾
+            </div>
+            <div id="helpMenu" class="menu-dropdown" style="display: none;">
+                <div class="menu-dropdown-item" onclick="openHelp()">使い方</div>
+                <div class="menu-dropdown-item" onclick="openAbout()">バージョン情報</div>
+                <div class="menu-separator-horizontal"></div>
+                <div class="menu-dropdown-item" onclick="openKeyboardShortcuts()">キーボードショートカット</div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <!-- 共通JavaScript -->
+    <script>
+        // メニュー制御
+        let activeMenu = null;
+        
+        function toggleFileMenu() {
+            toggleMenu('fileMenu');
+        }
+        
+        function toggleEditMenu() {
+            toggleMenu('editMenu');
+        }
+        
+        function toggleViewMenu() {
+            toggleMenu('viewMenu');
+        }
+        
+        function toggleEvaluationMenu() {
+            toggleMenu('evaluationMenu');
+        }
+        
+        function toggleHelpMenu() {
+            toggleMenu('helpMenu');
+        }
+        
+        function toggleMenu(menuId) {
+            const menu = document.getElementById(menuId);
+            const allMenus = document.querySelectorAll('.menu-dropdown');
+            
+            // 他のメニューを閉じる
+            allMenus.forEach(m => {
+                if (m.id !== menuId) {
+                    m.style.display = 'none';
+                }
+            });
+            
+            // 現在のメニューを切り替え
+            if (menu.style.display === 'none' || menu.style.display === '') {
+                menu.style.display = 'block';
+                activeMenu = menuId;
+            } else {
+                menu.style.display = 'none';
+                activeMenu = null;
+            }
+        }
+        
+        // メニュー外クリックで閉じる
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.menu-item') && !event.target.closest('.menu-dropdown')) {
+                const allMenus = document.querySelectorAll('.menu-dropdown');
+                allMenus.forEach(menu => {
+                    menu.style.display = 'none';
+                });
+                activeMenu = null;
+            }
+        });
+        
+        // 履歴欄の表示切替
+        let historyPanelVisible = false;
+        let evaluationPanelVisible = false;
+        
+        function toggleHistoryPanel() {
+            const historyPanel = document.querySelector('.history-panel');
+            const toggleText = document.getElementById('historyToggleText');
+            
+            if (historyPanel) {
+                historyPanelVisible = !historyPanelVisible;
+                if (historyPanelVisible) {
+                    historyPanel.classList.remove('collapsed');
+                    toggleText.textContent = '履歴欄を非表示';
+                } else {
+                    historyPanel.classList.add('collapsed');
+                    toggleText.textContent = '履歴欄を表示';
+                }
+            }
+        }
+        
+        function toggleEvaluationPanel() {
+            const evaluationPanel = document.querySelector('.evaluation-panel');
+            const toggleText = document.getElementById('evaluationToggleText');
+            
+            if (evaluationPanel) {
+                evaluationPanelVisible = !evaluationPanelVisible;
+                if (evaluationPanelVisible) {
+                    evaluationPanel.classList.remove('collapsed');
+                    toggleText.textContent = '評価欄を非表示';
+                } else {
+                    evaluationPanel.classList.add('collapsed');
+                    toggleText.textContent = '評価欄を表示';
+                }
+            }
+        }
+        
+        function resetLayout() {
+            // レイアウトをリセット
+            const panels = document.querySelectorAll('.history-panel, .evaluation-panel');
+            panels.forEach(panel => {
+                panel.classList.remove('collapsed');
+            });
+            historyPanelVisible = true;
+            evaluationPanelVisible = true;
+            
+            const toggleTexts = document.querySelectorAll('#historyToggleText, #evaluationToggleText');
+            toggleTexts.forEach(text => {
+                if (text.id === 'historyToggleText') {
+                    text.textContent = '履歴欄を非表示';
+                } else if (text.id === 'evaluationToggleText') {
+                    text.textContent = '評価欄を非表示';
+                }
+            });
+        }
+        
+        // 保存機能
+        function saveStructure() {
+            if (typeof window.saveStructure === 'function') {
+                window.saveStructure();
+            } else {
+                console.log('保存機能が利用できません');
+            }
+        }
+        
+        // 評価機能
+        function evaluateStructure() {
+            if (typeof window.evaluateStructure === 'function') {
+                window.evaluateStructure();
+            } else {
+                console.log('評価機能が利用できません');
+            }
+        }
+        
+        function evaluateWithClaude() {
+            if (typeof window.evaluateWithClaude === 'function') {
+                window.evaluateWithClaude();
+            } else {
+                console.log('Claude評価機能が利用できません');
+            }
+        }
+        
+        function evaluateWithGemini() {
+            if (typeof window.evaluateWithGemini === 'function') {
+                window.evaluateWithGemini();
+            } else {
+                console.log('Gemini評価機能が利用できません');
+            }
+        }
+        
+        // 差分表示機能
+        function toggleDiff() {
+            if (typeof window.toggleDiff === 'function') {
+                window.toggleDiff();
+            } else {
+                console.log('差分表示機能が利用できません');
+            }
+        }
+        
+        // その他の機能
+        function exportStructure() {
+            console.log('エクスポート機能');
+        }
+        
+        function undoAction() {
+            console.log('元に戻す');
+        }
+        
+        function redoAction() {
+            console.log('やり直し');
+        }
+        
+        function clearHistory() {
+            console.log('履歴をクリア');
+        }
+        
+        function viewEvaluationHistory() {
+            console.log('評価履歴を表示');
+        }
+        
+        function openAbout() {
+            window.open('/about', '_blank');
+        }
+        
+        function openKeyboardShortcuts() {
+            window.open('/help#shortcuts', '_blank');
+        }
+        
+        // ヘルプ機能
+        function openHelp() {
+            window.open('/help', '_blank');
+        }
+        
+        // 履歴ページへのリンク機能
+        function openEvaluationHistory() {
+            const structureId = getCurrentStructureId();
+            if (structureId) {
+                window.open(`/unified/structure/${structureId}/evaluation_history`, '_blank');
+            } else {
+                console.log('構造IDが取得できません');
+            }
+        }
+        
+        function openCompletionHistory() {
+            const structureId = getCurrentStructureId();
+            if (structureId) {
+                window.open(`/unified/structure/${structureId}/completion_history`, '_blank');
+            } else {
+                console.log('構造IDが取得できません');
+            }
+        }
+        
+        function getCurrentStructureId() {
+            // URLから構造IDを取得
+            const path = window.location.pathname;
+            const match = path.match(/\/unified\/([^\/]+)/);
+            return match ? match[1] : null;
+        }
+        
+        // 初期化時に履歴欄を非表示にする
+        document.addEventListener('DOMContentLoaded', function() {
+            const historyPanel = document.querySelector('.history-panel');
+            const evaluationPanel = document.querySelector('.evaluation-panel');
+            
+            if (historyPanel) {
+                historyPanel.classList.add('collapsed');
+                historyPanelVisible = false;
+            }
+            
+            if (evaluationPanel) {
+                evaluationPanel.classList.add('collapsed');
+                evaluationPanelVisible = false;
+            }
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

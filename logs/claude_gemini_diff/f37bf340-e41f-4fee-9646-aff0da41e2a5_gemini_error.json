@@ -1,0 +1,29 @@
+{
+  "structure_id": "f37bf340-e41f-4fee-9646-aff0da41e2a5",
+  "timestamp": "2025-06-24T17:05:50.238580",
+  "error_type": "gemini_syntax_error",
+  "error_message": "JSON抽出エラー: JSON構成が検出できませんでした",
+  "gemini_raw_response": "Gemini response placeholder",
+  "original_content": {
+    "menu_suggestion": "ユーザーが一日に摂取すべき栄養素を満たすためのメニューを提案します。",
+    "meal_record_and_check": "ユーザーが毎日の食事内容を記録し、その栄養状態をチェックできる機能を提供します。",
+    "information_sharing": "記録された食事内容を医療関係者と共有できる機能を用意します。"
+  },
+  "claude_analysis": null,
+  "validation_result": {
+    "has_title": false,
+    "has_modules": false,
+    "is_valid_structure": false,
+    "missing_keys": [
+      "title",
+      "modules"
+    ],
+    "validation_result": "invalid"
+  },
+  "claude_repair_attempted": true,
+  "claude_repair_result": {
+    "menu_suggestion": "ユーザーが一日に摂取すべき栄養素を満たすためのメニューを提案します。",
+    "meal_record_and_check": "ユーザーが毎日の食事内容を記録し、その栄養状態をチェックできる機能を提供します。",
+    "information_sharing": "記録された食事内容を医療関係者と共有できる機能を用意します。"
+  }
+}

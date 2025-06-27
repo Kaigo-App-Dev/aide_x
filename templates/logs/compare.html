@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>比較 - {{ structure_id }}</title>
+    <style>
+        body { background: #1e1e1e; color: #ccc; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        .container { max-width: 1400px; margin: 40px auto; background: #252526; border-radius: 8px; padding: 32px; }
+        h1 { color: #4ec9b0; margin-bottom: 8px; }
+        .meta { color: #888; font-size: 14px; margin-bottom: 24px; }
+        .back-links { margin-bottom: 24px; }
+        .back-link { color: #4ec9b0; text-decoration: none; margin-right: 20px; }
+        .back-link:hover { text-decoration: underline; }
+        .compare-header { background: #2d2d30; padding: 16px; border-radius: 6px; margin-bottom: 20px; }
+        .compare-info { display: flex; gap: 40px; }
+        .version-info { flex: 1; }
+        .version-title { color: #4ec9b0; font-weight: bold; margin-bottom: 8px; }
+        .version-meta { color: #888; font-size: 12px; }
+        .diff-container { display: flex; gap: 20px; }
+        .diff-column { flex: 1; background: #1e1e1e; border-radius: 6px; padding: 16px; }
+        .diff-title { color: #4ec9b0; font-weight: bold; margin-bottom: 16px; text-align: center; }
+        .diff-content { font-family: 'Consolas', monospace; font-size: 12px; line-height: 1.4; }
+        .diff-line { padding: 2px 8px; margin: 1px 0; border-radius: 3px; }
+        .diff-line.added { background: #1e3a1e; color: #4ec9b0; }
+        .diff-line.removed { background: #3a1e1e; color: #c586c0; }
+        .diff-line.unchanged { color: #888; }
+        .diff-line.changed { background: #3a3a1e; color: #dcdcaa; }
+        .section { margin-bottom: 20px; }
+        .section-title { color: #4ec9b0; font-weight: bold; margin-bottom: 12px; cursor: pointer; }
+        .section-title:hover { color: #45b8a0; }
+        .section-content { display: none; }
+        .section-content.expanded { display: block; }
+        .toggle-icon { margin-right: 8px; }
+        .no-diff { color: #888; font-style: italic; text-align: center; padding: 20px; }
+        .error-message { color: #c586c0; text-align: center; padding: 40px; }
+        .return-btn { background: #4ec9b0; color: #1e1e1e; border: none; border-radius: 4px; padding: 8px 24px; font-size: 16px; font-weight: bold; cursor: pointer; margin: 32px auto 0; display: block; }
+        .return-btn:hover { background: #45b8a0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="back-links">
+        <a href="/logs/evaluations" class="back-link">← 評価履歴</a>
+        <a href="/logs/completions" class="back-link">← 補完履歴</a>
+        <a href="/unified/{{ structure_id }}" class="back-link">← 統合インターフェース</a>
+    </div>
+    
+    <h1>🔍 構成比較</h1>
+    <div class="meta">
+        <span>構成ID: <b>{{ structure_id }}</b></span>
+        <span> | タイムスタンプ: <b>{{ timestamp }}</b></span>
+    </div>
+    
+    {% if current_data %}
+    <div class="compare-header">
+        <div class="compare-info">
+            <div class="version-info">
+                <div class="version-title">現在の構成</div>
+                <div class="version-meta">
+                    タイムスタンプ: {{ current_data.timestamp }}<br>
+                    タイトル: {{ current_data.title or 'N/A' }}
+                </div>
+            </div>
+            <div class="version-info">
+                <div class="version-title">前回の構成</div>
+                <div class="version-meta">
+                    {% if previous_data %}
+                    タイムスタンプ: {{ previous_data.timestamp }}<br>
+                    タイトル: {{ previous_data.title or 'N/A' }}
+                    {% else %}
+                    前回の構成なし
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if previous_data %}
+    <div class="diff-container">
+        <div class="diff-column">
+            <div class="diff-title">前回の構成</div>
+            <div class="diff-content" id="previousContent"></div>
+        </div>
+        <div class="diff-column">
+            <div class="diff-title">現在の構成</div>
+            <div class="diff-content" id="currentContent"></div>
+        </div>
+    </div>
+    
+    <!-- 評価履歴の比較 -->
+    {% if current_data.evaluations or previous_data.evaluations %}
+    <div class="section">
+        <div class="section-title" onclick="toggleSection('evaluations')">
+            <span class="toggle-icon" id="evaluations-icon">▶</span>
+            評価履歴の比較
+        </div>
+        <div class="section-content" id="evaluations-content">
+            <div class="diff-container">
+                <div class="diff-column">
+                    <div class="diff-title">前回の評価</div>
+                    <div class="diff-content">
+                        {% if previous_data.evaluations %}
+                            {% for eval in previous_data.evaluations %}
+                            <div class="diff-line">
+                                <strong>スコア:</strong> {{ "%.1f"|format(eval.score * 100) if eval.score else "N/A" }}<br>
+                                <strong>フィードバック:</strong><br>
+                                {{ eval.feedback or "フィードバックなし" }}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="no-diff">評価履歴なし</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="diff-column">
+                    <div class="diff-title">現在の評価</div>
+                    <div class="diff-content">
+                        {% if current_data.evaluations %}
+                            {% for eval in current_data.evaluations %}
+                            <div class="diff-line">
+                                <strong>スコア:</strong> {{ "%.1f"|format(eval.score * 100) if eval.score else "N/A" }}<br>
+                                <strong>フィードバック:</strong><br>
+                                {{ eval.feedback or "フィードバックなし" }}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="no-diff">評価履歴なし</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- 補完履歴の比較 -->
+    {% if current_data.completions or previous_data.completions %}
+    <div class="section">
+        <div class="section-title" onclick="toggleSection('completions')">
+            <span class="toggle-icon" id="completions-icon">▶</span>
+            補完履歴の比較
+        </div>
+        <div class="section-content" id="completions-content">
+            <div class="diff-container">
+                <div class="diff-column">
+                    <div class="diff-title">前回の補完</div>
+                    <div class="diff-content">
+                        {% if previous_data.completions %}
+                            {% for comp in previous_data.completions %}
+                            <div class="diff-line">
+                                <strong>内容:</strong><br>
+                                {{ comp.content or "補完内容なし" }}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="no-diff">補完履歴なし</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="diff-column">
+                    <div class="diff-title">現在の補完</div>
+                    <div class="diff-content">
+                        {% if current_data.completions %}
+                            {% for comp in current_data.completions %}
+                            <div class="diff-line">
+                                <strong>内容:</strong><br>
+                                {{ comp.content or "補完内容なし" }}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="no-diff">補完履歴なし</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div class="error-message">
+        前回の構成が見つかりませんでした。<br>
+        初回の構成または履歴が存在しない可能性があります。
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div class="error-message">
+        指定されたタイムスタンプの構成が見つかりませんでした。
+    </div>
+    {% endif %}
+    <button class="return-btn" onclick="window.location.href='/logs/structure/{{ structure_id }}'">この履歴一覧へ戻る</button>
+</div>
+
+<script>
+// セクションの折りたたみ
+function toggleSection(sectionId) {
+    const content = document.getElementById(sectionId + '-content');
+    const icon = document.getElementById(sectionId + '-icon');
+    if (content.classList.contains('expanded')) {
+        content.classList.remove('expanded');
+        icon.textContent = '▶';
+    } else {
+        content.classList.add('expanded');
+        icon.textContent = '▼';
+    }
+}
+
+function renderDiffColumns(currentData, previousData) {
+    if (!currentData || !previousData) return;
+    const ignoreKeys = ['evaluations', 'completions', 'timestamp'];
+    const allKeys = Array.from(new Set([...Object.keys(currentData), ...Object.keys(previousData)]));
+    let prevHtml = '';
+    let currHtml = '';
+    allKeys.forEach(key => {
+        if (ignoreKeys.includes(key)) return;
+        const prevVal = previousData[key];
+        const currVal = currentData[key];
+        let prevClass = 'unchanged', currClass = 'unchanged';
+        if (prevVal !== currVal) {
+            prevClass = 'changed';
+            currClass = 'changed';
+        }
+        prevHtml += `<div class="diff-line ${prevClass}"><strong>${key}:</strong> ${prevVal === undefined ? '-' : prevVal}</div>`;
+        currHtml += `<div class="diff-line ${currClass}"><strong>${key}:</strong> ${currVal === undefined ? '-' : currVal}</div>`;
+    });
+    document.getElementById('previousContent').innerHTML = prevHtml || '<div class="no-diff">構成情報なし</div>';
+    document.getElementById('currentContent').innerHTML = currHtml || '<div class="no-diff">構成情報なし</div>';
+}
+window.onload = function() {
+{% if current_data and previous_data %}
+    renderDiffColumns({{ current_data | tojson | safe }}, {{ previous_data | tojson | safe }});
+{% else %}
+    // データがない場合は何もしない
+{% endif %}
+};
+</script>
+</body>
+</html> 

@@ -1,0 +1,25 @@
+{
+  "structure_id": "unified_test_001",
+  "module_id": "unified_test",
+  "timestamp": "2025-06-19T09:50:44.553878",
+  "history": [
+    {
+      "role": "user",
+      "source": "initial_creation",
+      "content": "{\n  \"id\": \"unified_test_001\",\n  \"title\": \"統合インターフェーステスト\",\n  \"description\": \"統合インターフェースの動作確認用\",\n  \"content\": {\n    \"sections\": [\n      {\n        \"title\": \"テストセクション\",\n        \"content\": \"テスト内容\"\n      }\n    ]\n  }\n}",
+      "timestamp": "2025-06-19T09:50:44.553878"
+    },
+    {
+      "role": "claude",
+      "source": "structure_evaluation",
+      "content": "{\"score\": 0.85, \"feedback\": \"良い構造です\", \"details\": {\"completeness\": 0.9}}",
+      "timestamp": "2025-06-19T09:50:44.563759"
+    },
+    {
+      "role": "gemini",
+      "source": "structure_completion",
+      "content": "Geminiによる補完提案: セクションの詳細化を推奨します",
+      "timestamp": "2025-06-19T09:50:44.578942"
+    }
+  ]
+}

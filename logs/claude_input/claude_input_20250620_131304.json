@@ -1,0 +1,14 @@
+{
+  "timestamp": "2025-06-20T13:13:04.492126",
+  "provider": "claude",
+  "structure_id": "test-normal",
+  "structure_title": "正常構成テスト",
+  "structure_content": {
+    "title": "テスト構成",
+    "description": "テスト用の構成です",
+    "content": {
+      "セクション1": "説明1",
+      "セクション2": "説明2"
+    }
+  }
+}

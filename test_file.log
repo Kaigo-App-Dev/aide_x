@@ -1,0 +1,8 @@
+2025-06-19 12:33:49,438 - INFO - 🔍 setup_logging() - root.handlers: [<FileHandler C:\dev\aide_x\test_file.log (NOTSET)>]
+2025-06-19 12:33:49,438 - INFO - 🔍 setup_logging() - root.level: 20
+2025-06-19 12:33:49,438 - INFO - 🔍 setup_logging() - FLASK_DEBUG: False
+2025-06-19 12:33:49,438 - INFO - 🧪 setup_logging() 完了 - ログ設定テスト
+2025-06-19 12:33:49,439 - INFO - ✅ /log-test - アクセス成功
+2025-06-19 12:33:49,439 - INFO - 🧪 logger(root) - アクセス成功
+2025-06-19 12:33:49,439 - INFO - [ACCESS] GET /log-test from 127.0.0.1
+2025-06-19 12:33:49,439 - INFO - [RESPONSE] GET /log-test -> 200

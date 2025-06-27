@@ -1,0 +1,445 @@
+{
+  "structure_id": "test_structure_001",
+  "module_id": "test_module",
+  "timestamp": "2025-06-19T09:41:15.927142",
+  "history": [
+    {
+      "role": "user",
+      "source": "save_structure",
+      "content": "{\"title\": \"テスト構造\", \"content\": \"テスト内容\"}",
+      "timestamp": "2025-06-19T09:41:15.927142"
+    },
+    {
+      "role": "claude",
+      "source": "structure_evaluation",
+      "content": "{\"score\": 0.8, \"feedback\": \"良い構造です\"}",
+      "timestamp": "2025-06-19T09:41:15.937584"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "テストメッセージ",
+      "timestamp": "2025-06-22T12:16:44.035107"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{title: AI応答タイトル, content: {section: AI内容}}",
+      "timestamp": "2025-06-22T12:16:44.044598"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "テストメッセージ",
+      "timestamp": "2025-06-22T12:18:15.572169"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"AI応答タイトル\", \"content\": {\"section\": \"AI内容\"}}",
+      "timestamp": "2025-06-22T12:18:15.587190"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "テストメッセージ",
+      "timestamp": "2025-06-22T12:19:38.171728"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"AI応答タイトル\", \"content\": {\"section\": \"AI内容\"}}",
+      "timestamp": "2025-06-22T12:19:38.190595"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "テストメッセージ",
+      "timestamp": "2025-06-22T12:20:03.155419"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"AI応答タイトル\", \"content\": {\"section\": \"AI内容\"}}",
+      "timestamp": "2025-06-22T12:20:03.174821"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "テストメッセージ",
+      "timestamp": "2025-06-22T12:20:22.246162"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"AI応答タイトル\", \"content\": {\"section\": \"AI内容\"}}",
+      "timestamp": "2025-06-22T12:20:22.252252"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "Claude失敗テスト",
+      "timestamp": "2025-06-22T12:20:22.296558"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "プロンプト例外テスト",
+      "timestamp": "2025-06-22T12:20:22.345524"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "すみません、\"プロンプト例外テスト\"というフレーズの意味がよくわからないため、具体的な説明や文脈を提供していただけますか？もしプログラミングの例外処理テストについての質問であれば、もう少し詳細を教えていただければと思います。",
+      "timestamp": "2025-06-22T12:20:26.038400"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "テストメッセージ",
+      "timestamp": "2025-06-22T12:20:45.899785"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"AI応答タイトル\", \"content\": {\"section\": \"AI内容\"}}",
+      "timestamp": "2025-06-22T12:20:45.908864"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "Claude失敗テスト",
+      "timestamp": "2025-06-22T12:20:45.935726"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "プロンプト例外テスト",
+      "timestamp": "2025-06-22T12:20:45.960658"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "すみません、具体的な状況や目的について詳しく教えていただけますか？「プロンプト例外テスト」についての情報が不足していて、適切な回答ができません。プログラミングの例外処理のテストを指しているのか、コマンドプロンプトのテストを指しているのかなど、もう少し具体的に教えていただければと思います。",
+      "timestamp": "2025-06-22T12:20:51.027069"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "テストメッセージ",
+      "timestamp": "2025-06-22T12:21:17.870616"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"AI応答タイトル\", \"content\": {\"section\": \"AI内容\"}}",
+      "timestamp": "2025-06-22T12:21:17.883742"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "Claude失敗テスト",
+      "timestamp": "2025-06-22T12:21:17.899791"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "テストメッセージ",
+      "timestamp": "2025-06-22T12:23:53.763461"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"AI応答タイトル\", \"content\": {\"section\": \"AI内容\"}}",
+      "timestamp": "2025-06-22T12:23:53.787713"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "テストメッセージ",
+      "timestamp": "2025-06-22T12:24:14.025827"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"AI応答タイトル\", \"content\": {\"section\": \"AI内容\"}}",
+      "timestamp": "2025-06-22T12:24:14.031398"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "Claude失敗テスト",
+      "timestamp": "2025-06-22T12:24:14.058088"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "テストメッセージ",
+      "timestamp": "2025-06-22T12:25:37.012202"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"AI応答タイトル\", \"content\": {\"section\": \"AI内容\"}}",
+      "timestamp": "2025-06-22T12:25:37.021987"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "Claude失敗テスト",
+      "timestamp": "2025-06-22T12:25:37.042653"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "テストメッセージ",
+      "timestamp": "2025-06-22T12:26:58.304833"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"AI応答タイトル\", \"content\": {\"section\": \"AI内容\"}}",
+      "timestamp": "2025-06-22T12:26:58.319218"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "Claude失敗テスト",
+      "timestamp": "2025-06-22T12:26:58.341845"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "ChatGPTテストメッセージ",
+      "timestamp": "2025-06-22T12:29:14.111839"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"AI応答タイトル\", \"content\": {\"section\": \"ChatGPTの応答内容です\"}}",
+      "timestamp": "2025-06-22T12:29:14.125786"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "Claude評価テストメッセージ",
+      "timestamp": "2025-06-22T12:29:14.145013"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "こんにちは、Claudeの評価テストを行います。具体的に何を評価したいですか？機能性、パフォーマンス、使いやすさなど、評価の観点を教えていただけますか？",
+      "timestamp": "2025-06-22T12:29:17.718915"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "Claude失敗テスト",
+      "timestamp": "2025-06-22T12:29:17.972994"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "ChatGPTテストメッセージ",
+      "timestamp": "2025-06-22T12:30:35.310723"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"AI応答タイトル\", \"content\": {\"section\": \"ChatGPTの応答内容です\"}}",
+      "timestamp": "2025-06-22T12:30:35.323560"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "Claude評価テストメッセージ",
+      "timestamp": "2025-06-22T12:30:35.349245"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"評価用AI応答\", \"content\": {\"section\": \"評価用内容\"}}",
+      "timestamp": "2025-06-22T12:30:35.359001"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "ChatGPTテストメッセージ",
+      "timestamp": "2025-06-22T12:31:28.573086"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"AI応答タイトル\", \"content\": {\"section\": \"ChatGPTの応答内容です\"}}",
+      "timestamp": "2025-06-22T12:31:28.592919"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "Claude評価テストメッセージ",
+      "timestamp": "2025-06-22T12:31:28.619418"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"title\": \"評価用AI応答\", \"content\": {\"section\": \"評価用内容\"}}",
+      "timestamp": "2025-06-22T12:31:28.631723"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "ユーザーの質問",
+      "timestamp": "2025-06-22T12:39:32.040733"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"構成\": {\"項目\": \"内容\", \"詳細\": \"テストデータ\"}}",
+      "timestamp": "2025-06-22T12:39:32.047732"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "ユーザーの質問",
+      "timestamp": "2025-06-22T12:40:04.372329"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"構成\": {\"項目\": \"内容\", \"詳細\": \"テストデータ\"}}",
+      "timestamp": "2025-06-22T12:40:04.386641"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "ユーザーの質問",
+      "timestamp": "2025-06-22T12:40:59.742268"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"構成\": {\"項目\": \"内容\", \"詳細\": \"テストデータ\"}}",
+      "timestamp": "2025-06-22T12:40:59.758305"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "ユーザーの質問",
+      "timestamp": "2025-06-22T12:45:40.590076"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"構成\": {\"項目\": \"内容\"}}",
+      "timestamp": "2025-06-22T12:45:40.598679"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "ユーザーの質問",
+      "timestamp": "2025-06-22T12:47:28.964409"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"構成\": {\"項目\": \"内容\"}}",
+      "timestamp": "2025-06-22T12:47:28.980250"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "ユーザーの質問",
+      "timestamp": "2025-06-22T12:47:56.175401"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"構成\": {\"項目\": \"内容\"}}",
+      "timestamp": "2025-06-22T12:47:56.185879"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "ユーザーの質問",
+      "timestamp": "2025-06-22T12:48:22.758968"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"構成\": {\"項目\": \"内容\"}}",
+      "timestamp": "2025-06-22T12:48:22.771695"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "ユーザーの質問",
+      "timestamp": "2025-06-22T12:49:56.882779"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"構成\": {\"項目\": \"内容\"}}",
+      "timestamp": "2025-06-22T12:49:56.900424"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "ユーザーの質問",
+      "timestamp": "2025-06-22T12:52:38.224314"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"構成\": {\"項目\": \"内容\"}}",
+      "timestamp": "2025-06-22T12:52:38.245356"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "評価履歴テスト",
+      "timestamp": "2025-06-22T12:54:45.413969"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"構成\": {\"項目\": \"内容\"}}",
+      "timestamp": "2025-06-22T12:54:45.423629"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2回目の評価",
+      "timestamp": "2025-06-22T12:54:45.448131"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"構成\": {\"項目\": \"内容\"}}",
+      "timestamp": "2025-06-22T12:54:45.458467"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "評価履歴テスト",
+      "timestamp": "2025-06-22T12:55:14.847340"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"構成\": {\"項目\": \"内容\"}}",
+      "timestamp": "2025-06-22T12:55:14.862407"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2回目の評価",
+      "timestamp": "2025-06-22T12:55:14.889944"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "{\"構成\": {\"項目\": \"更新された内容\", \"新機能\": \"追加機能\"}}",
+      "timestamp": "2025-06-22T12:55:14.904101"
+    }
+  ]
+}

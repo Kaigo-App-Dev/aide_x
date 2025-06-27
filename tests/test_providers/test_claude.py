@@ -31,9 +31,12 @@ def test_message_conversion_and_response(mock_prompt_manager, mock_save_log):
         mock_anthropic.return_value = mock_client
 
         provider = ClaudeProvider(api_key="dummy-key", prompt_manager=mock_prompt_manager)
-        result = provider.chat([
-            ChatMessage(role="user", content="Test message")
-        ], prompt_manager=mock_prompt_manager)
+        
+        # Promptオブジェクトを作成
+        from src.llm.prompts.prompt import Prompt
+        test_prompt = Prompt(template="Test system prompt\n{content}", description="Test prompt")
+        
+        result = provider.chat(test_prompt, model_name="claude-3-opus-20240229", prompt_manager=mock_prompt_manager)
         assert result == "Test response"
         mock_save_log.assert_any_call(
             "claude_request",
@@ -57,8 +60,13 @@ def test_message_conversion_and_response(mock_prompt_manager, mock_save_log):
 def test_prompt_not_found(mock_prompt_manager, mock_save_log):
     mock_prompt_manager.get_prompt.return_value = None
     provider = ClaudeProvider(api_key="dummy-key", prompt_manager=mock_prompt_manager)
+    
+    # Promptオブジェクトを作成
+    from src.llm.prompts.prompt import Prompt
+    test_prompt = Prompt(template="Test prompt", description="Test prompt")
+    
     with pytest.raises(PromptNotFoundError) as exc_info:
-        provider.chat([ChatMessage(role="user", content="Test message")], prompt_manager=mock_prompt_manager)
+        provider.chat(test_prompt, model_name="claude-3-opus-20240229", prompt_manager=mock_prompt_manager)
     assert "Prompt template 'chat' not found for provider 'claude'" in str(exc_info.value)
     mock_save_log.assert_not_called()  # プロンプトが見つからない場合はログ出力なし
 
@@ -69,8 +77,13 @@ def test_api_error(mock_prompt_manager, mock_save_log):
         mock_anthropic.return_value = mock_client
 
         provider = ClaudeProvider(api_key="dummy-key", prompt_manager=mock_prompt_manager)
+        
+        # Promptオブジェクトを作成
+        from src.llm.prompts.prompt import Prompt
+        test_prompt = Prompt(template="Test prompt", description="Test prompt")
+        
         with pytest.raises(APIRequestError) as exc_info:
-            provider.chat([ChatMessage(role="user", content="Test message")], prompt_manager=mock_prompt_manager)
+            provider.chat(test_prompt, model_name="claude-3-opus-20240229", prompt_manager=mock_prompt_manager)
         assert "Claude: API request error" in str(exc_info.value)
         mock_save_log.assert_any_call(
             "claude_request",

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>チャットメッセージ送信テスト</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .result.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .log {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>チャットメッセージ送信テスト</h1>
+        <p>統合インターフェースのメッセージ送信機能をテストします。</p>
+        
+        <div class="test-section">
+            <h3>1. メッセージ送信テスト</h3>
+            <div class="input-group">
+                <input type="text" id="messageInput" placeholder="テストメッセージを入力..." value="こんにちは、テストメッセージです">
+                <button onclick="sendTestMessage()">送信</button>
+            </div>
+            <div id="messageResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. 評価実行テスト</h3>
+            <button onclick="evaluateTest()">評価実行</button>
+            <div id="evaluateResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. 保存テスト</h3>
+            <button onclick="saveTest()">保存</button>
+            <div id="saveResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. ログ出力</h3>
+            <div id="logOutput" class="log"></div>
+        </div>
+    </div>
+    
+    <script>
+        const structureId = 'test_unified_001';
+        
+        // CSRFトークンを取得
+        function getCSRFToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        }
+        
+        // ログ出力
+        function log(message, type = 'info') {
+            const logOutput = document.getElementById('logOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            logOutput.textContent += logEntry;
+            logOutput.scrollTop = logOutput.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        // 結果表示
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+        }
+        
+        // メッセージ送信テスト
+        function sendTestMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) {
+                showResult('messageResult', 'メッセージを入力してください', 'error');
+                return;
+            }
+            
+            log(`メッセージ送信開始: ${message}`);
+            
+            const button = input.nextElementSibling;
+            button.disabled = true;
+            button.textContent = '送信中...';
+            
+            fetch(`/unified/${structureId}/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => {
+                log(`レスポンス受信: ${response.status} ${response.statusText}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                log(`レスポンスデータ: ${JSON.stringify(data, null, 2)}`);
+                if (data.success) {
+                    showResult('messageResult', `✅ 成功: ${data.message}`, 'success');
+                } else {
+                    showResult('messageResult', `❌ エラー: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                log(`エラー: ${error.message}`, 'error');
+                showResult('messageResult', `❌ エラー: ${error.message}`, 'error');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.textContent = '送信';
+            });
+        }
+        
+        // 評価実行テスト
+        function evaluateTest() {
+            log('評価実行開始');
+            
+            const button = event.target;
+            button.disabled = true;
+            button.textContent = '評価中...';
+            
+            fetch(`/unified/${structureId}/evaluate`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            })
+            .then(response => {
+                log(`評価レスポンス: ${response.status} ${response.statusText}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                log(`評価結果: ${JSON.stringify(data, null, 2)}`);
+                if (data.success) {
+                    showResult('evaluateResult', `✅ 成功: ${data.message}`, 'success');
+                } else {
+                    showResult('evaluateResult', `❌ エラー: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                log(`評価エラー: ${error.message}`, 'error');
+                showResult('evaluateResult', `❌ エラー: ${error.message}`, 'error');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.textContent = '評価実行';
+            });
+        }
+        
+        // 保存テスト
+        function saveTest() {
+            log('保存開始');
+            
+            const button = event.target;
+            button.disabled = true;
+            button.textContent = '保存中...';
+            
+            fetch(`/unified/${structureId}/save`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            })
+            .then(response => {
+                log(`保存レスポンス: ${response.status} ${response.statusText}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                log(`保存結果: ${JSON.stringify(data, null, 2)}`);
+                if (data.success) {
+                    showResult('saveResult', `✅ 成功: ${data.message}`, 'success');
+                } else {
+                    showResult('saveResult', `❌ エラー: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                log(`保存エラー: ${error.message}`, 'error');
+                showResult('saveResult', `❌ エラー: ${error.message}`, 'error');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.textContent = '保存';
+            });
+        }
+        
+        // ページ読み込み時の処理
+        document.addEventListener('DOMContentLoaded', function() {
+            log('ページ初期化完了');
+            
+            // CSRFトークンの確認
+            const csrfToken = getCSRFToken();
+            if (csrfToken) {
+                log('CSRFトークン確認済み');
+            } else {
+                log('CSRFトークンが見つかりません', 'error');
+            }
+            
+            // Enterキーでメッセージ送信
+            document.getElementById('messageInput').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    sendTestMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

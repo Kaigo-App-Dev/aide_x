@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>補完履歴一覧</title>
+    <style>
+        body { background: #1e1e1e; color: #ccc; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        .container { max-width: 1400px; margin: 40px auto; background: #252526; border-radius: 8px; padding: 32px; }
+        h1 { color: #4ec9b0; margin-bottom: 8px; }
+        .back-link { color: #4ec9b0; text-decoration: none; margin-bottom: 24px; display: inline-block; }
+        .back-link:hover { text-decoration: underline; }
+        .stats { background: #2d2d30; padding: 16px; border-radius: 6px; margin-bottom: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #4ec9b0; }
+        .stat-label { color: #888; font-size: 12px; margin-top: 4px; }
+        .filters { background: #2d2d30; padding: 16px; border-radius: 6px; margin-bottom: 20px; }
+        .filter-row { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; }
+        .filter-row:last-child { margin-bottom: 0; }
+        .filter-group { display: flex; align-items: center; gap: 8px; }
+        .filter-label { color: #ccc; font-size: 14px; min-width: 80px; }
+        .filter-input { background: #1e1e1e; border: 1px solid #3c3c3c; color: #ccc; padding: 6px 12px; border-radius: 4px; }
+        .filter-input:focus { outline: none; border-color: #4ec9b0; }
+        .filter-button { background: #4ec9b0; color: #1e1e1e; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; }
+        .filter-button:hover { background: #45b8a0; }
+        .filter-button.active { background: #c586c0; }
+        .search-box { flex: 1; }
+        .search-input { width: 100%; background: #1e1e1e; border: 1px solid #3c3c3c; color: #ccc; padding: 8px 12px; border-radius: 4px; }
+        .search-input:focus { outline: none; border-color: #4ec9b0; }
+        .table-container { background: #1e1e1e; border-radius: 6px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #2d2d30; color: #4ec9b0; padding: 12px; text-align: left; font-weight: bold; }
+        td { padding: 12px; border-bottom: 1px solid #3c3c3c; }
+        tr:hover { background: #2d2d30; }
+        .title-link { color: #4ec9b0; text-decoration: none; }
+        .title-link:hover { text-decoration: underline; }
+        .count-badge { background: #4ec9b0; color: #1e1e1e; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-left: 8px; }
+        .count-badge:hover { background: #45b8a0; cursor: pointer; }
+        .compare-link { color: #c586c0; text-decoration: none; font-size: 12px; }
+        .compare-link:hover { text-decoration: underline; }
+        .empty-message { text-align: center; color: #888; padding: 40px; font-style: italic; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/unified" class="back-link">← 統合インターフェース</a>
+    <h1>📝 補完履歴一覧</h1>
+    
+    <!-- 統計情報 -->
+    <div class="stats">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">総件数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="structureCount">0</div>
+                <div class="stat-label">構成数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="avgTokens">0</div>
+                <div class="stat-label">平均トークン数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="medianTokens">0</div>
+                <div class="stat-label">中央値トークン数</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- フィルタ -->
+    <div class="filters">
+        <div class="filter-row">
+            <div class="filter-group">
+                <span class="filter-label">表示:</span>
+                <button class="filter-button active" data-filter="all">すべて</button>
+                <button class="filter-button" data-filter="recent">最近</button>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">並び順:</span>
+                <button class="filter-button active" data-sort="desc">新しい順</button>
+                <button class="filter-button" data-sort="asc">古い順</button>
+            </div>
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="タイトルで検索..." id="searchInput">
+            </div>
+        </div>
+        <div class="filter-row">
+            <div class="filter-group">
+                <span class="filter-label">日付範囲:</span>
+                <input type="date" class="filter-input" id="fromDate">
+                <span style="color: #888;">〜</span>
+                <input type="date" class="filter-input" id="toDate">
+                <button class="filter-button" onclick="applyDateFilter()">適用</button>
+                <button class="filter-button" onclick="clearDateFilter()">クリア</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- テーブル -->
+    <div class="table-container">
+        <table id="completionsTable">
+            <thead>
+                <tr>
+                    <th>構成タイトル</th>
+                    <th>補完内容</th>
+                    <th>日時</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="completionsTableBody">
+                {% for completion in completions %}
+                <tr data-title="{{ completion.title.lower() }}" data-timestamp="{{ completion.timestamp }}" data-tokens="{{ completion.content|length if completion.content else 0 }}">
+                    <td>
+                        <a href="/unified/{{ completion.structure_id }}" class="title-link">
+                            {{ completion.title or '無題' }}
+                        </a>
+                        <span class="count-badge" onclick="filterByStructure('{{ completion.structure_id }}')">1</span>
+                    </td>
+                    <td>
+                        <div style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            {{ completion.content or '内容なし' }}
+                        </div>
+                    </td>
+                    <td>{{ completion.timestamp }}</td>
+                    <td>
+                        <a href="/compare/{{ completion.structure_id }}/{{ completion.timestamp }}" class="compare-link">比較</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div id="emptyMessage" class="empty-message hidden">
+            補完履歴が見つかりませんでした。
+        </div>
+    </div>
+</div>
+
+<script>
+// データ
+let allCompletions = {{ completions | tojson | safe }};
+let filteredCompletions = [...allCompletions];
+let currentSort = 'desc';
+let currentFilter = 'all';
+
+// 初期化
+document.addEventListener('DOMContentLoaded', function() {
+    updateStats();
+    updateTable();
+    
+    // イベントリスナー
+    document.getElementById('searchInput').addEventListener('input', filterByTitle);
+    
+    // フィルタボタン
+    document.querySelectorAll('[data-filter]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.filter;
+            applyFilters();
+        });
+    });
+    
+    // ソートボタン
+    document.querySelectorAll('[data-sort]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-sort]').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentSort = this.dataset.sort;
+            applyFilters();
+        });
+    });
+});
+
+// 統計更新
+function updateStats() {
+    const totalCount = filteredCompletions.length;
+    const structureIds = new Set(filteredCompletions.map(c => c.structure_id));
+    const structureCount = structureIds.size;
+    
+    // トークン数計算（簡易版：文字数）
+    const tokenCounts = filteredCompletions.map(c => c.content ? c.content.length : 0);
+    const avgTokens = tokenCounts.length > 0 ? Math.round(tokenCounts.reduce((a, b) => a + b, 0) / tokenCounts.length) : 0;
+    const medianTokens = tokenCounts.length > 0 ? calculateMedian(tokenCounts) : 0;
+    
+    document.getElementById('totalCount').textContent = totalCount;
+    document.getElementById('structureCount').textContent = structureCount;
+    document.getElementById('avgTokens').textContent = avgTokens;
+    document.getElementById('medianTokens').textContent = medianTokens;
+}
+
+// 中央値計算
+function calculateMedian(arr) {
+    const sorted = arr.slice().sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 === 0 ? Math.round((sorted[mid - 1] + sorted[mid]) / 2) : sorted[mid];
+}
+
+// タイトルフィルタ
+function filterByTitle() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    filteredCompletions = allCompletions.filter(c => 
+        c.title && c.title.toLowerCase().includes(searchTerm)
+    );
+    applyFilters();
+}
+
+// 構成IDフィルタ
+function filterByStructure(structureId) {
+    filteredCompletions = allCompletions.filter(c => c.structure_id === structureId);
+    applyFilters();
+}
+
+// 日付フィルタ
+function applyDateFilter() {
+    const fromDate = document.getElementById('fromDate').value;
+    const toDate = document.getElementById('toDate').value;
+    
+    filteredCompletions = allCompletions.filter(c => {
+        const timestamp = c.timestamp;
+        if (fromDate && timestamp < fromDate) return false;
+        if (toDate && timestamp > toDate) return false;
+        return true;
+    });
+    applyFilters();
+}
+
+// 日付フィルタクリア
+function clearDateFilter() {
+    document.getElementById('fromDate').value = '';
+    document.getElementById('toDate').value = '';
+    filteredCompletions = [...allCompletions];
+    applyFilters();
+}
+
+// フィルタ適用
+function applyFilters() {
+    // 表示フィルタ
+    if (currentFilter === 'recent') {
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        filteredCompletions = filteredCompletions.filter(c => new Date(c.timestamp) > oneWeekAgo);
+    }
+    
+    // ソート
+    filteredCompletions.sort((a, b) => {
+        const comparison = a.timestamp.localeCompare(b.timestamp);
+        return currentSort === 'desc' ? -comparison : comparison;
+    });
+    
+    updateStats();
+    updateTable();
+}
+
+// テーブル更新
+function updateTable() {
+    const tbody = document.getElementById('completionsTableBody');
+    const emptyMessage = document.getElementById('emptyMessage');
+    
+    if (filteredCompletions.length === 0) {
+        tbody.innerHTML = '';
+        emptyMessage.classList.remove('hidden');
+        return;
+    }
+    
+    emptyMessage.classList.add('hidden');
+    
+    tbody.innerHTML = filteredCompletions.map(completion => `
+        <tr data-title="${completion.title ? completion.title.toLowerCase() : ''}" data-timestamp="${completion.timestamp}" data-tokens="${completion.content ? completion.content.length : 0}">
+            <td>
+                <a href="/unified/${completion.structure_id}" class="title-link">
+                    ${completion.title || '無題'}
+                </a>
+                <span class="count-badge" onclick="filterByStructure('${completion.structure_id}')">1</span>
+            </td>
+            <td>
+                <div style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${completion.content || '内容なし'}
+                </div>
+            </td>
+            <td>${completion.timestamp}</td>
+            <td>
+                <a href="/compare/${completion.structure_id}/${completion.timestamp}" class="compare-link">比較</a>
+            </td>
+        </tr>
+    `).join('');
+}
+</script>
+</body>
+</html> 

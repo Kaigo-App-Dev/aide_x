@@ -1,0 +1,36 @@
+{
+  "structure_id": "e8bf21a4-47eb-42ba-90a7-79f5b1d38000",
+  "timestamp": "2025-06-24T17:13:23.372726",
+  "error_type": "gemini_syntax_error",
+  "error_message": "JSON抽出エラー: JSON構成の解析に失敗しました",
+  "gemini_raw_response": "Error: Gemini: generate_response error: 400 API key not valid. Please pass a valid API key. [reason: \"API_KEY_INVALID\"\ndomain: \"googleapis.com\"\nmetadata {\n  key: \"service\"\n  value: \"generativelanguage.googleapis.com\"\n}\n, locale: \"en-US\"\nmessage: \"API key not valid. Please pass a valid API key.\"\n]",
+  "original_content": {
+    "functions": [
+      {
+        "name": "栄養バランスチェック",
+        "description": "ユーザーが食べたものを記録し、その栄養バランスを計算する機能"
+      },
+      {
+        "name": "メニュー提案",
+        "description": "必要な栄養素が不足していた場合に、それを補うメニューを提案する機能"
+      },
+      {
+        "name": "食事記録",
+        "description": "食事の内容を記録し、健康状態の把握や医師とのコミュニケーションに活用する機能"
+      }
+    ]
+  },
+  "claude_analysis": null,
+  "validation_result": {
+    "has_title": false,
+    "has_modules": false,
+    "is_valid_structure": false,
+    "missing_keys": [
+      "title",
+      "modules"
+    ],
+    "validation_result": "invalid"
+  },
+  "claude_repair_attempted": false,
+  "claude_repair_result": null
+}

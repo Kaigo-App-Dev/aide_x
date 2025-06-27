@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-06-27T15:04:47.115496",
+  "structure_id": "cca52cab-3397-48d2-aa5a-02ecac2cac41",
+  "error_type": "ValueError",
+  "error_message": "構文チェック失敗: 必須キーが不足しています: title, modules",
+  "stack_trace": "Traceback (most recent call last):\n  File \"C:\\dev\\aide_x\\src\\routes\\unified_routes.py\", line 420, in apply_gemini_completion\n    raise ValueError(f\"構文チェック失敗: {validation_result.get('error_message', 'No message')}\")\nValueError: 構文チェック失敗: 必須キーが不足しています: title, modules\n",
+  "structure_content": {
+    "main_features": {
+      "meal_recording": "ユーザーが毎日の食事内容を簡単に記録できる機能",
+      "nutrient_calculation": "記録した食事から摂取した栄養素を自動で計算し、バランスが取れているかどうかを表示する機能",
+      "health_checklist": "日々の体調や食事内容に応じた健康チェック項目を提案する機能"
+    }
+  },
+  "claude_feedback": "Claude評価が利用できません",
+  "retry_count": 2,
+  "max_retries": 2
+}

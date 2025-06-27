@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-06-22T09:16:11.762737",
+  "provider": "claude",
+  "structure_id": "test-004",
+  "structure_title": "テスト構造",
+  "structure_content": {
+    "title": "テスト構造",
+    "content": {
+      "sections": [
+        {
+          "title": "項目1",
+          "content": "項目1の内容"
+        },
+        {
+          "title": "項目2",
+          "content": "項目2の内容"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "nonexistent_id",
+  "title": "",
+  "description": "",
+  "project": "default",
+  "content": "",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "こんにちは！統合インターフェースへようこそ。構成の編集や評価について何でもお聞かせください。",
+      "timestamp": "2025-06-20T13:46:57.725612",
+      "source": "chat"
+    }
+  ]
+}

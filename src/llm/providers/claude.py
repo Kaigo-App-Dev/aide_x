@@ -153,6 +153,58 @@ class ClaudeProvider(BaseLLMProvider):
             )
             raise APIRequestError(error_msg)
 
+    def call(self, messages: List[Dict[str, str]], **kwargs) -> AIProviderResponse:
+        """
+        Claude APIを呼び出して応答を取得
+        
+        Args:
+            messages (List[Dict[str, str]]): メッセージのリスト
+            **kwargs: 追加のパラメータ
+            
+        Returns:
+            AIProviderResponse: 生成された応答
+            
+        Raises:
+            APIRequestError: APIリクエストが失敗した場合
+            ResponseFormatError: レスポンスの形式が不正な場合
+        """
+        logger.info("Claude API call started")
+        logger.debug(f"Claude messages: {messages}")
+        
+        try:
+            # Claude API呼び出し
+            response = self.client.messages.create(
+                model=self.model_name,
+                messages=messages,
+                temperature=kwargs.get("temperature", 0.7),
+                max_tokens=kwargs.get("max_tokens", 1000)
+            )
+            
+            # レスポンスの処理
+            if response and response.content and len(response.content) > 0:
+                content = response.content[0].text or ""
+                logger.info(f"Claude API call successful: {content[:100]}...")
+                logger.debug(f"Claude full response: {content}")
+                
+                return {
+                    "content": content,
+                    "model": self.model_name,
+                    "provider": "claude",
+                    "usage": {
+                        "input_tokens": response.usage.input_tokens if response.usage else 0,
+                        "output_tokens": response.usage.output_tokens if response.usage else 0
+                    }
+                }
+            else:
+                error_msg = "Claude API returned empty response"
+                logger.error(error_msg)
+                raise ResponseFormatError("claude", error_msg)
+                
+        except Exception as e:
+            error_msg = f"Claude API call failed: {str(e)}"
+            logger.error(error_msg)
+            raise APIRequestError("claude", error_msg)
+
 def call_claude_api(
     messages: List[Dict[str, str]],
     model: str = "claude-3-opus-20240229",

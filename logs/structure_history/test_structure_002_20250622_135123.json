@@ -1,0 +1,36 @@
+{
+  "id": "test_structure_002",
+  "title": "精度テスト構成",
+  "content": "テスト内容",
+  "evaluations": [
+    {
+      "timestamp": "2024-01-01T10:00:00",
+      "score": 0.9,
+      "feedback": "優秀"
+    },
+    {
+      "timestamp": "2024-01-02T10:00:00",
+      "score": 0.5,
+      "feedback": "普通"
+    },
+    {
+      "timestamp": "2024-01-03T10:00:00",
+      "score": 0.1,
+      "feedback": "改善必要"
+    }
+  ],
+  "completions": [
+    {
+      "timestamp": "2024-01-01T11:00:00",
+      "content": "短い"
+    },
+    {
+      "timestamp": "2024-01-02T11:00:00",
+      "content": "中程度の長さ"
+    },
+    {
+      "timestamp": "2024-01-03T11:00:00",
+      "content": "とても長い補完内容で、多くの文字を含んでいます"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "total_completions": 27,
+  "successful_completions": 17,
+  "failed_completions": 10,
+  "skipped_completions": 0,
+  "error_types": {
+    "json_parsing": 8,
+    "unknown": 1,
+    "syntax_validation": 1
+  },
+  "recent_errors": [
+    {
+      "timestamp": "2025-06-24T17:01:19.725277",
+      "structure_id": "8f2a8899-e2a5-4e7c-883a-b375cce68aa6",
+      "error_type": "json_parsing",
+      "error_message": "JSON抽出エラー: JSON構成が検出できませんでした"
+    },
+    {
+      "timestamp": "2025-06-24T17:05:50.256486",
+      "structure_id": "f37bf340-e41f-4fee-9646-aff0da41e2a5",
+      "error_type": "json_parsing",
+      "error_message": "JSON抽出エラー: JSON構成が検出できませんでした"
+    },
+    {
+      "timestamp": "2025-06-24T17:13:23.387040",
+      "structure_id": "e8bf21a4-47eb-42ba-90a7-79f5b1d38000",
+      "error_type": "json_parsing",
+      "error_message": "JSON抽出エラー: JSON構成の解析に失敗しました"
+    },
+    {
+      "timestamp": "2025-06-24T17:18:55.784550",
+      "structure_id": "1379f477-46a9-4f1a-8734-16cf0902a4ad",
+      "error_type": "json_parsing",
+      "error_message": "JSON抽出エラー: JSON構成の解析に失敗しました"
+    },
+    {
+      "timestamp": "2025-06-24T17:36:18.052858",
+      "structure_id": "bb76f3e6-999e-43f1-a7f7-7a3263250af4",
+      "error_type": "json_parsing",
+      "error_message": "JSON抽出エラー: JSON構成が検出できませんでした"
+    },
+    {
+      "timestamp": "2025-06-24T17:44:41.736298",
+      "structure_id": "74e17980-66ea-4bfe-980e-2a26ef5d7d9e",
+      "error_type": "json_parsing",
+      "error_message": "JSON抽出エラー: JSON構成の解析に失敗しました"
+    },
+    {
+      "timestamp": "2025-06-27T13:45:37.592831",
+      "structure_id": "fa04dd78-8968-48a0-86ef-a690c814fe94",
+      "error_type": "json_parsing",
+      "error_message": "JSON抽出エラー: JSON構成の解析に失敗しました"
+    },
+    {
+      "timestamp": "2025-06-27T14:27:07.701191",
+      "structure_id": "af30caac-79ce-4ba9-a892-4d559beb6706",
+      "error_type": "json_parsing",
+      "error_message": "JSON抽出エラー: JSON構成の解析に失敗しました"
+    },
+    {
+      "timestamp": "2025-06-27T15:00:40.435515",
+      "structure_id": "959cddea-4e3e-4e46-8187-31fc5b0eb5b0",
+      "error_type": "unknown",
+      "error_message": "'error_message'"
+    },
+    {
+      "timestamp": "2025-06-27T15:04:47.140449",
+      "structure_id": "cca52cab-3397-48d2-aa5a-02ecac2cac41",
+      "error_type": "syntax_validation",
+      "error_message": "構文チェック失敗: 必須キーが不足しています: title, modules"
+    }
+  ],
+  "claude_analysis_stats": {
+    "too_long_count": 0,
+    "vague_count": 0,
+    "empty_count": 0,
+    "normal_count": 0
+  },
+  "prevention_effectiveness": {
+    "retry_success_count": 0,
+    "retry_failure_count": 0,
+    "skip_prevented_errors": 0,
+    "effectiveness_rate": 0.0
+  },
+  "success_rate": 62.96
+}

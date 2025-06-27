@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}構成履歴 - {{ structure_id }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h1>📋 構成履歴</h1>
+        <div class="header-info">
+            <span>構造ID: {{ structure_id }}</span>
+        </div>
+        <div class="header-actions">
+            <a href="/unified/{{ structure_id }}" class="btn btn-primary">← 統合インターフェースに戻る</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        {% if history_list %}
+            <div class="history-container">
+                <h2>保存履歴一覧</h2>
+                <div class="history-list">
+                    {% for history in history_list %}
+                    <div class="history-item">
+                        <div class="history-header">
+                            <div class="history-info">
+                                <span class="history-id">{{ history.id }}</span>
+                                <span class="history-time">{{ history.timestamp }}</span>
+                            </div>
+                            <div class="history-actions">
+                                <button onclick="restoreHistory('{{ structure_id }}', '{{ history.id }}')" class="btn btn-restore">
+                                    🔄 復元
+                                </button>
+                                <button onclick="viewHistoryDetail('{{ history.id }}')" class="btn btn-view">
+                                    👁️ 詳細
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {% if history.diff_html %}
+                        <div class="history-diff">
+                            <h4>変更内容:</h4>
+                            <div class="diff-content">
+                                {{ history.diff_html | safe }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="history-content">
+                            <h4>構成内容:</h4>
+                            <pre class="content-preview">{{ history.content | tojson(indent=2) }}</pre>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-history">
+                <div class="empty-content">
+                    <div class="empty-icon">📝</div>
+                    <h3>履歴がありません</h3>
+                    <p>構成を保存すると履歴が表示されます。</p>
+                    <a href="/unified/{{ structure_id }}" class="btn btn-primary">構成に戻る</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 復元確認モーダル -->
+<div id="restoreModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>履歴を復元しますか？</h3>
+            <span class="modal-close" onclick="closeRestoreModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>選択した履歴の構成に復元します。現在の構成は失われます。</p>
+        </div>
+        <div class="modal-footer">
+            <button onclick="confirmRestore()" class="btn btn-primary">復元する</button>
+            <button onclick="closeRestoreModal()" class="btn btn-secondary">キャンセル</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentRestoreHistoryId = null;
+
+function restoreHistory(structureId, historyId) {
+    currentRestoreHistoryId = historyId;
+    document.getElementById('restoreModal').style.display = 'block';
+}
+
+function closeRestoreModal() {
+    document.getElementById('restoreModal').style.display = 'none';
+    currentRestoreHistoryId = null;
+}
+
+function confirmRestore() {
+    if (!currentRestoreHistoryId) return;
+    
+    fetch(`/unified/restore_structure/{{ structure_id }}/${currentRestoreHistoryId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('履歴を復元しました');
+            window.location.href = `/unified/{{ structure_id }}`;
+        } else {
+            alert('復元に失敗しました: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('復元エラー:', error);
+        alert('復元中にエラーが発生しました');
+    })
+    .finally(() => {
+        closeRestoreModal();
+    });
+}
+
+function viewHistoryDetail(historyId) {
+    // 詳細表示の実装（必要に応じて）
+    console.log('履歴詳細表示:', historyId);
+}
+</script>
+
+<style>
+.history-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.history-item {
+    background: #1e1e1e;
+    border: 1px solid #3e3e42;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #3e3e42;
+}
+
+.history-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.history-id {
+    font-weight: bold;
+    color: #4ec9b0;
+    font-size: 14px;
+}
+
+.history-time {
+    color: #858585;
+    font-size: 12px;
+}
+
+.history-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-restore {
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-view {
+    background: #007acc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.history-diff {
+    margin-bottom: 12px;
+    padding: 12px;
+    background: #252526;
+    border-radius: 4px;
+}
+
+.history-diff h4 {
+    margin: 0 0 8px 0;
+    color: #ff9800;
+    font-size: 14px;
+}
+
+.diff-content {
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.history-content h4 {
+    margin: 0 0 8px 0;
+    color: #d4d4d4;
+    font-size: 14px;
+}
+
+.content-preview {
+    background: #252526;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    overflow-x: auto;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.empty-history {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-content {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.empty-content h3 {
+    color: #d4d4d4;
+    margin: 0 0 12px 0;
+}
+
+.empty-content p {
+    color: #858585;
+    margin: 0 0 24px 0;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #1e1e1e;
+    border: 1px solid #3e3e42;
+    border-radius: 8px;
+    padding: 20px;
+    min-width: 400px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #d4d4d4;
+}
+
+.modal-close {
+    color: #858585;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.modal-close:hover {
+    color: #d4d4d4;
+}
+
+.modal-body {
+    margin-bottom: 16px;
+    color: #d4d4d4;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: #007acc;
+    color: white;
+}
+
+.btn-secondary {
+    background: #2d2d30;
+    color: #d4d4d4;
+    border: 1px solid #4e4e52;
+}
+</style>
+{% endblock %}
+
+{% macro diff_json(before, after) %}
+  {# Python側で差分HTMLを生成して渡すのが理想。ここでは簡易的にJinjaで比較 #}
+  {% set before_str = before|tojson(indent=2) %}
+  {% set after_str = after|tojson(indent=2) %}
+  <pre>{{ after_str }}</pre>
+{% endmacro %} 

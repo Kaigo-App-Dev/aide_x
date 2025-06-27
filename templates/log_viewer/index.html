@@ -1,0 +1,368 @@
+{% extends "base.html" %}
+
+{% block title %}ログビューアー - AIDE-X{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- サイドバー: 検索条件 -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-search"></i> 検索条件</h5>
+                </div>
+                <div class="card-body">
+                    <form id="searchForm">
+                        <div class="mb-3">
+                            <label for="structure_id" class="form-label">構成ID</label>
+                            <input type="text" class="form-control" id="structure_id" name="structure_id" 
+                                   placeholder="例: test-001">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="user_id" class="form-label">ユーザーID</label>
+                            <input type="text" class="form-control" id="user_id" name="user_id" 
+                                   placeholder="例: user123">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="level" class="form-label">ログレベル</label>
+                            <select class="form-select" id="level" name="level">
+                                <option value="">すべて</option>
+                                <option value="DEBUG">DEBUG</option>
+                                <option value="INFO">INFO</option>
+                                <option value="WARNING">WARNING</option>
+                                <option value="ERROR">ERROR</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="start_date" class="form-label">開始日</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="end_date" class="form-label">終了日</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="keyword" class="form-label">キーワード</label>
+                            <input type="text" class="form-control" id="keyword" name="keyword" 
+                                   placeholder="例: 構成評価">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="limit" class="form-label">表示件数</label>
+                            <select class="form-select" id="limit" name="limit">
+                                <option value="50">50件</option>
+                                <option value="100" selected>100件</option>
+                                <option value="200">200件</option>
+                                <option value="500">500件</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> 検索
+                        </button>
+                    </form>
+                    
+                    <hr>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('log_viewer.view_stats') }}" class="btn btn-outline-info">
+                            <i class="fas fa-chart-bar"></i> 統計情報
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- メインコンテンツ: ログ表示 -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-list"></i> ログ一覧</h5>
+                    <div>
+                        <span id="resultCount" class="badge bg-secondary">0件</span>
+                        <button id="clearBtn" class="btn btn-outline-secondary btn-sm ms-2">
+                            <i class="fas fa-times"></i> クリア
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="loadingIndicator" class="text-center d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">読み込み中...</span>
+                        </div>
+                        <p class="mt-2">ログを検索中...</p>
+                    </div>
+                    
+                    <div id="logContainer">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-search fa-3x mb-3"></i>
+                            <p>検索条件を設定して「検索」ボタンをクリックしてください</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 統計情報パネル -->
+            <div id="statsPanel" class="card mt-3 d-none">
+                <div class="card-header">
+                    <h6><i class="fas fa-chart-pie"></i> 検索結果統計</h6>
+                </div>
+                <div class="card-body">
+                    <div id="statsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.log-entry {
+    border-left: 4px solid #dee2e6;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.log-entry.INFO {
+    border-left-color: #17a2b8;
+    background-color: #d1ecf1;
+}
+
+.log-entry.WARNING {
+    border-left-color: #ffc107;
+    background-color: #fff3cd;
+}
+
+.log-entry.ERROR {
+    border-left-color: #dc3545;
+    background-color: #f8d7da;
+}
+
+.log-entry.DEBUG {
+    border-left-color: #6c757d;
+    background-color: #e2e3e5;
+}
+
+.log-timestamp {
+    font-size: 0.85em;
+    color: #6c757d;
+    font-family: monospace;
+}
+
+.log-level {
+    font-weight: bold;
+    font-size: 0.85em;
+}
+
+.log-level.INFO { color: #17a2b8; }
+.log-level.WARNING { color: #856404; }
+.log-level.ERROR { color: #721c24; }
+.log-level.DEBUG { color: #6c757d; }
+
+.log-message {
+    margin-top: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.stats-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.stats-item:last-child {
+    border-bottom: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('searchForm');
+    const logContainer = document.getElementById('logContainer');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const resultCount = document.getElementById('resultCount');
+    const clearBtn = document.getElementById('clearBtn');
+    const statsPanel = document.getElementById('statsPanel');
+    const statsContent = document.getElementById('statsContent');
+    
+    // 検索フォームの送信
+    searchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        performSearch();
+    });
+    
+    // クリアボタン
+    clearBtn.addEventListener('click', function() {
+        searchForm.reset();
+        logContainer.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-search fa-3x mb-3"></i>
+                <p>検索条件を設定して「検索」ボタンをクリックしてください</p>
+            </div>
+        `;
+        resultCount.textContent = '0件';
+        statsPanel.classList.add('d-none');
+    });
+    
+    function performSearch() {
+        // ローディング表示
+        loadingIndicator.classList.remove('d-none');
+        logContainer.innerHTML = '';
+        statsPanel.classList.add('d-none');
+        
+        // フォームデータを取得
+        const formData = new FormData(searchForm);
+        const searchData = {};
+        for (let [key, value] of formData.entries()) {
+            if (value.trim()) {
+                searchData[key] = value.trim();
+            }
+        }
+        
+        // API呼び出し
+        fetch('/logs/search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(searchData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            loadingIndicator.classList.add('d-none');
+            
+            if (data.success) {
+                displayLogs(data.logs);
+                displayStats(data.stats);
+                resultCount.textContent = `${data.total_count}件`;
+            } else {
+                logContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        エラー: ${data.error}
+                    </div>
+                `;
+                resultCount.textContent = '0件';
+            }
+        })
+        .catch(error => {
+            loadingIndicator.classList.add('d-none');
+            logContainer.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    通信エラー: ${error.message}
+                </div>
+            `;
+            resultCount.textContent = '0件';
+        });
+    }
+    
+    function displayLogs(logs) {
+        if (!logs || logs.length === 0) {
+            logContainer.innerHTML = `
+                <div class="text-center text-muted">
+                    <i class="fas fa-search fa-3x mb-3"></i>
+                    <p>該当するログが見つかりませんでした</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const logsHtml = logs.map(log => `
+            <div class="log-entry ${log.level}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span class="log-timestamp">${log.timestamp}</span>
+                    <span class="log-level ${log.level}">${log.level}</span>
+                </div>
+                <div class="log-message">${escapeHtml(log.message)}</div>
+            </div>
+        `).join('');
+        
+        logContainer.innerHTML = logsHtml;
+    }
+    
+    function displayStats(stats) {
+        if (!stats || Object.keys(stats).length === 0) {
+            statsPanel.classList.add('d-none');
+            return;
+        }
+        
+        let statsHtml = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>基本情報</h6>
+                    <div class="stats-item">
+                        <span>総エントリ数:</span>
+                        <span class="badge bg-primary">${stats.total_entries}</span>
+                    </div>
+        `;
+        
+        if (stats.levels && Object.keys(stats.levels).length > 0) {
+            statsHtml += '<h6 class="mt-3">ログレベル別</h6>';
+            for (const [level, count] of Object.entries(stats.levels)) {
+                statsHtml += `
+                    <div class="stats-item">
+                        <span>${level}:</span>
+                        <span class="badge bg-secondary">${count}件</span>
+                    </div>
+                `;
+            }
+        }
+        
+        statsHtml += '</div><div class="col-md-6">';
+        
+        if (stats.structure_ids && stats.structure_ids.length > 0) {
+            statsHtml += `
+                <h6>関連構成ID</h6>
+                <div class="stats-item">
+                    <span>構成ID:</span>
+                    <span class="badge bg-info">${stats.structure_ids.join(', ')}</span>
+                </div>
+            `;
+        }
+        
+        if (stats.user_ids && stats.user_ids.length > 0) {
+            statsHtml += `
+                <h6 class="mt-3">関連ユーザーID</h6>
+                <div class="stats-item">
+                    <span>ユーザーID:</span>
+                    <span class="badge bg-success">${stats.user_ids.join(', ')}</span>
+                </div>
+            `;
+        }
+        
+        if (stats.date_range && stats.date_range.start && stats.date_range.end) {
+            statsHtml += `
+                <h6 class="mt-3">日付範囲</h6>
+                <div class="stats-item">
+                    <span>期間:</span>
+                    <span class="badge bg-warning">${stats.date_range.start} ～ ${stats.date_range.end}</span>
+                </div>
+            `;
+        }
+        
+        statsHtml += '</div></div>';
+        
+        statsContent.innerHTML = statsHtml;
+        statsPanel.classList.remove('d-none');
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+});
+</script>
+{% endblock %} 

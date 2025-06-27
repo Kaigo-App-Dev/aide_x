@@ -1,0 +1,475 @@
+{
+  "structure_id": "test_conversation_001",
+  "module_id": "",
+  "timestamp": "2025-06-23T10:43:55.787505",
+  "history": [
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "構成の目的は〇〇です",
+      "timestamp": "2025-06-23T10:43:55.787505"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答テスト",
+      "timestamp": "2025-06-23T10:43:55.795643"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "最初の質問",
+      "timestamp": "2025-06-23T10:43:57.062564"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答1",
+      "timestamp": "2025-06-23T10:43:57.072327"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2番目の質問",
+      "timestamp": "2025-06-23T10:43:57.080111"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答2",
+      "timestamp": "2025-06-23T10:43:57.091391"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "構成の目的は〇〇です",
+      "timestamp": "2025-06-23T10:50:54.443500"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答テスト",
+      "timestamp": "2025-06-23T10:50:54.452123"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "最初の質問",
+      "timestamp": "2025-06-23T10:50:55.616440"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答1",
+      "timestamp": "2025-06-23T10:50:55.629801"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2番目の質問",
+      "timestamp": "2025-06-23T10:50:55.642811"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答2",
+      "timestamp": "2025-06-23T10:50:55.651051"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "構成の目的は〇〇です",
+      "timestamp": "2025-06-23T10:52:44.207515"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答テスト",
+      "timestamp": "2025-06-23T10:52:44.225693"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "最初の質問",
+      "timestamp": "2025-06-23T10:52:45.388867"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答1",
+      "timestamp": "2025-06-23T10:52:45.394350"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2番目の質問",
+      "timestamp": "2025-06-23T10:52:45.410525"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答2",
+      "timestamp": "2025-06-23T10:52:45.417485"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "構成の目的は〇〇です",
+      "timestamp": "2025-06-23T10:55:17.523690"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答テスト",
+      "timestamp": "2025-06-23T10:55:17.541100"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "最初の質問",
+      "timestamp": "2025-06-23T10:55:18.096091"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答1",
+      "timestamp": "2025-06-23T10:55:18.106666"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2番目の質問",
+      "timestamp": "2025-06-23T10:55:18.118240"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答2",
+      "timestamp": "2025-06-23T10:55:18.133899"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "構成の目的は〇〇です",
+      "timestamp": "2025-06-23T10:58:55.231191"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答テスト",
+      "timestamp": "2025-06-23T10:58:55.242440"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "最初の質問",
+      "timestamp": "2025-06-23T10:58:55.783560"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答1",
+      "timestamp": "2025-06-23T10:58:55.801603"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2番目の質問",
+      "timestamp": "2025-06-23T10:58:55.815695"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答2",
+      "timestamp": "2025-06-23T10:58:55.815695"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "構成の目的は〇〇です",
+      "timestamp": "2025-06-23T11:00:34.201069"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答テスト",
+      "timestamp": "2025-06-23T11:00:34.204002"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "最初の質問",
+      "timestamp": "2025-06-23T11:00:34.931221"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答1",
+      "timestamp": "2025-06-23T11:00:34.939252"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2番目の質問",
+      "timestamp": "2025-06-23T11:00:34.946518"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答2",
+      "timestamp": "2025-06-23T11:00:34.946518"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "構成の目的は〇〇です",
+      "timestamp": "2025-06-23T11:03:13.412138"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答テスト",
+      "timestamp": "2025-06-23T11:03:13.428083"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "最初の質問",
+      "timestamp": "2025-06-23T11:03:13.760905"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答1",
+      "timestamp": "2025-06-23T11:03:13.781383"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2番目の質問",
+      "timestamp": "2025-06-23T11:03:13.793185"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答2",
+      "timestamp": "2025-06-23T11:03:13.793185"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "構成の目的は〇〇です",
+      "timestamp": "2025-06-23T11:09:47.504828"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答テスト",
+      "timestamp": "2025-06-23T11:09:47.516745"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "最初の質問",
+      "timestamp": "2025-06-23T11:09:47.892584"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答1",
+      "timestamp": "2025-06-23T11:09:47.892584"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2番目の質問",
+      "timestamp": "2025-06-23T11:09:47.907991"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答2",
+      "timestamp": "2025-06-23T11:09:47.923928"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "構成の目的は〇〇です",
+      "timestamp": "2025-06-23T11:10:36.355554"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答テスト",
+      "timestamp": "2025-06-23T11:10:36.370801"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "最初の質問",
+      "timestamp": "2025-06-23T11:10:36.760062"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答1",
+      "timestamp": "2025-06-23T11:10:36.775925"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2番目の質問",
+      "timestamp": "2025-06-23T11:10:36.791770"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答2",
+      "timestamp": "2025-06-23T11:10:36.791770"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "構成の目的は〇〇です",
+      "timestamp": "2025-06-23T11:14:24.617659"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答テスト",
+      "timestamp": "2025-06-23T11:14:24.627759"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "最初の質問",
+      "timestamp": "2025-06-23T11:14:25.009209"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答1",
+      "timestamp": "2025-06-23T11:14:25.026938"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2番目の質問",
+      "timestamp": "2025-06-23T11:14:25.043094"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答2",
+      "timestamp": "2025-06-23T11:14:25.043094"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "構成の目的は〇〇です",
+      "timestamp": "2025-06-23T11:29:31.151672"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答テスト",
+      "timestamp": "2025-06-23T11:29:31.162516"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "最初の質問",
+      "timestamp": "2025-06-23T11:29:31.535360"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答1",
+      "timestamp": "2025-06-23T11:29:31.545847"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2番目の質問",
+      "timestamp": "2025-06-23T11:29:31.560978"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答2",
+      "timestamp": "2025-06-23T11:29:31.577076"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "構成の目的は〇〇です",
+      "timestamp": "2025-06-23T11:32:46.305496"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答テスト",
+      "timestamp": "2025-06-23T11:32:46.320626"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "最初の質問",
+      "timestamp": "2025-06-23T11:32:46.708422"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答1",
+      "timestamp": "2025-06-23T11:32:46.713428"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2番目の質問",
+      "timestamp": "2025-06-23T11:32:46.734402"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答2",
+      "timestamp": "2025-06-23T11:32:46.744352"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "構成の目的は〇〇です",
+      "timestamp": "2025-06-23T11:33:02.338476"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答テスト",
+      "timestamp": "2025-06-23T11:33:02.338476"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "最初の質問",
+      "timestamp": "2025-06-23T11:33:02.721581"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答1",
+      "timestamp": "2025-06-23T11:33:02.736573"
+    },
+    {
+      "role": "user",
+      "source": "send_message_user",
+      "content": "2番目の質問",
+      "timestamp": "2025-06-23T11:33:02.752649"
+    },
+    {
+      "role": "assistant",
+      "source": "send_message_assistant",
+      "content": "AI応答2",
+      "timestamp": "2025-06-23T11:33:02.768672"
+    }
+  ]
+}

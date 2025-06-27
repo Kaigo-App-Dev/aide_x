@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>評価履歴 - {{ structure_id }}</title>
+    <style>
+        body {
+            background: #1e1e1e;
+            color: #ccc;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            background: #252526;
+            border-radius: 8px;
+            padding: 32px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #3e3e42;
+        }
+        
+        .header h1 {
+            color: #4ec9b0;
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .back-link {
+            color: #4ec9b0;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 16px;
+            border: 1px solid #4ec9b0;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .back-link:hover {
+            background: #4ec9b0;
+            color: #1e1e1e;
+        }
+        
+        .meta {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        
+        .summary {
+            background: #2d2d30;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .summary-item {
+            text-align: center;
+        }
+        
+        .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4ec9b0;
+            margin-bottom: 4px;
+        }
+        
+        .summary-label {
+            font-size: 12px;
+            color: #858585;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .history-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .history-item {
+            background: #2d2d30;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            padding: 20px;
+            border-left: 4px solid #4ec9b0;
+        }
+        
+        .history-item:hover {
+            background: #3e3e42;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        
+        .history-meta {
+            flex: 1;
+        }
+        
+        .history-timestamp {
+            color: #aaa;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        
+        .history-provider {
+            font-size: 14px;
+            color: #4ec9b0;
+            font-weight: bold;
+        }
+        
+        .history-score {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4ec9b0;
+            margin-left: 16px;
+        }
+        
+        .history-content {
+            margin-bottom: 16px;
+        }
+        
+        .history-structure-preview {
+            background: #1e1e1e;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+        
+        .history-feedback {
+            color: #ccc;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+        
+        .history-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #4ec9b0;
+            color: #1e1e1e;
+        }
+        
+        .btn-primary:hover {
+            background: #45b8a0;
+        }
+        
+        .btn-secondary {
+            background: #3e3e42;
+            color: #ccc;
+        }
+        
+        .btn-secondary:hover {
+            background: #4e4e52;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+        
+        .error-message {
+            background: #2d2d30;
+            border-left: 4px solid #ff6b6b;
+            padding: 16px;
+            margin-bottom: 24px;
+            color: #ff6b6b;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #252526;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #3e3e42;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: #4ec9b0;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-close:hover {
+            color: #ccc;
+        }
+        
+        .modal-body {
+            line-height: 1.6;
+        }
+        
+        .modal-body pre {
+            background: #1e1e1e;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        
+        .strengths {
+            color: #4ec9b0;
+            margin-bottom: 12px;
+        }
+        
+        .weaknesses {
+            color: #ff6b6b;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📊 評価履歴</h1>
+        <a href="/unified/{{ structure_id }}" class="back-link">← 統合インターフェースに戻る</a>
+    </div>
+    
+    <div class="meta">
+        <span>構成ID: <b>{{ structure_id }}</b></span>
+        {% if structure and structure.title %} | <span>タイトル: <b>{{ structure.title }}</b></span>{% endif %}
+    </div>
+    
+    {% if error %}
+    <div class="error-message">
+        <strong>エラー:</strong> {{ error }}
+    </div>
+    {% endif %}
+    
+    {% if summary and summary.total_count > 0 %}
+    <div class="summary">
+        <h3>📈 統計情報</h3>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <div class="summary-value">{{ summary.total_count }}</div>
+                <div class="summary-label">総評価回数</div>
+            </div>
+            {% if summary.average_score %}
+            <div class="summary-item">
+                <div class="summary-value">{{ "%.1f"|format(summary.average_score * 100) }}</div>
+                <div class="summary-label">平均スコア</div>
+            </div>
+            {% endif %}
+            <div class="summary-item">
+                <div class="summary-value">{{ summary.providers|length }}</div>
+                <div class="summary-label">使用プロバイダー数</div>
+            </div>
+            {% if summary.latest_timestamp %}
+            <div class="summary-item">
+                <div class="summary-value">{{ summary.latest_timestamp[:10] }}</div>
+                <div class="summary-label">最新評価日</div>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if summary.provider_counts %}
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #3e3e42;">
+            <h4>プロバイダー別統計:</h4>
+            {% for provider, count in summary.provider_counts.items() %}
+            <span style="margin-right: 16px; color: #4ec9b0;">{{ provider }}: {{ count }}回</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% if history %}
+    <ul class="history-list">
+        {% for entry in history %}
+        <li class="history-item" data-index="{{ loop.index0 }}">
+            <div class="history-header">
+                <div class="history-meta">
+                    <div class="history-timestamp">{{ entry.timestamp[:19].replace('T', ' ') if entry.timestamp }}</div>
+                    <div class="history-provider">
+                        {% if entry.evaluation_result.provider == 'claude' %}
+                        🧠 Claude評価
+                        {% elif entry.evaluation_result.provider == 'gemini' %}
+                        ✨ Gemini評価
+                        {% else %}
+                        🤖 {{ entry.evaluation_result.provider }}評価
+                        {% endif %}
+                    </div>
+                </div>
+                {% if entry.evaluation_result.score %}
+                <div class="history-score">
+                    {{ "%.0f"|format(entry.evaluation_result.score * 100) if entry.evaluation_result.score != 'N/A' else 'N/A' }}点
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="history-content">
+                <!-- 構成プレビュー -->
+                <div class="history-structure-preview">
+                    <strong>構成プレビュー:</strong>
+                    {% if entry.structure_before %}
+                        {% if entry.structure_before.title %}
+                        <div>📝 タイトル: {{ entry.structure_before.title }}</div>
+                        {% endif %}
+                        {% if entry.structure_before.description %}
+                        <div>📋 説明: {{ entry.structure_before.description[:100] }}{% if entry.structure_before.description|length > 100 %}...{% endif %}</div>
+                        {% endif %}
+                        {% if entry.structure_before.content %}
+                        <div>⚙️ モジュール数: {{ entry.structure_before.content|length }}</div>
+                        {% endif %}
+                    {% else %}
+                        <div>構成データなし</div>
+                    {% endif %}
+                </div>
+                
+                <!-- 評価フィードバック -->
+                {% if entry.evaluation_result.feedback %}
+                <div class="history-feedback">
+                    <strong>フィードバック:</strong><br>
+                    {{ entry.evaluation_result.feedback[:200] }}{% if entry.evaluation_result.feedback|length > 200 %}...{% endif %}
+                </div>
+                {% endif %}
+                
+                <!-- 強み・弱み -->
+                {% if entry.evaluation_result.details %}
+                    {% if entry.evaluation_result.details.strengths %}
+                    <div class="strengths">
+                        <strong>✅ 強み:</strong> {{ entry.evaluation_result.details.strengths[:100] }}{% if entry.evaluation_result.details.strengths|length > 100 %}...{% endif %}
+                    </div>
+                    {% endif %}
+                    {% if entry.evaluation_result.details.weaknesses %}
+                    <div class="weaknesses">
+                        <strong>⚠️ 弱み:</strong> {{ entry.evaluation_result.details.weaknesses[:100] }}{% if entry.evaluation_result.details.weaknesses|length > 100 %}...{% endif %}
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+            <div class="history-actions">
+                <button onclick="showDetail({{ loop.index0 }})" class="btn btn-primary">
+                    🔍 詳細表示
+                </button>
+                <button onclick="compareWithCurrent({{ loop.index0 }})" class="btn btn-secondary">
+                    🔄 現在と比較
+                </button>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty-state">
+        <h3>📭 評価履歴がありません</h3>
+        <p>この構成の評価履歴はまだ保存されていません。</p>
+        <p>統合インターフェースで評価を実行してから、履歴を保存してください。</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- 詳細モーダル -->
+<div id="detailModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">評価詳細</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- 詳細内容がここに表示される -->
+        </div>
+    </div>
+</div>
+
+<script>
+// モーダル表示
+function showDetail(index) {
+    const historyData = {{ history | tojson }};
+    const entry = historyData[index];
+    
+    if (!entry) return;
+    
+    const modal = document.getElementById('detailModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    
+    // タイトル設定
+    const timestamp = entry.timestamp ? entry.timestamp.replace('T', ' ').substring(0, 19) : 'Unknown';
+    const provider = entry.evaluation_result.provider || 'Unknown';
+    modalTitle.textContent = `${provider}評価詳細 (${timestamp})`;
+    
+    // 内容設定
+    let content = '';
+    
+    // 構成情報
+    content += '<h4>📋 評価対象構成</h4>';
+    content += '<pre>' + JSON.stringify(entry.structure_before, null, 2) + '</pre>';
+    
+    // 評価結果
+    content += '<h4>🔍 評価結果</h4>';
+    if (entry.evaluation_result.score) {
+        content += `<p><strong>スコア:</strong> ${entry.evaluation_result.score}</p>`;
+    }
+    if (entry.evaluation_result.feedback) {
+        content += `<p><strong>フィードバック:</strong></p>`;
+        content += `<div style="background: #1e1e1e; padding: 12px; border-radius: 4px; margin-bottom: 16px;">${entry.evaluation_result.feedback}</div>`;
+    }
+    
+    // 詳細情報
+    if (entry.evaluation_result.details) {
+        content += '<h4>📊 詳細情報</h4>';
+        content += '<pre>' + JSON.stringify(entry.evaluation_result.details, null, 2) + '</pre>';
+    }
+    
+    modalBody.innerHTML = content;
+    modal.style.display = 'block';
+}
+
+// 現在の構成と比較
+function compareWithCurrent(index) {
+    const historyData = {{ history | tojson }};
+    const entry = historyData[index];
+    
+    if (!entry) return;
+    
+    // 統合インターフェースに遷移して比較表示
+    const compareUrl = `/unified/{{ structure_id }}?compare=${index}`;
+    window.open(compareUrl, '_blank');
+}
+
+// モーダルを閉じる
+function closeModal() {
+    document.getElementById('detailModal').style.display = 'none';
+}
+
+// モーダル外クリックで閉じる
+window.onclick = function(event) {
+    const modal = document.getElementById('detailModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
+</body>
+</html> 

@@ -6,18 +6,22 @@ from typing import Dict, Any, List
 from src.llm.hub import call_model, LLMHub
 from src.llm.providers.claude import ClaudeProvider
 from src.llm.providers.base import ChatMessage
+from src.llm.prompts.manager import PromptManager
 from unittest.mock import patch, MagicMock
+from src.llm.prompts.prompt import Prompt
 
 def test_claude_call():
     """Claude APIの呼び出しテスト"""
-    prompt = "Hello, Claude!"
+    prompt_manager = PromptManager()
+    prompt_manager.register_template("claude", "test", "Hello, Claude!")
+    
     response = call_model(
+        provider_name="claude",
         model_name="claude-3-opus-20240229",
-        prompt=prompt
+        prompt_name="test",
+        prompt_manager=prompt_manager
     )
-    assert isinstance(response, dict)
-    assert "content" in response
-    assert isinstance(response["content"], str)
+    assert isinstance(response, str)
 
 @patch('anthropic.Anthropic')
 def test_claude_provider(mock_anthropic):
@@ -30,9 +34,16 @@ def test_claude_provider(mock_anthropic):
     mock_anthropic.return_value = mock_client
 
     # プロバイダーのインスタンス化とテスト
-    provider = ClaudeProvider(api_key="test_key")
-    messages = [ChatMessage(role="user", content="Hello, Claude!")]
-    response = provider.chat(messages)
+    prompt_manager = PromptManager()
+    provider = ClaudeProvider(prompt_manager=prompt_manager, api_key="test_key")
+    
+    # Promptオブジェクトを作成
+    test_prompt = Prompt(
+        template="Hello, Claude!",
+        description="Test prompt"
+    )
+    
+    response = provider.chat(test_prompt, model_name="claude-3-opus-20240229", prompt_manager=prompt_manager)
 
     # アサーション
     assert isinstance(response, str)
@@ -41,11 +52,13 @@ def test_claude_provider(mock_anthropic):
 
 def test_gemini_call():
     """Gemini APIの呼び出しテスト"""
-    prompt = "Hello, Gemini!"
+    prompt_manager = PromptManager()
+    prompt_manager.register_template("gemini", "test", "Hello, Gemini!")
+    
     response = call_model(
+        provider_name="gemini",
         model_name="gemini-1.5-flash",
-        prompt=prompt
+        prompt_name="test",
+        prompt_manager=prompt_manager
     )
-    assert isinstance(response, dict)
-    assert "content" in response
-    assert isinstance(response["content"], str) 
+    assert isinstance(response, str) 

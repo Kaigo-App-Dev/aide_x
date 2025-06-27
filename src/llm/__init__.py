@@ -14,6 +14,7 @@ from .providers.chatgpt import ChatGPTProvider
 from .providers.gemini import GeminiProvider
 from .prompts import prompt_manager, PromptManager
 from .controller import AIController
+import logging
 
 __all__ = [
     "BaseLLMProvider",
@@ -26,6 +27,8 @@ __all__ = [
     "prompt_manager",
     "AIController"
 ]
+
+logger = logging.getLogger(__name__)
 
 def call_model(
     model: str,
@@ -57,6 +60,10 @@ def call_model(
             "usage": Optional[Dict[str, Any]]  # トークン数やコスト情報
         }
     """
+    logger.info(f"🔍 call_model開始 - model: {model}, provider: {provider}")
+    logger.debug(f"call_model - messages: {messages}")
+    logger.debug(f"call_model - system_prompt: {system_prompt}")
+    
     # プロバイダーが指定されていない場合はモデル名から判定
     if not provider:
         if "claude" in model.lower():
@@ -66,15 +73,33 @@ def call_model(
         elif "gpt" in model.lower():
             provider = "chatgpt"
         else:
-            raise ValueError(f"Unknown model: {model}")
+            error_msg = f"Unknown model: {model}"
+            logger.error(f"❌ call_model - {error_msg}")
+            raise ValueError(error_msg)
+    
+    logger.info(f"✅ call_model - 使用プロバイダー: {provider}")
 
     # ChatMessageをDict[str, str]に変換
-    formatted_messages = [
-        {"role": msg.role, "content": msg.content}
-        for msg in messages
-    ]
+    formatted_messages = []
+    for msg in messages:
+        if hasattr(msg, 'role') and hasattr(msg, 'content'):
+            formatted_messages.append({
+                "role": msg.role,
+                "content": msg.content
+            })
+        elif isinstance(msg, dict):
+            formatted_messages.append({
+                "role": msg.get("role", "user"),
+                "content": msg.get("content", "")
+            })
+        else:
+            logger.warning(f"⚠️ call_model - 無効なメッセージ形式: {msg}")
+            continue
+    
+    logger.debug(f"call_model - formatted_messages: {formatted_messages}")
 
     try:
+        logger.info(f"🚀 call_model - AIController.call開始 - provider: {provider}")
         response = AIController.call(
             provider=provider,
             messages=formatted_messages,
@@ -84,20 +109,35 @@ def call_model(
             max_tokens=max_tokens,
             **kwargs
         )
+        
+        logger.info(f"✅ call_model - AIController.call成功")
+        logger.debug(f"call_model - response: {response}")
+        
+        # レスポンスの型チェック
+        if isinstance(response, dict):
+            content = response.get("content", "")
+        else:
+            content = str(response) if response is not None else ""
+        
+        logger.info(f"📝 call_model - 抽出されたcontent長: {len(content)}")
+        logger.debug(f"call_model - 抽出されたcontent: {content[:200]}...")
+        
         return {
-            "content": response,
-            "raw": None,
+            "content": content,
+            "raw": response if isinstance(response, dict) else None,
             "provider": provider,
             "error": None,
             "model": model,
-            "usage": None
+            "usage": response.get("usage") if isinstance(response, dict) else None
         }
     except Exception as e:
+        error_msg = f"call_model - AIController.call失敗: {str(e)}"
+        logger.error(f"❌ {error_msg}")
         return {
             "content": "",
             "raw": None,
             "provider": provider,
-            "error": str(e),
+            "error": error_msg,
             "model": model,
             "usage": None
         }

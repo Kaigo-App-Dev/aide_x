@@ -1,0 +1,25 @@
+{
+  "structure_id": "test_multiple_001",
+  "module_id": "",
+  "timestamp": "2025-06-22T12:00:19.309693",
+  "history": [
+    {
+      "role": "claude",
+      "source": "structure_evaluation",
+      "content": "{\"score\": 0.85, \"feedback\": \"Claude\\u8a55\\u4fa11\", \"timestamp\": \"2025-06-22T12:00:19.309693\"}",
+      "timestamp": "2025-06-22T12:00:19.309693"
+    },
+    {
+      "role": "gemini",
+      "source": "structure_evaluation",
+      "content": "{\"score\": 0.78, \"feedback\": \"Gemini\\u8a55\\u4fa11\", \"timestamp\": \"2025-06-22T12:00:19.310696\"}",
+      "timestamp": "2025-06-22T12:00:19.318918"
+    },
+    {
+      "role": "claude",
+      "source": "structure_evaluation",
+      "content": "{\"score\": 0.92, \"feedback\": \"Claude\\u8a55\\u4fa12\", \"timestamp\": \"2025-06-22T12:00:19.318918\"}",
+      "timestamp": "2025-06-22T12:00:19.324452"
+    }
+  ]
+}

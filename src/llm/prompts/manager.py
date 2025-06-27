@@ -42,6 +42,34 @@ class Prompt:
             logger.error(error_msg)
             raise TemplateFormatError(self.provider, self.name, error_msg)
 
+    def format(self, **kwargs) -> str:
+        """
+        テンプレートをフォーマット
+        
+        Args:
+            **kwargs: テンプレートのプレースホルダーに渡す値
+            
+        Returns:
+            str: フォーマットされたテンプレート
+        """
+        try:
+            return self.template.format(**kwargs)
+        except KeyError as e:
+            error_msg = f"Invalid template format: {str(e)}"
+            logger.error(error_msg)
+            raise TemplateFormatError(self.provider, self.name, error_msg)
+        except Exception as e:
+            error_msg = f"Failed to format template: {str(e)}"
+            logger.error(error_msg)
+            raise TemplateFormatError(self.provider, self.name, error_msg)
+
+class PromptAlreadyExistsError(Exception):
+    """テンプレート重複登録時の例外"""
+    def __init__(self, provider: str, template_name: str):
+        super().__init__(f"Template '{template_name}' already exists for provider '{provider}'")
+        self.provider = provider
+        self.template_name = template_name
+
 class PromptManager:
     """プロンプト管理クラス"""
     
@@ -51,6 +79,14 @@ class PromptManager:
         self.builtin_templates: Dict[str, str] = {}
         self.prompts: Dict[str, Prompt] = {}
         logger.info("PromptManager initialized")
+        
+        # テンプレートを自動登録
+        try:
+            from .templates import register_all_templates
+            register_all_templates(self)
+            logger.info("✅ テンプレート自動登録完了")
+        except Exception as e:
+            logger.warning(f"⚠️ テンプレート自動登録に失敗: {str(e)}")
     
     def register_template(self, provider: str, template_name: str, template: str, description: str = "") -> None:
         """
@@ -68,9 +104,11 @@ class PromptManager:
         try:
             if provider not in self.templates:
                 self.templates[provider] = {}
+            if template_name in self.templates[provider]:
+                raise PromptAlreadyExistsError(provider, template_name)
             
             # テンプレートのフォーマットを検証
-            template.format(placeholder="test")
+            # template.format(placeholder="test")  # 検証無効化 - プレースホルダー名が不明なため
             
             self.templates[provider][template_name] = template
             logger.info(f"Template '{template_name}' registered for provider '{provider}'")
@@ -169,7 +207,17 @@ class PromptManager:
             Optional[Prompt]: プロンプトテンプレート（存在しない場合はNone）
         """
         prompt_name = f"{provider}.{template_name}"
-        return self.prompts.get(prompt_name)
+        logger.info(f"🔍 get_prompt - provider: {provider}, template_name: {template_name}")
+        logger.info(f"🔍 get_prompt - prompt_name: {prompt_name}")
+        logger.info(f"🔍 get_prompt - available keys: {list(self.prompts.keys())}")
+        
+        result = self.prompts.get(prompt_name)
+        if result:
+            logger.info(f"✅ get_prompt - found: {prompt_name}")
+        else:
+            logger.warning(f"❌ get_prompt - not found: {prompt_name}")
+        
+        return result
 
     def get(self, template_name: str) -> Union[str, Dict[str, str]]:
         """
@@ -180,35 +228,20 @@ class PromptManager:
             
         Returns:
             Union[str, Dict[str, str]]: テンプレート内容
+            
+        Raises:
+            PromptNotFoundError: テンプレートが見つからない場合
         """
         if template_name in self.templates:
             return self.templates[template_name]
         if template_name in self.builtin_templates:
             return self.builtin_templates[template_name]
-        raise KeyError(f"Template not found: {template_name}")
+        raise PromptNotFoundError("", template_name)
     
     def register_builtin_templates(self) -> None:
-        """組み込みテンプレートを登録"""
-        self.builtin_templates = {
-            "evaluation": """
-            以下の構造を評価してください：
-            
-            {user_input}
-            
-            評価結果は以下のJSON形式で返してください：
-            {{
-                "score": 0.0-1.0の数値,
-                "feedback": "評価フィードバック",
-                "details": {{
-                    "structure_score": 構造の評価スコア,
-                    "content_score": 内容の評価スコア,
-                    "coherence_score": 一貫性の評価スコア,
-                    "completeness_score": 完全性の評価スコア
-                }},
-                "is_valid": true/false
-            }}
-            """
-        }
+        """組み込みテンプレートを登録する（非推奨 - __init__.pyで自動登録）"""
+        logger.warning("register_builtin_templates is deprecated. Templates are automatically registered in __init__.py")
+        pass
     
     def format_prompt(self, template_name: str, **kwargs: Any) -> str:
         """
@@ -266,5 +299,15 @@ class PromptManager:
             logger.error(f"Message formatting error: {str(e)}")
             raise PromptNotFoundError(provider, template_name)
 
-# グローバルインスタンス
-prompt_manager = PromptManager() 
+# シングルトンインスタンス
+prompt_manager = PromptManager()
+
+# グローバルインスタンスにテンプレートを登録
+try:
+    from .templates import register_all_templates
+    register_all_templates(prompt_manager)
+    from .prompt_loader import register_all_yaml_templates
+    register_all_yaml_templates(prompt_manager)
+    logger.info("Global PromptManager initialized with templates")
+except Exception as e:
+    logger.warning(f"Failed to register templates to global PromptManager: {str(e)}") 

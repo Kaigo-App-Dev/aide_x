@@ -11,7 +11,7 @@ from typing import Dict, Any
 from src.llm.prompts.manager import PromptManager
 from src.llm.prompts.prompt_loader import register_all_yaml_templates
 from src.types import EvaluationResult
-from main import create_app
+from src.app import create_app
 from flask import Flask
 from src.llm.controller import AIController
 from src.llm.providers import ChatGPTProvider, ClaudeProvider, GeminiProvider
@@ -178,16 +178,15 @@ def setup_test_environment(prompt_manager: PromptManager, claude_provider: Claud
 
 @pytest.fixture
 def app():
-    """Flaskアプリケーションのフィクスチャ"""
-    app = Flask(__name__)
-    register_routes(app)
+    app = create_app()
+    app.config['TESTING'] = True
+    app.config['WTF_CSRF_ENABLED'] = False
     return app
 
 @pytest.fixture
 def client(app):
     """Flaskテストクライアントを返す"""
-    with app.test_client() as client:
-        yield client
+    return app.test_client()
 
 @pytest.fixture
 def sample_structure_data():
@@ -226,4 +225,23 @@ os.environ.setdefault("CLAUDE_API_KEY", "dummy_key")
 os.environ.setdefault("OPENAI_API_KEY", "dummy_key")
 os.environ.setdefault("FLASK_ENV", "testing")
 os.environ.setdefault("FLASK_DEBUG", "True")
-os.environ.setdefault("LOG_LEVEL", "DEBUG") 
+os.environ.setdefault("LOG_LEVEL", "DEBUG")
+
+@pytest.fixture
+def mock_prompt_manager():
+    """モックPromptManagerのフィクスチャ"""
+    mock_manager = MagicMock(spec=PromptManager)
+    
+    # テスト用のテンプレートを設定
+    mock_manager.get.return_value = "Hello {name}!"
+    mock_manager.get_prompt.return_value = MagicMock(
+        template="Hello {name}!",
+        format=lambda **kwargs: f"Hello {kwargs.get('name', 'World')}!"
+    )
+    
+    return mock_manager
+
+@pytest.fixture
+def mock_api_key():
+    """モックAPIキーのフィクスチャ"""
+    return "test_api_key_12345" 

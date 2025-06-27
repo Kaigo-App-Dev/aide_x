@@ -1,0 +1,126 @@
+{% extends "base_layout.html" %}
+
+{% block title %}AIDE-X 統合インターフェース - {{ structure_id }}{% endblock %}
+
+{% block head %}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/unified.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="main-container">
+        <!-- 左ペイン：チャット -->
+        <div class="chat-pane">
+            <div class="pane-header">
+                <div class="pane-title">
+                    💬 チャット
+                </div>
+                <div class="pane-actions">
+                    <button class="pane-toggle" onclick="toggleChatPane()">◀</button>
+                </div>
+            </div>
+            <div class="pane-content">
+                {% if messages is not none %}
+                  {% set msg_list_safe = messages %}
+                {% else %}
+                  {% set msg_list_safe = [] %}
+                {% endif %}
+                
+                <!-- チャット専用テンプレートをinclude -->
+                {% include 'structure/chat.html' %}
+            </div>
+        </div>
+        
+        <!-- 中央ペイン：構成 -->
+        <div class="center-pane">
+            <!-- 構成専用テンプレートをinclude -->
+            {% include 'structure/structure.html' %}
+        </div>
+        
+        <!-- 右ペイン：補助UI -->
+        <div class="right-pane">
+            <div class="pane-header">
+                <div class="pane-title">
+                    🛠️ 補助ツール
+                </div>
+                <div class="pane-actions">
+                    <button class="pane-toggle" onclick="toggleRightPane()">▶</button>
+                </div>
+            </div>
+            <div class="pane-content">
+                <!-- 補助UI専用テンプレートをinclude -->
+                {% include 'structure/structure_ui.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/unified.js') }}?v=1.0.4"></script>
+<script>
+// ペイン切り替え機能
+function toggleChatPane() {
+    const chatPane = document.querySelector('.chat-pane');
+    chatPane.classList.toggle('collapsed');
+}
+
+function toggleRightPane() {
+    const rightPane = document.querySelector('.right-pane');
+    rightPane.classList.toggle('collapsed');
+}
+
+function toggleOutputPane() {
+    const outputPane = document.getElementById('output-pane');
+    const toggleBtn = document.getElementById('output-toggle-icon');
+    
+    if (outputPane.classList.contains('visible')) {
+        outputPane.classList.remove('visible');
+        toggleBtn.textContent = '▼';
+    } else {
+        outputPane.classList.add('visible');
+        toggleBtn.textContent = '◀';
+    }
+}
+
+// カード展開/折りたたみ機能
+function toggleCard(header) {
+    const card = header.closest('.structure-card');
+    card.classList.toggle('expanded');
+}
+
+function renderDiffHighlight(currentData, previousData) {
+  if (!currentData || !previousData) return;
+  const ignoreKeys = ['evaluations', 'completions', 'timestamp'];
+  const allKeys = Array.from(new Set([...Object.keys(currentData), ...Object.keys(previousData)]));
+  let prevHtml = '';
+  let currHtml = '';
+  allKeys.forEach(key => {
+    if (ignoreKeys.includes(key)) return;
+    const prevVal = previousData[key];
+    const currVal = currentData[key];
+    let prevClass = 'unchanged', currClass = 'unchanged';
+    if (prevVal !== currVal) {
+      prevClass = 'changed';
+      currClass = 'changed';
+    }
+    prevHtml += `<div class="diff-line ${prevClass}"><strong>${key}:</strong> ${prevVal ?? '-'}</div>`;
+    currHtml += `<div class="diff-line ${currClass}"><strong>${key}:</strong> ${currVal ?? '-'}</div>`;
+  });
+  document.getElementById('previousContent').innerHTML = prevHtml || '<div class="no-diff">構成情報なし</div>';
+  document.getElementById('currentContent').innerHTML = currHtml || '<div class="no-diff">構成情報なし</div>';
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  // ペインレイアウト初期化（unifiedInterfaceが初期化された後に実行）
+  setTimeout(function() {
+    if (window.unifiedInterface) {
+      window.unifiedInterface.initializePaneLayout();
+    } else {
+      console.warn('⚠️ unifiedInterfaceが初期化されていません');
+    }
+  }, 100);
+});
+</script>
+{% endblock %} 

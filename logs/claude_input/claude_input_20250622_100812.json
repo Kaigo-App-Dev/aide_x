@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-06-22T10:08:12.448470",
+  "provider": "claude",
+  "structure_id": "test_unified_001",
+  "structure_title": "テスト統合インターフェース",
+  "structure_content": {
+    "title": "テスト構成",
+    "description": "テスト用の構成です",
+    "content": {
+      "セクション1": {
+        "項目1": "説明1",
+        "項目2": "説明2"
+      },
+      "セクション2": {
+        "項目3": "説明3",
+        "項目4": "説明4"
+      }
+    }
+  }
+}

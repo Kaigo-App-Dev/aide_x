@@ -1,0 +1,185 @@
+{% extends "base_layout.html" %}
+
+{% block title %}AIDE-X - バージョン情報{% endblock %}
+
+{% block head %}
+    <style>
+        .about-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .about-header {
+            margin-bottom: 40px;
+        }
+        
+        .about-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #007acc;
+            margin-bottom: 16px;
+        }
+        
+        .about-subtitle {
+            font-size: 1.2rem;
+            color: #858585;
+            margin-bottom: 20px;
+        }
+        
+        .version-info {
+            background: #252526;
+            border: 1px solid #3c3c3c;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .version-number {
+            font-size: 1.5rem;
+            color: #4ec9b0;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        
+        .version-details {
+            color: #cccccc;
+            line-height: 1.6;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            color: #cccccc;
+            border-bottom: 1px solid #3c3c3c;
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-list li:before {
+            content: "✓ ";
+            color: #4ec9b0;
+            font-weight: bold;
+        }
+        
+        .tech-stack {
+            background: #2d2d30;
+            border: 1px solid #3c3c3c;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .tech-stack h3 {
+            color: #4ec9b0;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+        
+        .tech-item {
+            display: inline-block;
+            background: #1e1e1e;
+            border: 1px solid #3c3c3c;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 4px;
+            color: #cccccc;
+            font-size: 0.9rem;
+        }
+        
+        .back-btn {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .back-btn:hover {
+            background: #005a9e;
+        }
+        
+        @media (max-width: 768px) {
+            .about-title {
+                font-size: 2rem;
+            }
+            
+            .version-info, .tech-stack {
+                padding: 16px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="about-container">
+    <div class="about-header">
+        <h1 class="about-title">🧠 AIDE-X</h1>
+        <p class="about-subtitle">AI駆動の構成作成・評価ツール</p>
+    </div>
+    
+    <div class="version-info">
+        <div class="version-number">Version 1.0.0</div>
+        <div class="version-details">
+            <p><strong>リリース日:</strong> 2024年12月</p>
+            <p><strong>ライセンス:</strong> MIT License</p>
+            <p><strong>開発者:</strong> AIDE-X Team</p>
+        </div>
+    </div>
+    
+    <div class="version-info">
+        <h3 style="color: #4ec9b0; margin-top: 0;">✨ 新機能</h3>
+        <ul class="feature-list">
+            <li>VSCode風メニューバー</li>
+            <li>履歴欄の表示切替機能</li>
+            <li>新規構成作成のウェルカムページ</li>
+            <li>統合されたチャット・評価・構成管理</li>
+            <li>Claude/Gemini評価の統合</li>
+            <li>レスポンシブデザイン対応</li>
+        </ul>
+    </div>
+    
+    <div class="tech-stack">
+        <h3>🛠️ 技術スタック</h3>
+        <div>
+            <span class="tech-item">Python 3.11+</span>
+            <span class="tech-item">Flask</span>
+            <span class="tech-item">Jinja2</span>
+            <span class="tech-item">HTML5</span>
+            <span class="tech-item">CSS3</span>
+            <span class="tech-item">JavaScript</span>
+            <span class="tech-item">Anthropic Claude</span>
+            <span class="tech-item">Google Gemini</span>
+            <span class="tech-item">OpenAI ChatGPT</span>
+        </div>
+    </div>
+    
+    <div class="version-info">
+        <h3 style="color: #4ec9b0; margin-top: 0;">📝 更新履歴</h3>
+        <div class="version-details">
+            <p><strong>v1.0.0 (2024-12)</strong></p>
+            <ul class="feature-list">
+                <li>初回リリース</li>
+                <li>AI統合評価システム</li>
+                <li>チャット機能</li>
+                <li>構成管理機能</li>
+            </ul>
+        </div>
+    </div>
+    
+    <a href="javascript:history.back()" class="back-btn">← 戻る</a>
+</div>
+{% endblock %} 

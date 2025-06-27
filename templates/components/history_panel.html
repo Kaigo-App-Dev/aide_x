@@ -1,0 +1,114 @@
+<!-- 履歴パネル -->
+<div class="aide-history-panel">
+    <div class="aide-history-header">
+        <h4>📋 履歴</h4>
+        <div class="aide-history-filters">
+            <input type="text" id="historySearch" placeholder="検索..." class="aide-form-control-sm">
+            <select id="historyFilter" class="aide-form-control-sm">
+                <option value="">すべて</option>
+                <option value="save">保存</option>
+                <option value="evaluation">評価</option>
+                <option value="chat">会話</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="aide-history-list" id="historyList">
+        {% if structure.get('history') %}
+            {% for log in structure.history[-10:] %}
+            <div class="aide-history-item" data-type="{{ log.action }}">
+                <div class="aide-history-time">{{ log.timestamp }}</div>
+                <div class="aide-history-action">{{ log.action }}</div>
+                <div class="aide-history-detail">{{ log.detail[:50] }}{% if log.detail|length > 50 %}...{% endif %}</div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="aide-history-empty">
+                <p>履歴がありません</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="aide-history-actions">
+        <button class="aide-btn aide-btn-outline-secondary aide-btn-sm" id="refreshHistoryBtn">
+            🔄 更新
+        </button>
+        <button class="aide-btn aide-btn-outline-primary aide-btn-sm" id="exportHistoryBtn">
+            📤 エクスポート
+        </button>
+    </div>
+</div>
+
+<script>
+// 履歴パネル用のJavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const structureId = '{{ structure.id }}';
+    const historySearch = document.getElementById('historySearch');
+    const historyFilter = document.getElementById('historyFilter');
+    const historyList = document.getElementById('historyList');
+    const refreshHistoryBtn = document.getElementById('refreshHistoryBtn');
+    const exportHistoryBtn = document.getElementById('exportHistoryBtn');
+    
+    function filterHistory() {
+        const searchTerm = historySearch.value.toLowerCase();
+        const filterType = historyFilter.value;
+        const historyItems = historyList.querySelectorAll('.aide-history-item');
+        
+        historyItems.forEach(item => {
+            const action = item.querySelector('.aide-history-action').textContent.toLowerCase();
+            const detail = item.querySelector('.aide-history-detail').textContent.toLowerCase();
+            const type = item.dataset.type;
+            
+            const matchesSearch = action.includes(searchTerm) || detail.includes(searchTerm);
+            const matchesFilter = !filterType || type === filterType;
+            
+            item.style.display = matchesSearch && matchesFilter ? 'block' : 'none';
+        });
+    }
+    
+    function refreshHistory() {
+        fetch(`/unified/${structureId}/history`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 履歴リストを更新
+                    historyList.innerHTML = data.history.map(log => `
+                        <div class="aide-history-item" data-type="${log.action}">
+                            <div class="aide-history-time">${log.timestamp}</div>
+                            <div class="aide-history-action">${log.action}</div>
+                            <div class="aide-history-detail">${log.detail.substring(0, 50)}${log.detail.length > 50 ? '...' : ''}</div>
+                        </div>
+                    `).join('');
+                }
+            })
+            .catch(error => {
+                console.error('履歴更新エラー:', error);
+            });
+    }
+    
+    function exportHistory() {
+        fetch(`/unified/${structureId}/export-history`)
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `history_${structureId}_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            })
+            .catch(error => {
+                console.error('履歴エクスポートエラー:', error);
+                alert('履歴のエクスポートに失敗しました');
+            });
+    }
+    
+    // イベントリスナー
+    historySearch.addEventListener('input', filterHistory);
+    historyFilter.addEventListener('change', filterHistory);
+    refreshHistoryBtn.addEventListener('click', refreshHistory);
+    exportHistoryBtn.addEventListener('click', exportHistory);
+});
+</script> 

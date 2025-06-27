@@ -1,0 +1,1036 @@
+/* ========================================
+   統合インターフェース CSS
+   AIDE-X Unified Interface Styles
+   Prefix: aide-* でスコープ分離
+======================================== */
+
+/* メインコンテナ */
+.aide-unified-container {
+    display: flex;
+    height: calc(100vh - 100px);
+    gap: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+}
+
+/* カラム共通スタイル */
+.aide-column {
+    flex: 1;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* カラムヘッダー */
+.aide-column-header {
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+    font-weight: 600;
+    font-size: 18px;
+    color: #495057;
+}
+
+/* カラムコンテンツ */
+.aide-column-content {
+    flex: 1;
+    padding: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 左カラム専用スタイル */
+.aide-column:first-child .aide-column-content {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 右カラムのタブ切り替え */
+.aide-right-tabs {
+    display: flex;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.aide-tab-button {
+    flex: 1;
+    padding: 15px 20px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 500;
+    color: #6c757d;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+}
+
+.aide-tab-button.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+    background: white;
+}
+
+.aide-tab-button:hover {
+    background: #e9ecef;
+}
+
+.aide-tab-content {
+    display: none;
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.aide-tab-content.active {
+    display: block;
+}
+
+/* 通知スタイル */
+.aide-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 6px;
+    color: white;
+    font-weight: 500;
+    z-index: 1000;
+    animation: aide-slideIn 0.3s ease-out;
+}
+
+.aide-notification-success {
+    background-color: #28a745;
+}
+
+.aide-notification-error {
+    background-color: #dc3545;
+}
+
+.aide-notification-info {
+    background-color: #007bff;
+}
+
+/* アニメーション */
+@keyframes aide-slideIn {
+    from { 
+        transform: translateX(100%); 
+        opacity: 0; 
+    }
+    to { 
+        transform: translateX(0); 
+        opacity: 1; 
+    }
+}
+
+@keyframes aide-slideOut {
+    from { 
+        transform: translateX(0); 
+        opacity: 1; 
+    }
+    to { 
+        transform: translateX(100%); 
+        opacity: 0; 
+    }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 1200px) {
+    .aide-unified-container {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .aide-column {
+        min-height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .aide-unified-container {
+        padding: 10px;
+        gap: 10px;
+    }
+    
+    .aide-column-header {
+        padding: 15px;
+        font-size: 16px;
+    }
+    
+    .aide-column-content {
+        padding: 15px;
+    }
+}
+
+/* Bootstrap競合回避 */
+.aide-unified-container .card {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+}
+
+.aide-unified-container .row {
+    margin: 0;
+}
+
+.aide-unified-container .btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+/* エディタパネル専用スタイル */
+.aide-editor-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.aide-form-group {
+    margin-bottom: 20px;
+}
+
+.aide-form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+}
+
+.aide-form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.aide-form-control:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.aide-editor-textarea {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    font-family: 'Courier New', monospace;
+    resize: vertical;
+    min-height: 300px;
+    width: 100%;
+}
+
+.aide-editor-textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.aide-form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.aide-form-check-input {
+    margin: 0;
+}
+
+.aide-form-check-label {
+    font-size: 14px;
+    color: #495057;
+    cursor: pointer;
+}
+
+.aide-editor-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.aide-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.aide-btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.aide-btn-primary:hover {
+    background: #0056b3;
+}
+
+.aide-btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.aide-btn-info:hover {
+    background: #138496;
+}
+
+.aide-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.aide-ui-result {
+    margin-top: 20px;
+}
+
+.aide-card {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.aide-card-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.aide-card-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.aide-card-body {
+    padding: 20px;
+}
+
+/* 評価パネル専用スタイル */
+.aide-evaluation-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.aide-evaluation-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #e9ecef;
+}
+
+.aide-evaluation-title {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 10px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.aide-evaluation-title.aide-claude::before {
+    content: "🤖";
+}
+
+.aide-evaluation-title.aide-gemini::before {
+    content: "🔮";
+}
+
+.aide-score-display {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.aide-score-item {
+    text-align: center;
+    flex: 1;
+}
+
+.aide-score-label {
+    font-weight: 500;
+    color: #6c757d;
+    min-width: 80px;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.aide-score-value {
+    font-weight: 600;
+    color: #007bff;
+    font-size: 18px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.aide-score-value.high {
+    color: #28a745;
+}
+
+.aide-score-value.medium {
+    color: #ffc107;
+}
+
+.aide-score-value.low {
+    color: #dc3545;
+}
+
+.aide-evaluation-comment {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #495057;
+    border-left: 4px solid #007bff;
+}
+
+.aide-evaluation-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.aide-btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.aide-btn-success:hover {
+    background: #1e7e34;
+}
+
+.aide-btn-warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.aide-btn-warning:hover {
+    background: #e0a800;
+}
+
+.aide-loading {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+.aide-loading.show {
+    display: block;
+}
+
+.aide-spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007bff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: aide-spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes aide-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 履歴パネル専用スタイル */
+.aide-history-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.aide-history-header {
+    margin-bottom: 15px;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 10px;
+}
+
+.aide-history-header h4 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #495057;
+}
+
+.aide-history-filters {
+    display: flex;
+    gap: 8px;
+}
+
+.aide-form-control-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+.aide-history-list {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 300px;
+}
+
+.aide-history-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.aide-history-item:hover {
+    border-color: #007bff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.aide-history-time {
+    color: #6c757d;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.aide-history-action {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 2px;
+}
+
+.aide-history-detail {
+    color: #495057;
+    line-height: 1.4;
+    font-size: 12px;
+    color: #6c757d;
+    line-height: 1.3;
+}
+
+.aide-history-empty {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+.aide-history-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.aide-btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.aide-btn-outline-secondary {
+    color: #6c757d;
+    border: 1px solid #6c757d;
+    background: transparent;
+}
+
+.aide-btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: white;
+}
+
+.aide-btn-outline-primary {
+    color: #007bff;
+    border: 1px solid #007bff;
+    background: transparent;
+}
+
+.aide-btn-outline-primary:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* 統合インターフェース用CSS */
+
+/* メインコンテナ */
+.unified-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ヘッダー部分 */
+.unified-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: white;
+}
+
+.header-info h1 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.structure-info {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.structure-id, .structure-title {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 6px 12px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.save-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.save-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.save-btn:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* エラーメッセージ */
+.error-message {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.warning-message {
+    background: linear-gradient(135deg, #feca57, #ff9ff3);
+    color: #2c3e50;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.info-message {
+    background: linear-gradient(135deg, #48dbfb, #0abde3);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* メインコンテンツ */
+.unified-content {
+    margin-top: 20px;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.content-panel {
+    min-height: 500px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.content-panel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.content-panel-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 15px 20px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.content-panel-header h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.content-panel-body {
+    padding: 20px;
+    height: 400px;
+    overflow-y: auto;
+    background: #fafbfc;
+}
+
+/* メッセージ表示 */
+.message {
+    margin-bottom: 15px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    max-width: 85%;
+    position: relative;
+    animation: messageSlideIn 0.3s ease;
+}
+
+@keyframes messageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message.user {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    margin-left: auto;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.message.assistant {
+    background: white;
+    color: #333;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.message.raw {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    border: 1px solid #ffeaa7;
+    color: #856404;
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+}
+
+.message.note {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: 1px solid #dee2e6;
+    color: #6c757d;
+    font-style: italic;
+    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
+}
+
+.message-content {
+    margin-bottom: 6px;
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+.message-time {
+    font-size: 11px;
+    opacity: 0.7;
+    text-align: right;
+}
+
+.message-header {
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.message-label {
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.1);
+    font-size: 11px;
+}
+
+.empty-message {
+    text-align: center;
+    color: #6c757d;
+    padding: 40px 20px;
+    font-style: italic;
+}
+
+/* チャット入力 */
+.chat-input-container {
+    padding: 15px;
+    border-top: 1px solid #e9ecef;
+    background: white;
+    margin-top: 15px;
+}
+
+.chat-input {
+    width: 100%;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    resize: vertical;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.chat-send-btn {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.chat-send-btn:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-1px);
+}
+
+.chat-send-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 評価結果 */
+.score-section {
+    margin-bottom: 25px;
+}
+
+.score-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.score-label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 16px;
+}
+
+.score-value {
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.score-bar {
+    width: 100%;
+    height: 10px;
+    background: #e9ecef;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.score-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    transition: width 0.8s ease;
+    border-radius: 5px;
+}
+
+.feedback-section {
+    margin-bottom: 25px;
+}
+
+.feedback-section h5 {
+    margin: 0 0 12px 0;
+    color: #495057;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.feedback-text {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+    line-height: 1.6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.no-evaluation {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+}
+
+.run-eval-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+}
+
+.run-eval-btn:hover {
+    background: linear-gradient(135deg, #218838, #1e7e34);
+    transform: translateY(-2px);
+}
+
+.refresh-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+    background: linear-gradient(135deg, #218838, #1e7e34);
+    transform: translateY(-1px);
+}
+
+/* 通知 */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .unified-container {
+        padding: 10px;
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .unified-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+        padding: 15px;
+    }
+    
+    .structure-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .content-panel-body {
+        height: 300px;
+    }
+    
+    .message {
+        max-width: 95%;
+    }
+    
+    .notification {
+        right: 10px;
+        left: 10px;
+        top: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-info h1 {
+        font-size: 24px;
+    }
+    
+    .content-panel-header h4 {
+        font-size: 16px;
+    }
+    
+    .score-value {
+        font-size: 24px;
+    }
+} 

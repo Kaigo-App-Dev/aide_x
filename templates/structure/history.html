@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}構造履歴 - {{ structure_id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-history"></i>
+                構造履歴: {{ structure_id }}
+            </h1>
+            
+            {% if error %}
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            {% if summary %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i>
+                        履歴サマリー
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>総エントリ数:</strong>
+                            <span class="badge badge-primary">{{ summary.total_entries }}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>最終更新:</strong>
+                            <span class="text-muted">
+                                {% if summary.last_updated %}
+                                    {{ summary.last_updated[:19].replace('T', ' ') }}
+                                {% else %}
+                                    なし
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>役割:</strong>
+                            {% for role in summary.roles %}
+                                <span class="badge badge-secondary">{{ role }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>操作:</strong>
+                            {% for source in summary.sources %}
+                                <span class="badge badge-info">{{ source }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if history_data and history_data.history %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i>
+                        履歴詳細
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for entry in history_data.history %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                {% if entry.role == "user" %}
+                                    <i class="fas fa-user text-primary"></i>
+                                {% elif entry.role == "claude" %}
+                                    <i class="fas fa-robot text-success"></i>
+                                {% elif entry.role == "gemini" %}
+                                    <i class="fas fa-brain text-warning"></i>
+                                {% else %}
+                                    <i class="fas fa-cog text-secondary"></i>
+                                {% endif %}
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <h6 class="mb-1">
+                                        {{ entry.role|title }} - {{ entry.source }}
+                                    </h6>
+                                    <small class="text-muted">
+                                        {{ entry.timestamp[:19].replace('T', ' ') }}
+                                    </small>
+                                </div>
+                                <div class="timeline-body">
+                                    <div class="content-preview">
+                                        {% if entry.content|length > 200 %}
+                                            <pre class="content-text">{{ entry.content[:200] }}...</pre>
+                                            <button class="btn btn-sm btn-outline-primary mt-2" 
+                                                    onclick="toggleContent('{{ loop.index }}')">
+                                                全文表示
+                                            </button>
+                                            <div id="content-full-{{ loop.index }}" class="content-full" style="display: none;">
+                                                <pre class="content-text">{{ entry.content }}</pre>
+                                            </div>
+                                        {% else %}
+                                            <pre class="content-text">{{ entry.content }}</pre>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info" role="alert">
+                <i class="fas fa-info-circle"></i>
+                履歴データがありません。
+            </div>
+            {% endif %}
+            
+            <div class="mt-4">
+                <a href="{{ url_for('structure.edit_structure', structure_id=structure_id) }}" 
+                   class="btn btn-primary">
+                    <i class="fas fa-edit"></i>
+                    構造を編集
+                </a>
+                <a href="{{ url_for('structure.list_structures') }}" 
+                   class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    構造一覧に戻る
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timeline-content {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    margin-left: 20px;
+}
+
+.timeline-header {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.content-preview {
+    max-height: 300px;
+    overflow: hidden;
+}
+
+.content-text {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 0.9em;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.content-full {
+    margin-top: 10px;
+}
+
+.content-full .content-text {
+    max-height: none;
+}
+</style>
+
+<script>
+function toggleContent(index) {
+    const preview = document.querySelector(`#content-full-${index}`).previousElementSibling;
+    const fullContent = document.querySelector(`#content-full-${index}`);
+    const button = preview.querySelector('button');
+    
+    if (fullContent.style.display === 'none') {
+        fullContent.style.display = 'block';
+        button.textContent = '折りたたむ';
+    } else {
+        fullContent.style.display = 'none';
+        button.textContent = '全文表示';
+    }
+}
+</script>
+{% endblock %} 

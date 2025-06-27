@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>評価履歴 - {{ structure_id }}</title>
+    <style>
+        body { background: #1e1e1e; color: #ccc; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        .container { max-width: 1200px; margin: 40px auto; background: #252526; border-radius: 8px; padding: 32px; }
+        h1 { color: #4ec9b0; margin-bottom: 8px; }
+        .meta { color: #888; font-size: 14px; margin-bottom: 24px; }
+        .back-link { color: #4ec9b0; text-decoration: none; font-size: 14px; margin-bottom: 24px; display: inline-block; }
+        .back-link:hover { text-decoration: underline; }
+        .nav-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #3e3e42; }
+        .nav-tab { background: none; border: none; color: #888; padding: 10px 20px; cursor: pointer; border-bottom: 2px solid transparent; }
+        .nav-tab.active { color: #4ec9b0; border-bottom-color: #4ec9b0; }
+        .nav-tab:hover { color: #ccc; }
+        .search-controls { background: #2d2d30; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        .search-row { display: flex; gap: 15px; margin-bottom: 10px; align-items: center; }
+        .search-input { flex: 1; background: #1e1e1e; border: 1px solid #3e3e42; color: #ccc; padding: 8px 12px; border-radius: 4px; }
+        .search-input:focus { outline: none; border-color: #4ec9b0; }
+        .sort-select { background: #1e1e1e; border: 1px solid #3e3e42; color: #ccc; padding: 8px 12px; border-radius: 4px; }
+        .date-input { background: #1e1e1e; border: 1px solid #3e3e42; color: #ccc; padding: 8px 12px; border-radius: 4px; }
+        .evaluation-list { margin: 0; padding: 0; list-style: none; }
+        .evaluation-item { background: #2d2d30; border-radius: 6px; margin-bottom: 15px; padding: 20px; }
+        .evaluation-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .evaluation-meta { flex: 1; }
+        .evaluation-timestamp { color: #aaa; font-size: 13px; margin-bottom: 5px; }
+        .evaluation-score { font-size: 18px; font-weight: bold; color: #4ec9b0; }
+        .evaluation-feedback { color: #ccc; line-height: 1.5; margin-bottom: 15px; }
+        .evaluation-actions { display: flex; gap: 10px; }
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .btn-apply { background: #4ec9b0; color: white; }
+        .btn-apply:hover { background: #45b8a0; }
+        .btn-detail { background: #2d2d30; color: #ccc; border: 1px solid #3e3e42; }
+        .btn-detail:hover { background: #3e3e42; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; }
+        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #252526; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-close { position: absolute; top: 15px; right: 20px; background: none; border: none; color: #888; font-size: 24px; cursor: pointer; }
+        .modal-close:hover { color: #ccc; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #888; }
+        .empty-state h3 { margin-bottom: 10px; color: #ccc; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/logs/structure/{{ structure_id }}" class="back-link">← 履歴一覧に戻る</a>
+    <h1>🧠 評価履歴</h1>
+    <div class="meta">
+        <span>構成ID: <b>{{ structure_id }}</b></span>
+        {% if structure and structure.title %} | <span>タイトル: <b>{{ structure.title }}</b></span>{% endif %}
+    </div>
+    
+    <!-- ナビゲーションタブ -->
+    <div class="nav-tabs">
+        <a href="/logs/structure/{{ structure_id }}" class="nav-tab">📊 全体履歴</a>
+        <a href="/logs/structure/{{ structure_id }}/evaluations" class="nav-tab active">🧠 評価履歴</a>
+        <a href="/logs/structure/{{ structure_id }}/completions" class="nav-tab">🔁 補完履歴</a>
+    </div>
+    
+    <!-- 検索・ソート・フィルター -->
+    <div class="search-controls">
+        <div class="search-row">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 フィードバックを検索...">
+            <select id="sortSelect" class="sort-select">
+                <option value="timestamp-desc">日時（新しい順）</option>
+                <option value="timestamp-asc">日時（古い順）</option>
+                <option value="score-desc">スコア（高い順）</option>
+                <option value="score-asc">スコア（低い順）</option>
+            </select>
+        </div>
+        <div class="search-row">
+            <input type="date" id="dateFrom" class="date-input" placeholder="開始日">
+            <span style="color: #888;">〜</span>
+            <input type="date" id="dateTo" class="date-input" placeholder="終了日">
+            <button onclick="clearFilters()" class="btn btn-detail">クリア</button>
+        </div>
+    </div>
+    
+    {% if evaluations %}
+    <ul class="evaluation-list" id="evaluationList">
+        {% for eval in evaluations %}
+        <li class="evaluation-item" 
+            data-timestamp="{{ eval.timestamp }}" 
+            data-score="{{ eval.score }}" 
+            data-feedback="{{ eval.feedback }}"
+            data-date="{{ eval.timestamp[:10] if eval.timestamp }}">
+            <div class="evaluation-header">
+                <div class="evaluation-meta">
+                    <div class="evaluation-timestamp">{{ eval.timestamp[:19].replace('T', ' ') if eval.timestamp }}</div>
+                    <div class="evaluation-score">スコア: {{ "%.1f"|format(eval.score * 100) if eval.score else "N/A" }}</div>
+                </div>
+                <div class="evaluation-actions">
+                    <button class="btn btn-apply" onclick="applyEvaluation('{{ structure_id }}', '{{ eval.timestamp }}')">
+                        ✅ 再適用
+                    </button>
+                    <button class="btn btn-detail" onclick="showDetail({{ loop.index0 }})">
+                        🔍 詳細
+                    </button>
+                </div>
+            </div>
+            <div class="evaluation-feedback">
+                {{ eval.feedback[:60] + "..." if eval.feedback and eval.feedback|length > 60 else eval.feedback or "フィードバックなし" }}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty-state">
+        <h3>📭 評価履歴がありません</h3>
+        <p>この構成の評価履歴はまだ保存されていません。</p>
+        <p>統合インターフェースで評価を実行してから、履歴を保存してください。</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- 詳細モーダル -->
+<div id="detailModal" class="modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <h3>🔍 評価詳細</h3>
+        <div id="modalContent"></div>
+    </div>
+</div>
+
+<script>
+// 評価データ
+const evaluations = {{ evaluations | tojson | safe }};
+
+// 検索・フィルター機能
+function filterEvaluations() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const dateFrom = document.getElementById('dateFrom').value;
+    const dateTo = document.getElementById('dateTo').value;
+    const sortBy = document.getElementById('sortSelect').value;
+    
+    const items = document.querySelectorAll('.evaluation-item');
+    
+    items.forEach(item => {
+        const feedback = item.dataset.feedback.toLowerCase();
+        const date = item.dataset.date;
+        
+        let show = true;
+        
+        // 検索フィルター
+        if (searchTerm && !feedback.includes(searchTerm)) {
+            show = false;
+        }
+        
+        // 日付フィルター
+        if (dateFrom && date < dateFrom) {
+            show = false;
+        }
+        if (dateTo && date > dateTo) {
+            show = false;
+        }
+        
+        item.style.display = show ? 'block' : 'none';
+    });
+    
+    // ソート
+    sortEvaluations(sortBy);
+}
+
+// ソート機能
+function sortEvaluations(sortBy) {
+    const list = document.getElementById('evaluationList');
+    const items = Array.from(list.children);
+    
+    items.sort((a, b) => {
+        switch (sortBy) {
+            case 'timestamp-desc':
+                return new Date(b.dataset.timestamp) - new Date(a.dataset.timestamp);
+            case 'timestamp-asc':
+                return new Date(a.dataset.timestamp) - new Date(b.dataset.timestamp);
+            case 'score-desc':
+                return parseFloat(b.dataset.score) - parseFloat(a.dataset.score);
+            case 'score-asc':
+                return parseFloat(a.dataset.score) - parseFloat(b.dataset.score);
+            default:
+                return 0;
+        }
+    });
+    
+    items.forEach(item => list.appendChild(item));
+}
+
+// フィルタークリア
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('dateFrom').value = '';
+    document.getElementById('dateTo').value = '';
+    document.getElementById('sortSelect').value = 'timestamp-desc';
+    filterEvaluations();
+}
+
+// 評価再適用
+function applyEvaluation(structureId, timestamp) {
+    if (confirm('この評価を再適用しますか？')) {
+        fetch(`/logs/apply/${structureId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ timestamp: timestamp })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = `/unified/${structureId}`;
+            } else {
+                alert('再適用に失敗しました: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('再適用エラー:', error);
+            alert('再適用中にエラーが発生しました');
+        });
+    }
+}
+
+// 詳細表示
+function showDetail(index) {
+    const eval = evaluations[index];
+    const modal = document.getElementById('detailModal');
+    const content = document.getElementById('modalContent');
+    
+    content.innerHTML = `
+        <div style="margin-bottom: 15px;">
+            <strong>日時:</strong> ${eval.timestamp ? eval.timestamp.replace('T', ' ') : 'N/A'}
+        </div>
+        <div style="margin-bottom: 15px;">
+            <strong>スコア:</strong> ${eval.score ? (eval.score * 100).toFixed(1) : 'N/A'}
+        </div>
+        <div style="margin-bottom: 15px;">
+            <strong>フィードバック:</strong><br>
+            <div style="background: #1e1e1e; padding: 10px; border-radius: 4px; margin-top: 5px; white-space: pre-wrap;">
+                ${eval.feedback || 'フィードバックなし'}
+            </div>
+        </div>
+        ${eval.details ? `
+        <div style="margin-bottom: 15px;">
+            <strong>詳細:</strong><br>
+            <div style="background: #1e1e1e; padding: 10px; border-radius: 4px; margin-top: 5px;">
+                <pre>${JSON.stringify(eval.details, null, 2)}</pre>
+            </div>
+        </div>
+        ` : ''}
+    `;
+    
+    modal.style.display = 'block';
+}
+
+// モーダル閉じる
+function closeModal() {
+    document.getElementById('detailModal').style.display = 'none';
+}
+
+// イベントリスナー
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('searchInput').addEventListener('input', filterEvaluations);
+    document.getElementById('sortSelect').addEventListener('change', filterEvaluations);
+    document.getElementById('dateFrom').addEventListener('change', filterEvaluations);
+    document.getElementById('dateTo').addEventListener('change', filterEvaluations);
+    
+    // モーダル外クリックで閉じる
+    document.getElementById('detailModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+});
+</script>
+</body>
+</html> 

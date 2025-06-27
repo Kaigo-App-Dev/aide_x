@@ -1,0 +1,202 @@
+name: Unified Interface Integration Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'templates/structure/unified_interface.html'
+      - 'static/css/unified.css'
+      - 'static/js/unified.js'
+      - 'src/routes/unified_routes.py'
+      - 'tests/routes/test_unified_interface.py'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'templates/structure/unified_interface.html'
+      - 'static/css/unified.css'
+      - 'static/js/unified.js'
+      - 'src/routes/unified_routes.py'
+      - 'tests/routes/test_unified_interface.py'
+
+jobs:
+  test-unified-interface:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-html
+        
+    - name: Run unified interface tests
+      run: |
+        python tests/run_unified_interface_tests.py
+        
+    - name: Generate test report
+      if: always()
+      run: |
+        pytest tests/routes/test_unified_interface.py \
+          --html=test-reports/unified-interface-report.html \
+          --self-contained-html \
+          --cov=src/routes/unified_routes \
+          --cov-report=html:test-reports/coverage \
+          --cov-report=term-missing
+          
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results-${{ matrix.python-version }}
+        path: |
+          test-reports/
+          .coverage
+          
+    - name: Check test coverage
+      run: |
+        coverage report --fail-under=80
+        
+  security-check:
+    runs-on: ubuntu-latest
+    needs: test-unified-interface
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+        
+    - name: Install security tools
+      run: |
+        pip install bandit safety
+        
+    - name: Run security scan
+      run: |
+        bandit -r src/routes/ -f json -o bandit-report.json || true
+        safety check --json --output safety-report.json || true
+        
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+          
+  template-validation:
+    runs-on: ubuntu-latest
+    needs: test-unified-interface
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+        
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install jinja2
+        
+    - name: Validate Jinja2 templates
+      run: |
+        python -c "
+        from jinja2 import Environment, FileSystemLoader
+        import os
+        
+        # テンプレートディレクトリの設定
+        env = Environment(loader=FileSystemLoader('templates'))
+        
+        # テスト用のコンテキスト
+        test_context = {
+            'structure': {
+                'id': 'test-id',
+                'title': 'Test Structure',
+                'description': 'Test Description',
+                'content': {
+                    'title': 'Test App',
+                    'description': 'Test App Description',
+                    'content': {'frontend': 'React', 'backend': 'Node.js'}
+                },
+                'evaluations': [],
+                'completions': [],
+                'messages': [],
+                'metadata': {}
+            },
+            'structure_id': 'test-id',
+            'messages': [],
+            'restore_index': None,
+            'current_data': None,
+            'previous_data': None
+        }
+        
+        # テンプレートの検証
+        try:
+            template = env.get_template('structure/unified_interface.html')
+            rendered = template.render(**test_context)
+            print('✅ unified_interface.html テンプレートの検証成功')
+        except Exception as e:
+            print(f'❌ テンプレート検証エラー: {e}')
+            exit(1)
+            
+        try:
+            template = env.get_template('components/improved_structure_card.html')
+            rendered = template.render(improved_structure=None)
+            print('✅ improved_structure_card.html テンプレートの検証成功')
+        except Exception as e:
+            print(f'❌ テンプレート検証エラー: {e}')
+            exit(1)
+        "
+        
+    - name: Check for Jinja2 syntax errors
+      run: |
+        python -c "
+        import re
+        
+        # テンプレートファイルの構文チェック
+        template_files = [
+            'templates/structure/unified_interface.html',
+            'templates/components/improved_structure_card.html'
+        ]
+        
+        for template_file in template_files:
+            with open(template_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+                
+            # 基本的なJinja2構文チェック
+            if '{{' in content and '}}' not in content:
+                print(f'❌ {template_file}: 閉じ括弧が不足しています')
+                exit(1)
+                
+            if '{%' in content and '%}' not in content:
+                print(f'❌ {template_file}: 制御構文の閉じ括弧が不足しています')
+                exit(1)
+                
+            print(f'✅ {template_file}: 構文チェック成功')
+        " 

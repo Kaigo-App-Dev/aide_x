@@ -1,0 +1,277 @@
+/* ========================================
+   チャットパネル CSS
+   AIDE-X Chat Panel Styles
+   Prefix: aide-* でスコープ分離
+======================================== */
+
+/* チャットコンテナ */
+.aide-chat-container {
+    display: flex !important;
+    flex-direction: column;
+    height: 100%;
+    min-height: 400px;
+}
+
+/* メッセージエリア */
+.aide-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    min-height: 200px;
+}
+
+/* チャット吹き出し */
+.aide-chat-bubble {
+    margin-bottom: 15px;
+    padding: 12px 16px;
+    border-radius: 18px;
+    max-width: 80%;
+    word-wrap: break-word;
+}
+
+.aide-chat-bubble.user {
+    background: #007bff;
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+}
+
+.aide-chat-bubble.ai {
+    background: #e9ecef;
+    color: #495057;
+    margin-right: auto;
+    border-bottom-left-radius: 4px;
+}
+
+.aide-chat-bubble.system {
+    background: #ffc107;
+    color: #212529;
+    margin: 10px auto;
+    text-align: center;
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 12px;
+}
+
+/* メッセージテキスト */
+.aide-message-text {
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+/* メッセージ時刻 */
+.aide-message-time {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 4px;
+}
+
+/* 入力エリア */
+.aide-chat-input-area {
+    display: flex !important;
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+    background: white;
+    border-top: 1px solid #e9ecef;
+    min-height: 120px;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+/* チャット入力テキストエリア */
+.aide-chat-input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 60px;
+    max-height: 120px;
+    font-family: inherit;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.aide-chat-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.aide-chat-input::placeholder {
+    color: #6c757d;
+    opacity: 0.7;
+}
+
+/* 送信ボタン */
+.aide-chat-send-button {
+    padding: 12px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+    align-self: flex-end;
+    min-width: 80px;
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.aide-chat-send-button:hover {
+    background: #0056b3;
+}
+
+.aide-chat-send-button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.aide-chat-send-button:active {
+    transform: translateY(1px);
+}
+
+/* デバッグ情報 */
+.aide-debug-info {
+    color: #666;
+    font-size: 12px;
+    margin-bottom: 10px;
+    padding: 5px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border-left: 3px solid #007bff;
+}
+
+/* 空のメッセージ表示 */
+.aide-empty-message {
+    color: #999;
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+}
+
+/* メッセージ読み込み中 */
+.aide-loading-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+.aide-loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e9ecef;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: aide-spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes aide-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* メッセージタイプ別アイコン */
+.aide-message-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.aide-message-icon.user::before {
+    content: "👤";
+}
+
+.aide-message-icon.ai::before {
+    content: "🤖";
+}
+
+.aide-message-icon.system::before {
+    content: "⚙️";
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .aide-chat-bubble {
+        max-width: 90%;
+        padding: 10px 14px;
+    }
+    
+    .aide-chat-input-area {
+        padding: 10px;
+        min-height: 100px;
+    }
+    
+    .aide-chat-input {
+        min-height: 50px;
+        padding: 10px;
+    }
+    
+    .aide-chat-send-button {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+}
+
+/* Bootstrap競合回避 */
+.aide-chat-container .btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.aide-chat-container .form-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+}
+
+.aide-chat-container .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* キーボードショートカット表示 */
+.aide-shortcut-hint {
+    font-size: 11px;
+    color: #6c757d;
+    text-align: right;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* エラーメッセージ */
+.aide-error-message {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+/* 成功メッセージ */
+.aide-success-message {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    border-radius: 6px;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 14px;
+} 

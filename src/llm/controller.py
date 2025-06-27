@@ -50,7 +50,7 @@ class AIController:
         self.prompt_manager = prompt_manager
         self._providers: Dict[str, Any] = {}
         self.failed_providers: Dict[str, str] = {}
-        logger.info("🔄 AIControllerを初期化しました")
+        logger.info("AIControllerを初期化しました")
 
     def register_provider(self, name: str, provider: Any) -> None:
         """AIプロバイダを登録する"""
@@ -65,7 +65,15 @@ class AIController:
             raise AIProviderError(f"プロバイダ '{provider}' は登録されていません")
         
         try:
-            return self._providers[provider].call(messages, **kwargs)
+            # プロバイダーのcallメソッドを呼び出し
+            response = self._providers[provider].call(messages, **kwargs)
+            
+            # レスポンスの処理
+            if isinstance(response, dict):
+                return response.get("content", "")
+            else:
+                return str(response) if response is not None else ""
+                
         except Exception as e:
             logger.error(f"❌ {provider}プロバイダの呼び出しに失敗: {str(e)}")
             raise AIProviderError(f"AI呼び出しエラー: {str(e)}")

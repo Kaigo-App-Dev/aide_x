@@ -1,0 +1,2 @@
+2025-06-19 12:10:46,099 - test_complete_logging - INFO - 🧪 app.logger.info() - アクセス成功
+2025-06-19 12:10:46,099 - werkzeug - INFO - 🧪 werkzeug.logger.info() - アクセス成功

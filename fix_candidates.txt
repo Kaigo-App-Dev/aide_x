@@ -1,0 +1,76 @@
+# AIDE-X エラー修正候補リスト
+# 作成日: 2025-06-22
+
+## 1. テンプレートフォーマットエラー修正（高優先度）
+
+### ファイル: src/llm/prompts/manager.py
+**問題**: テンプレート検証で `template.format(placeholder="test")` を使用しているが、
+実際のテンプレートは `{structure}` を期待しているためKeyErrorが発生
+
+**修正箇所**: 行82付近
+```python
+# 現在のコード（問題あり）
+template.format(placeholder="test")
+
+# 修正案1: 実際のプレースホルダーを使用
+template.format(structure="test")
+
+# 修正案2: 検証を無効化（推奨）
+# template.format(placeholder="test")  # この行をコメントアウトまたは削除
+```
+
+### ファイル: tests/structure/test_evaluator.py
+**問題**: テストで使用しているテンプレートが実際のテンプレートと一致していない
+
+**修正箇所**: 行19付近
+```python
+# 現在のコード（問題あり）
+manager.register_template("claude", "structure_evaluation", "Evaluate: {structure}")
+
+# 修正案: 実際のテンプレート形式に合わせる
+manager.register_template("claude", "structure_evaluation", "以下の構成を評価してください：\n{structure}")
+```
+
+## 2. Unicodeエンコードエラー修正（高優先度）
+
+### ファイル: src/llm/controller.py
+**問題**: emoji文字（\U0001f504）がcp932エンコーディングでエラー
+
+**修正箇所**: 行53付近
+```python
+# 現在のコード（問題あり）
+logger.info("\U0001f504 AIControllerを初期化しました")
+
+# 修正案1: emojiを削除
+logger.info("AIControllerを初期化しました")
+
+# 修正案2: 文字列として明示的に指定
+logger.info("🔄 AIControllerを初期化しました")
+```
+
+## 3. テスト設定の修正（中優先度）
+
+### ファイル: tests/conftest.py
+**問題**: main.pyからのimportが失敗している可能性
+
+**修正箇所**: 行14付近
+```python
+# 現在のコード（問題あり）
+from main import create_app
+
+# 修正案: 正しいパスを使用
+from src.app import create_app
+```
+
+## 4. 型定義の統一（低優先度）
+
+### ファイル: src/types.py と src/common/types.py
+**問題**: 同じ型定義が複数ファイルに存在している
+
+**修正案**: 一箇所に統合し、他からimportするように変更
+
+## 修正優先順位
+1. テンプレートフォーマットエラー（18件のエラーを解決）
+2. Unicodeエンコードエラー（ログ出力の問題を解決）
+3. テスト設定の修正（テスト実行の問題を解決）
+4. 型定義の統一（保守性向上） 

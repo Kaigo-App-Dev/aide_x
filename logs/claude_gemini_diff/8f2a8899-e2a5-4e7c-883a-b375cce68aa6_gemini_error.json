@@ -1,0 +1,36 @@
+{
+  "structure_id": "8f2a8899-e2a5-4e7c-883a-b375cce68aa6",
+  "timestamp": "2025-06-24T17:01:19.719281",
+  "error_type": "gemini_syntax_error",
+  "error_message": "JSON抽出エラー: JSON構成が検出できませんでした",
+  "gemini_raw_response": "Gemini response placeholder",
+  "original_content": {
+    "features": [
+      {
+        "name": "食事記録機能",
+        "description": "食事の内容と量を記録し、過去の食事を振り返ることができます。"
+      },
+      {
+        "name": "栄養バランスチェック機能",
+        "description": "食事記録からその日の栄養素摂取状況を分析し、偏りがあればアドバイスを表示します。"
+      },
+      {
+        "name": "レシピ提案機能",
+        "description": "ユーザーの健康状態や栄養素の必要量を考慮したレシピを提案します。"
+      }
+    ]
+  },
+  "claude_analysis": null,
+  "validation_result": {
+    "has_title": false,
+    "has_modules": false,
+    "is_valid_structure": false,
+    "missing_keys": [
+      "title",
+      "modules"
+    ],
+    "validation_result": "invalid"
+  },
+  "claude_repair_attempted": false,
+  "claude_repair_result": null
+}

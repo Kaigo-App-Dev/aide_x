@@ -9,13 +9,22 @@ import logging
 from datetime import datetime
 from uuid import uuid4
 from typing import Dict, Any, List, Optional, cast, TypedDict, Union, Tuple
-from src.types import StructureDict, StructureHistory, EvaluationResult, LLMResponse
+# from src.types import StructureDict, StructureHistory  # 型エラーのため一時的にコメントアウト
 
 # Initialize logger
 logger = logging.getLogger(__name__)
 
 # 構造テンプレート保存ディレクトリ
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
+def get_data_dir():
+    """Get the data directory from environment variable or default"""
+    return os.environ.get("AIDEX_DATA_DIR", os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data'))
+
+# デバッグ出力
+logger.debug(f"🔧 DATA_DIR設定: {get_data_dir()} (AIDEX_DATA_DIR: {os.environ.get('AIDEX_DATA_DIR', '未設定')})")
+
+# 型定義を一時的にここで定義
+StructureDict = Dict[str, Any]
+StructureHistory = Dict[str, Any]
 
 class StructureHistory(TypedDict):
     """構造の履歴データ型"""
@@ -35,11 +44,11 @@ class StructureDict(TypedDict):
 
 def get_structure_path(structure_id: str) -> str:
     """Get the path for a structure file"""
-    return os.path.join(DATA_DIR, f"{structure_id}.json")
+    return os.path.join(get_data_dir(), f"{structure_id}.json")
 
 def get_history_path(structure_id: str) -> str:
     """Get the path for a structure history file"""
-    return os.path.join(DATA_DIR, f"{structure_id}_history.json")
+    return os.path.join(get_data_dir(), f"{structure_id}_history.json")
 
 def get_structure(structure_id: str) -> Optional[StructureDict]:
     """
@@ -74,8 +83,10 @@ def save_structure(structure_id: str, structure: StructureDict) -> bool:
         bool: 保存が成功したかどうか
     """
     try:
-        os.makedirs("structures", exist_ok=True)
-        file_path = f"structures/{structure_id}.json"
+        # AIDEX_DATA_DIRを優先して使用
+        data_dir = get_data_dir()
+        os.makedirs(data_dir, exist_ok=True)
+        file_path = os.path.join(data_dir, f"{structure_id}.json")
         
         # Convert datetime objects to strings
         structure_json = json.dumps(structure, ensure_ascii=False, indent=2, default=str)
@@ -132,9 +143,9 @@ def save_structure_history(history: StructureHistory, structure_id: str) -> bool
 
 def load_structures() -> List[Dict[str, Any]]:
     """Load all structures from the data directory"""
-    os.makedirs(DATA_DIR, exist_ok=True)
+    os.makedirs(get_data_dir(), exist_ok=True)
     structures = []
-    for root, dirs, files in os.walk(DATA_DIR):
+    for root, dirs, files in os.walk(get_data_dir()):
         for filename in files:
             if not filename.endswith('.json') or '_history' in filename:
                 continue
@@ -166,15 +177,48 @@ def load_structures() -> List[Dict[str, Any]]:
                 logger.error(f"読み込み失敗: {filename} → {e}")
     return structures
 
-def load_structure_by_id(structure_id: str, project: str = "default") -> Dict[str, Any]:
-    """Load a structure by its ID"""
-    path = os.path.join(DATA_DIR, project, f"{structure_id}.json")
-    logger.debug(f"🔍 構成読み込みパス: {path}")
-    if os.path.exists(path):
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    logger.warning("⚠️ ファイルが見つかりませんでした。")
-    return {"id": structure_id, "title": "", "description": "", "project": project, "content": ""}
+def load_structure_by_id(structure_id: str) -> Optional[Dict[str, Any]]:
+    """
+    指定されたIDの構成を複数の候補パスから検索して読み込む
+    
+    Args:
+        structure_id (str): 構成のID
+        
+    Returns:
+        Optional[Dict[str, Any]]: 構成データ、存在しない場合はNone
+    """
+    # 候補パスのリスト（AIDEX_DATA_DIRを最優先）
+    possible_paths = [
+        os.path.join(get_data_dir(), "default", f"{structure_id}.json"),  # AIDEX_DATA_DIR/default/
+        os.path.join(get_data_dir(), f"{structure_id}.json"),             # AIDEX_DATA_DIR/
+        f"data/default/{structure_id}.json",                        # 従来のパス（後方互換性）
+        f"structures/{structure_id}.json",                          # 従来のパス（後方互換性）
+        f"data/{structure_id}.json"                                 # 従来のパス（後方互換性）
+    ]
+    
+    logger.info(f"📂 構成ファイル読み込み開始: {structure_id}")
+    logger.debug(f"  -> DATA_DIR: {get_data_dir()}")
+    
+    for path in possible_paths:
+        logger.debug(f"  -> 試行パス: {path}")
+        if os.path.exists(path):
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    structure = json.load(f)
+                logger.info(f"  ✅ 成功: {path}")
+                return structure
+            except json.JSONDecodeError as e:
+                logger.error(f"  ❌ JSONデコードエラー: {path} - {e}")
+                continue  # 次の候補へ
+            except Exception as e:
+                logger.error(f"  ❌ ファイル読み込みエラー: {path} - {e}")
+                continue  # 次の候補へ
+        else:
+            logger.debug(f"  -> ファイルなし")
+
+    logger.warning(f"⚠️ 構成ファイルが見つかりませんでした: {structure_id}")
+    logger.warning(f"   確認した全パス: {possible_paths}")
+    return None
 
 def load_previous_version(structure_id: str) -> Optional[Dict[str, Any]]:
     """Load the previous version of a structure"""
@@ -220,7 +264,7 @@ def append_structure_log(structure: Dict[str, Any], action: str, detail: str = "
 def get_candidates_for_evolution(threshold: float = 0.85) -> List[Dict[str, Any]]:
     """Get structures that need evolution (not final and low score)"""
     candidates = []
-    for root, dirs, files in os.walk(DATA_DIR):
+    for root, dirs, files in os.walk(get_data_dir()):
         for filename in files:
             if not filename.endswith(".json") or '_history' in filename:
                 continue
@@ -475,6 +519,53 @@ def load_structure(structure_id: str) -> Dict[str, Any]:
         logger.error(f"構造データの読み込み中にエラーが発生しました: {str(e)}")
         raise ValueError(f"構造データの読み込みに失敗しました: {str(e)}")
 
+def is_ui_ready(structure: dict) -> bool:
+    """
+    構成がUI出力に適しているかどうかを判定する
+    
+    Args:
+        structure: 構成データ
+        
+    Returns:
+        bool: UI出力に適している場合はTrue
+    """
+    content = structure.get("content", {})
+    
+    # contentが文字列の場合（HTMLが直接含まれている場合）
+    if isinstance(content, str):
+        return "<div" in content or "<html" in content or "UI" in content or "画面構成" in content
+    
+    # contentが辞書の場合（構造化データ）
+    if isinstance(content, dict):
+        # タイトルや説明にUI関連のキーワードが含まれているかチェック
+        title = str(content.get("title", "")).lower()
+        description = str(content.get("description", "")).lower()
+        
+        ui_keywords = [
+            "ui", "画面", "インターフェース", "プレビュー", "表示", 
+            "コンポーネント", "レイアウト", "デザイン", "スタイル",
+            "html", "css", "javascript", "react", "vue", "angular"
+        ]
+        
+        # タイトルまたは説明にUI関連キーワードが含まれているかチェック
+        for keyword in ui_keywords:
+            if keyword in title or keyword in description:
+                return True
+        
+        # content内の構成要素をチェック
+        content_elements = content.get("content", {})
+        if isinstance(content_elements, dict):
+            for key, value in content_elements.items():
+                key_lower = str(key).lower()
+                if any(keyword in key_lower for keyword in ui_keywords):
+                    return True
+                
+                # 値が文字列でHTMLタグが含まれている場合
+                if isinstance(value, str) and ("<div" in value or "<html" in value):
+                    return True
+    
+    return False
+
 __all__ = [
     'StructureDict',
     'StructureHistory',
@@ -492,5 +583,6 @@ __all__ = [
     'summarize_structure',
     'summarize_user_requirements',
     'normalize_structure_format',
-    'validate_structure'
+    'validate_structure',
+    'is_ui_ready'
 ] 

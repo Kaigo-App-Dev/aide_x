@@ -1,0 +1,78 @@
+{% if improved_structure %}
+<div class="improved-structure-card" id="improved-structure-card">
+    <div class="card-header">
+        <div class="card-title">
+            <i class="fas fa-lightbulb text-warning"></i>
+            <span>改善構成提案</span>
+            <span class="badge badge-success">Gemini生成</span>
+        </div>
+        <div class="card-actions">
+            <button class="btn btn-sm btn-outline-primary" onclick="evaluateImprovedStructure()" title="Claudeで再評価">
+                <i class="fas fa-search"></i> 評価
+            </button>
+            <button class="btn btn-sm btn-success" onclick="adoptImprovedStructure()" title="この構成を採用">
+                <i class="fas fa-check"></i> 採用
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="hideImprovedStructure()" title="非表示">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <div class="structure-info">
+            <h5 class="improved-title">{{ improved_structure.title }}</h5>
+            <p class="improved-description">{{ improved_structure.description or "説明なし" }}</p>
+        </div>
+        
+        <div class="improvement-reasons">
+            <h6><i class="fas fa-comment-dots text-info"></i> 改善理由（Claude提案）</h6>
+            <ul class="suggestions-list">
+                {% for suggestion in improved_structure.metadata.claude_suggestions %}
+                <li>{{ suggestion }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="structure-preview">
+            <h6><i class="fas fa-eye text-primary"></i> 構成プレビュー</h6>
+            <div class="preview-content">
+                <pre class="json-preview">{{ improved_structure.content | tojson(indent=2) }}</pre>
+            </div>
+        </div>
+        
+        <div class="metadata-info">
+            <small class="text-muted">
+                <i class="fas fa-clock"></i> 生成時刻: {{ improved_structure.metadata.improvement_timestamp | format_datetime }}
+                <br>
+                <i class="fas fa-link"></i> 元構成ID: {{ improved_structure.metadata.original_structure_id }}
+            </small>
+        </div>
+    </div>
+    
+    <div class="card-footer">
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="evaluateImprovedStructure()">
+                <i class="fas fa-search"></i> Claudeで評価
+            </button>
+            <button class="btn btn-success" onclick="adoptImprovedStructure()">
+                <i class="fas fa-check"></i> この構成を採用
+            </button>
+            <button class="btn btn-outline-secondary" onclick="compareStructures()">
+                <i class="fas fa-exchange-alt"></i> 差分表示
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 改善構成の評価結果表示エリア -->
+<div id="improved-evaluation-result" class="evaluation-result" style="display: none;">
+    <div class="evaluation-header">
+        <h5><i class="fas fa-chart-line text-success"></i> 改善構成の評価結果</h5>
+        <button class="btn btn-sm btn-outline-secondary" onclick="hideImprovedEvaluation()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div id="improved-evaluation-content"></div>
+</div>
+{% endif %} 

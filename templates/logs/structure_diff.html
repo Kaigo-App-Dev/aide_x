@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>構成差分比較 - {{ structure_id }}</title>
+    <style>
+        body { background: #1e1e1e; color: #ccc; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        .container { max-width: 1200px; margin: 40px auto; background: #252526; border-radius: 8px; padding: 32px; }
+        h1 { color: #4ec9b0; margin-bottom: 8px; }
+        .meta { color: #888; font-size: 14px; margin-bottom: 24px; }
+        .back-link { color: #4ec9b0; text-decoration: none; font-size: 14px; margin-bottom: 24px; display: inline-block; }
+        .back-link:hover { text-decoration: underline; }
+        .diff-container { display: flex; gap: 20px; margin-top: 20px; }
+        .diff-panel { flex: 1; background: #2d2d30; border-radius: 6px; padding: 20px; }
+        .diff-title { font-weight: bold; margin-bottom: 15px; color: #4ec9b0; }
+        .diff-content { background: #1e1e1e; border-radius: 4px; padding: 15px; font-family: 'Consolas', monospace; font-size: 12px; line-height: 1.4; max-height: 500px; overflow-y: auto; }
+        .diff-line { margin: 2px 0; padding: 2px 4px; }
+        .diff-added { background: #0d4d0d; color: #4ec9b0; }
+        .diff-removed { background: #4d0d0d; color: #f44336; }
+        .diff-unchanged { color: #ccc; }
+        .diff-header { background: #3e3e42; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
+        .diff-summary { background: #2d2d30; padding: 15px; border-radius: 6px; margin-top: 20px; }
+        .summary-item { margin: 5px 0; }
+        .summary-added { color: #4ec9b0; }
+        .summary-removed { color: #f44336; }
+        .summary-unchanged { color: #888; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/logs/structure/{{ structure_id }}" class="back-link">← 履歴一覧に戻る</a>
+    <h1>構成差分比較</h1>
+    <div class="meta">
+        <span>構成ID: <b>{{ structure_id }}</b></span>
+        {% if structure and structure.title %} | <span>タイトル: <b>{{ structure.title }}</b></span>{% endif %}
+    </div>
+    
+    <div class="diff-header">
+        <div><strong>比較対象:</strong></div>
+        <div>v1: {{ v1_timestamp[:19].replace('T', ' ') if v1_timestamp }}</div>
+        <div>v2: {{ v2_timestamp[:19].replace('T', ' ') if v2_timestamp }}</div>
+    </div>
+    
+    {% if diff_data %}
+    <div class="diff-container">
+        <div class="diff-panel">
+            <div class="diff-title">v1 ({{ v1_timestamp[:19].replace('T', ' ') if v1_timestamp }})</div>
+            <div class="diff-content">
+                {% for line in diff_data.v1_lines %}
+                <div class="diff-line {% if line.type == 'added' %}diff-added{% elif line.type == 'removed' %}diff-removed{% else %}diff-unchanged{% endif %}">
+                    {{ line.content }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="diff-panel">
+            <div class="diff-title">v2 ({{ v2_timestamp[:19].replace('T', ' ') if v2_timestamp }})</div>
+            <div class="diff-content">
+                {% for line in diff_data.v2_lines %}
+                <div class="diff-line {% if line.type == 'added' %}diff-added{% elif line.type == 'removed' %}diff-removed{% else %}diff-unchanged{% endif %}">
+                    {{ line.content }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="diff-summary">
+        <h3>差分サマリー</h3>
+        <div class="summary-item summary-added">追加: {{ diff_data.added_count }} 行</div>
+        <div class="summary-item summary-removed">削除: {{ diff_data.removed_count }} 行</div>
+        <div class="summary-item summary-unchanged">変更なし: {{ diff_data.unchanged_count }} 行</div>
+    </div>
+    {% else %}
+    <div style="color:#888; text-align:center; padding:40px;">
+        差分データがありません。比較対象の履歴を選択してください。
+    </div>
+    {% endif %}
+</div>
+</body>
+</html> 

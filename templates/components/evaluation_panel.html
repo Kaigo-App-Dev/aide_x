@@ -1,0 +1,326 @@
+<!-- 評価パネル -->
+<div class="evaluation-panel">
+    <div class="evaluation-header">
+        <h4>📊 評価結果</h4>
+        <button onclick="refreshEvaluation()" class="refresh-btn" id="refreshEvalBtn">
+            🔄 再評価
+        </button>
+    </div>
+    
+    <div class="evaluation-content" id="evaluationContent">
+        {% if evaluation %}
+            <!-- スコア表示 -->
+            <div class="score-section">
+                <div class="score-display">
+                    <span class="score-label">総合スコア</span>
+                    <span class="score-value">{{ evaluation.score }}/100</span>
+                </div>
+                <div class="score-bar">
+                    <div class="score-fill" style="width: {{ evaluation.score }}%"></div>
+                </div>
+            </div>
+            
+            <!-- フィードバック表示 -->
+            <div class="feedback-section">
+                <h5>フィードバック</h5>
+                <div class="feedback-text">{{ evaluation.feedback }}</div>
+            </div>
+            
+            <!-- 詳細評価 -->
+            {% if evaluation.details %}
+            <div class="details-section">
+                <h5>詳細評価</h5>
+                {% for detail in evaluation.details %}
+                <div class="detail-item">
+                    <div class="detail-header">
+                        <span class="detail-category">{{ detail.category }}</span>
+                        <span class="detail-score">{{ detail.score }}/100</span>
+                    </div>
+                    <div class="detail-comment">{{ detail.comment }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="no-evaluation">
+                <p>まだ評価が実行されていません</p>
+                <button onclick="runEvaluation()" class="run-eval-btn">
+                    🚀 評価を実行
+                </button>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.evaluation-panel {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.evaluation-header {
+    background: #f8f9fa;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.evaluation-header h4 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.refresh-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.refresh-btn:hover {
+    background: #218838;
+}
+
+.evaluation-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    background: #fff;
+}
+
+.score-section {
+    margin-bottom: 20px;
+}
+
+.score-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.score-label {
+    font-weight: bold;
+    color: #333;
+}
+
+.score-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.score-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.score-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    transition: width 0.3s ease;
+}
+
+.feedback-section {
+    margin-bottom: 20px;
+}
+
+.feedback-section h5 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 14px;
+}
+
+.feedback-text {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+    line-height: 1.5;
+}
+
+.details-section h5 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 14px;
+}
+
+.detail-item {
+    margin-bottom: 15px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.detail-category {
+    font-weight: bold;
+    color: #495057;
+}
+
+.detail-score {
+    background: #007bff;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.detail-comment {
+    color: #6c757d;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.no-evaluation {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.run-eval-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+.run-eval-btn:hover {
+    background: #0056b3;
+}
+</style>
+
+<script>
+function refreshEvaluation() {
+    const button = document.getElementById('refreshEvalBtn');
+    button.disabled = true;
+    button.textContent = '評価中...';
+    
+    fetch(`/structure/unified/{{ structure_id }}/evaluate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 評価結果を更新
+            updateEvaluationDisplay(data.evaluation);
+        } else {
+            alert('評価エラー: ' + (data.error || '不明なエラー'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('通信エラーが発生しました');
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.textContent = '🔄 再評価';
+    });
+}
+
+function runEvaluation() {
+    const button = document.querySelector('.run-eval-btn');
+    button.disabled = true;
+    button.textContent = '評価中...';
+    
+    fetch(`/structure/unified/{{ structure_id }}/evaluate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 評価結果を表示
+            updateEvaluationDisplay(data.evaluation);
+        } else {
+            alert('評価エラー: ' + (data.error || '不明なエラー'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('通信エラーが発生しました');
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.textContent = '🚀 評価を実行';
+    });
+}
+
+function updateEvaluationDisplay(evaluation) {
+    const content = document.getElementById('evaluationContent');
+    
+    if (!evaluation) {
+        content.innerHTML = `
+            <div class="no-evaluation">
+                <p>評価に失敗しました</p>
+                <button onclick="runEvaluation()" class="run-eval-btn">🚀 再実行</button>
+            </div>
+        `;
+        return;
+    }
+    
+    let detailsHtml = '';
+    if (evaluation.details && evaluation.details.length > 0) {
+        detailsHtml = `
+            <div class="details-section">
+                <h5>詳細評価</h5>
+                ${evaluation.details.map(detail => `
+                    <div class="detail-item">
+                        <div class="detail-header">
+                            <span class="detail-category">${detail.category}</span>
+                            <span class="detail-score">${detail.score}/100</span>
+                        </div>
+                        <div class="detail-comment">${detail.comment}</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    content.innerHTML = `
+        <div class="score-section">
+            <div class="score-display">
+                <span class="score-label">総合スコア</span>
+                <span class="score-value">${evaluation.score}/100</span>
+            </div>
+            <div class="score-bar">
+                <div class="score-fill" style="width: ${evaluation.score}%"></div>
+            </div>
+        </div>
+        
+        <div class="feedback-section">
+            <h5>フィードバック</h5>
+            <div class="feedback-text">${evaluation.feedback}</div>
+        </div>
+        
+        ${detailsHtml}
+    `;
+}
+</script> 

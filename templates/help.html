@@ -1,0 +1,278 @@
+{% extends "base_layout.html" %}
+
+{% block title %}AIDE-X - ヘルプ{% endblock %}
+
+{% block head %}
+    <style>
+        .help-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .help-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .help-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #007acc;
+            margin-bottom: 16px;
+        }
+        
+        .help-subtitle {
+            font-size: 1.2rem;
+            color: #858585;
+        }
+        
+        .help-section {
+            background: #252526;
+            border: 1px solid #3c3c3c;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .help-section h2 {
+            color: #4ec9b0;
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 1.4rem;
+        }
+        
+        .help-section h3 {
+            color: #cccccc;
+            margin-top: 20px;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+        
+        .help-section p {
+            color: #cccccc;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        
+        .shortcut {
+            background: #2d2d30;
+            border: 1px solid #3c3c3c;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            color: #4ec9b0;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            color: #cccccc;
+            border-bottom: 1px solid #3c3c3c;
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-list li:before {
+            content: "✓ ";
+            color: #4ec9b0;
+            font-weight: bold;
+        }
+        
+        .menu-example {
+            background: #1e1e1e;
+            border: 1px solid #3c3c3c;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 12px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .workflow-step {
+            background: #2d2d30;
+            border-left: 4px solid #007acc;
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .workflow-step h4 {
+            color: #007acc;
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+        
+        .workflow-step p {
+            margin: 0;
+            color: #cccccc;
+        }
+        
+        @media (max-width: 768px) {
+            .help-title {
+                font-size: 2rem;
+            }
+            
+            .help-section {
+                padding: 16px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="help-container">
+    <div class="help-header">
+        <h1 class="help-title">🧠 AIDE-X ヘルプ</h1>
+        <p class="help-subtitle">AI駆動の構成作成・評価ツールの使い方</p>
+    </div>
+    
+    <!-- 基本操作 -->
+    <div class="help-section">
+        <h2>🚀 基本操作</h2>
+        <p>AIDE-Xは、AIを活用してプロジェクト構成を作成・評価するツールです。</p>
+        
+        <h3>メニューバー操作</h3>
+        <div class="menu-example">
+ファイル ▾  編集 ▾  表示 ▾  評価 ▾  ヘルプ ▾
+        </div>
+        
+        <ul class="feature-list">
+            <li><strong>ファイル</strong> - 新規構成作成、保存、エクスポート</li>
+            <li><strong>編集</strong> - 元に戻す、やり直し、履歴クリア</li>
+            <li><strong>表示</strong> - 履歴欄・評価欄の表示切替</li>
+            <li><strong>評価</strong> - Claude/Geminiでの評価実行</li>
+            <li><strong>ヘルプ</strong> - 使い方、バージョン情報</li>
+        </ul>
+    </div>
+    
+    <!-- ワークフロー -->
+    <div class="help-section">
+        <h2>📋 推奨ワークフロー</h2>
+        
+        <div class="workflow-step">
+            <h4>1. 新規構成作成</h4>
+            <p>「ファイル」→「新規構成」または <span class="shortcut">Ctrl+N</span> で新しい構成を開始</p>
+        </div>
+        
+        <div class="workflow-step">
+            <h4>2. チャットで構成作成</h4>
+            <p>左側のチャット欄でプロジェクトについて質問し、AIが自動的に構成を生成</p>
+        </div>
+        
+        <div class="workflow-step">
+            <h4>3. 構成の確認・編集</h4>
+            <p>中央の構成ビューで生成された構成を確認し、必要に応じて編集</p>
+        </div>
+        
+        <div class="workflow-step">
+            <h4>4. AI評価の実行</h4>
+            <p>「評価」→「Claudeで評価」または「Geminiで評価」で構成を評価</p>
+        </div>
+        
+        <div class="workflow-step">
+            <h4>5. 改善・保存</h4>
+            <p>評価結果を参考に構成を改善し、<span class="shortcut">Ctrl+S</span> で保存</p>
+        </div>
+    </div>
+    
+    <!-- チャット機能 -->
+    <div class="help-section">
+        <h2>💬 チャット機能</h2>
+        <p>左側のチャット欄でAIと対話しながら構成を作成できます。</p>
+        
+        <h3>チャットの使い方</h3>
+        <ul class="feature-list">
+            <li>プロジェクトの概要を説明する</li>
+            <li>特定の機能について質問する</li>
+            <li>構成の改善点を相談する</li>
+            <li>技術的な詳細を確認する</li>
+        </ul>
+        
+        <h3>チャットの種類</h3>
+        <ul class="feature-list">
+            <li><strong>ユーザーメッセージ</strong> - あなたの質問や要望</li>
+            <li><strong>AI応答</strong> - ChatGPTからの回答</li>
+            <li><strong>Claude評価</strong> - 構成の評価結果</li>
+        </ul>
+    </div>
+    
+    <!-- 構成ビュー -->
+    <div class="help-section">
+        <h2>📊 構成ビュー</h2>
+        <p>中央の構成ビューで現在の構成を確認・編集できます。</p>
+        
+        <h3>構成要素</h3>
+        <ul class="feature-list">
+            <li><strong>タイトル</strong> - プロジェクト名</li>
+            <li><strong>説明</strong> - プロジェクトの概要</li>
+            <li><strong>構成要素</strong> - 各機能やコンポーネント</li>
+            <li><strong>Gemini補完</strong> - AIによる改善提案</li>
+        </ul>
+        
+        <h3>操作</h3>
+        <ul class="feature-list">
+            <li>各セクションをクリックして詳細表示</li>
+            <li>「このセクションを詳しくする」で質問</li>
+            <li>「このセクションだけ評価」で個別評価</li>
+            <li>JSONエディタで直接編集</li>
+        </ul>
+    </div>
+    
+    <!-- キーボードショートカット -->
+    <div class="help-section">
+        <h2>⌨️ キーボードショートカット</h2>
+        
+        <h3>基本操作</h3>
+        <ul class="feature-list">
+            <li><span class="shortcut">Ctrl+N</span> - 新規構成作成</li>
+            <li><span class="shortcut">Ctrl+S</span> - 構成を保存</li>
+            <li><span class="shortcut">Ctrl+Z</span> - 元に戻す</li>
+            <li><span class="shortcut">Ctrl+Y</span> - やり直し</li>
+        </ul>
+        
+        <h3>チャット操作</h3>
+        <ul class="feature-list">
+            <li><span class="shortcut">Ctrl+Enter</span> - チャット送信</li>
+            <li><span class="shortcut">Enter</span> - 改行（Shift+Enterで送信）</li>
+            <li><span class="shortcut">Esc</span> - チャット入力キャンセル</li>
+        </ul>
+        
+        <h3>表示操作</h3>
+        <ul class="feature-list">
+            <li><span class="shortcut">Ctrl+H</span> - 履歴欄の表示切替</li>
+            <li><span class="shortcut">Ctrl+E</span> - 評価欄の表示切替</li>
+            <li><span class="shortcut">F11</span> - 全画面表示</li>
+        </ul>
+    </div>
+    
+    <!-- トラブルシューティング -->
+    <div class="help-section">
+        <h2>🔧 トラブルシューティング</h2>
+        
+        <h3>よくある問題</h3>
+        <ul class="feature-list">
+            <li><strong>チャットが応答しない</strong> - ネットワーク接続を確認</li>
+            <li><strong>評価が失敗する</strong> - APIキーの設定を確認</li>
+            <li><strong>構成が保存されない</strong> - ファイル権限を確認</li>
+            <li><strong>履歴が表示されない</strong> - 「表示」メニューから履歴欄を表示</li>
+        </ul>
+        
+        <h3>サポート</h3>
+        <p>問題が解決しない場合は、以下をご確認ください：</p>
+        <ul class="feature-list">
+            <li>ブラウザのコンソールでエラーメッセージを確認</li>
+            <li>ネットワーク接続を確認</li>
+            <li>APIキーの有効性を確認</li>
+            <li>ブラウザを再起動</li>
+        </ul>
+    </div>
+</div>
+{% endblock %} 

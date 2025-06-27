@@ -1,0 +1,58 @@
+# AIDE-X テストファイル修正一覧 (2025-06-22)
+
+## 修正完了ファイル
+
+### 1. Fixture修正
+- tests/conftest.py
+  - mock_prompt_manager fixture追加
+  - mock_api_key fixture追加
+
+### 2. Import修正
+- tests/api/test_structure_routes.py
+  - from main import create_app → from src.app import create_app
+
+### 3. 関数呼び出し修正
+- tests/llm/test_llm.py
+  - call_model関数のシグネチャ修正
+  - ClaudeProvider.chatメソッドの引数修正
+  - PromptManagerの初期化追加
+
+### 4. プロバイダーテスト修正
+- tests/llm/test_providers.py
+  - mock_prompt_manager fixture使用に修正
+- tests/test_providers/test_claude.py
+  - ClaudeProvider.chatメソッドのシグネチャ修正
+  - Promptオブジェクトの作成追加
+- tests/test_providers/test_gemini.py
+  - GeminiProvider.chatメソッドのシグネチャ修正
+  - Promptオブジェクトの作成追加
+
+### 5. 評価テスト修正
+- tests/structure/test_evaluator.py
+  - 構造データの形式を正しい形式に修正
+  - EvaluationResultのコンストラクタ呼び出し修正
+  - evaluate_structure_with関数のimport追加
+
+### 6. 型定義統合
+- src/types.py
+  - EvaluationResultの重複定義削除
+  - src.common.typesからimportするように修正
+
+## 修正内容の要約
+
+### 主要な修正カテゴリ
+1. **Fixtureエラー**: mock_prompt_managerが見つからない問題を解決
+2. **Importエラー**: 古いimportパスを新しいパスに修正
+3. **関数呼び出しエラー**: 引数の順序や必須パラメータの不足を修正
+4. **テンプレート登録エラー**: PromptManagerの構造不一致を修正
+5. **型エラー**: EvaluationResultの型定義を統一
+
+### 修正方針
+- 既存のコードの動作を維持しながら、テストの整合性を確保
+- 型チェッカーのエラーは一部無視（@dataclassとTypedDictの混在問題）
+- 破損したテストは一時的にコメントアウトではなく、正しい形式に修正
+
+## 次のステップ
+1. テスト実行による修正効果の確認
+2. 残存エラーの詳細分析
+3. 必要に応じて追加修正の実施 

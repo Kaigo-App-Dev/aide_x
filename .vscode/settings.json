@@ -5,5 +5,72 @@
     ],
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticMode": "workspace",
-    "python.analysis.autoImportCompletions": true
+    "python.analysis.autoImportCompletions": true,
+    "files.exclude": {
+        "**/_retired/**": true,
+        "**/__pycache__/**": true,
+        "**/*.pyc": true,
+        "**/.pytest_cache/**": true,
+        "**/.mypy_cache/**": true,
+        "**/logs/**": true,
+        "**/venv/**": true,
+        "**/node_modules/**": true,
+        "**/.venv/**": true
+    },
+    "search.exclude": {
+        "**/_retired/**": true,
+        "**/__pycache__/**": true,
+        "**/*.pyc": true,
+        "**/.pytest_cache/**": true,
+        "**/.mypy_cache/**": true,
+        "**/logs/**": true,
+        "**/venv/**": true,
+        "**/node_modules/**": true,
+        "**/.venv/**": true
+    },
+    "files.watcherExclude": {
+        "**/_retired/**": true,
+        "**/__pycache__/**": true,
+        "**/*.pyc": true,
+        "**/.pytest_cache/**": true,
+        "**/.mypy_cache/**": true,
+        "**/logs/**": true,
+        "**/venv/**": true,
+        "**/node_modules/**": true,
+        "**/.venv/**": true
+    },
+    "python.analysis.exclude": [
+        "**/_retired/**",
+        "**/__pycache__/**",
+        "**/.pytest_cache/**",
+        "**/.mypy_cache/**",
+        "**/logs/**",
+        "**/venv/**",
+        "**/.venv/**"
+    ],
+    "python.linting.ignorePatterns": [
+        "**/_retired/**",
+        "**/__pycache__/**",
+        "**/.pytest_cache/**",
+        "**/.mypy_cache/**",
+        "**/logs/**",
+        "**/venv/**",
+        "**/.venv/**"
+    ],
+    "cursorpyright.analysis.autoImportCompletions": true,
+    "cursorpyright.analysis.diagnosticMode": "workspace",
+    "cursorpyright.analysis.exclude": [
+        "**/_retired/**",
+        "**/__pycache__/**",
+        "**/.pytest_cache/**",
+        "**/.mypy_cache/**",
+        "**/logs/**",
+        "**/venv/**",
+        "**/.venv/**"
+    ],
+    "cursorpyright.analysis.extraPaths": [
+        "./",
+        "./utils"
+    ],
+    "cursorpyright.analysis.typeCheckingMode": "basic"
 } 

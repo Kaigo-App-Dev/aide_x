@@ -1,0 +1,19 @@
+{
+  "id": "test_structure_003",
+  "title": "更新構成",
+  "content": "更新内容",
+  "timestamp": "2024-01-02T10:00:00",
+  "evaluations": [
+    {
+      "timestamp": "2024-01-02T10:00:00",
+      "score": 0.8,
+      "feedback": "更新評価"
+    }
+  ],
+  "completions": [
+    {
+      "timestamp": "2024-01-02T11:00:00",
+      "content": "更新補完"
+    }
+  ]
+}

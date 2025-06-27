@@ -17,6 +17,9 @@ from typing import TypedDict, List, Optional, Dict, Any, Union, Literal, Protoco
 from datetime import datetime
 from dataclasses import dataclass
 
+# 共通型定義からimport
+from src.common.types import EvaluationResult, EvaluationFunction
+
 # ===== メッセージ関連の型定義 =====
 
 class MessageParam(TypedDict):
@@ -68,25 +71,6 @@ class StructureHistory(TypedDict):
     by: Literal["user", "Claude", "Gemini", "Cursor"]  # 実行主体
     detail: Optional[str]  # 詳細情報
     snapshot: Optional[Dict[str, Any]]  # スナップショット
-
-# ===== 評価結果関連の型定義 =====
-
-class EvaluationResult(TypedDict, total=False):
-    """評価結果の型定義"""
-    score: float  # 評価スコア
-    feedback: str  # フィードバック
-    details: Dict[str, Any]  # 詳細情報
-    is_valid: bool  # 有効性フラグ
-    comment: Optional[str]  # コメント
-    metrics: Optional[Dict[str, Any]]  # メトリクス
-    error: Optional[str]  # エラーメッセージ
-    intent_match: Optional[float]  # 意図の一致度
-    intent_reason: Optional[str]  # 意図の一致理由
-    quality_score: Optional[float]  # 品質スコア
-    improvement_suggestions: Optional[List[str]]  # 改善提案
-
-# 評価関数の型定義
-EvaluationFunction = Callable[[str, Optional[Any]], EvaluationResult]
 
 # ===== チャット関連の型定義 =====
 
@@ -187,7 +171,7 @@ __all__ = [
     'StructureDict',
     'StructureHistory',
     
-    # 評価結果関連
+    # 評価結果関連（src.common.typesからimport）
     'EvaluationResult',
     'EvaluationFunction',
     

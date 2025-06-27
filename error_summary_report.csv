@@ -1,0 +1,8 @@
+カテゴリ,件数,ファイル名,優先度,詳細
+テンプレートフォーマットエラー,18,tests/structure/test_evaluator.py,高,KeyError: 'structure' - テンプレート検証でplaceholder="test"を使用しているが、実際のテンプレートは{structure}を期待
+モジュール未定義,0,なし,中,src.からのimportは正常に動作
+型エラー,0,なし,中,TypedDictの定義は正常
+構文エラー,0,なし,中,JSON構文エラーは発生していない
+未使用・冗長import,0,なし,低,未使用importは検出されていない
+_retired/残余参照,0,なし,除外対象,退避ファイルは正常に除外されている
+Unicodeエンコードエラー,1,src/llm/controller.py,高,emoji文字（\U0001f504）がcp932エンコーディングでエラー 

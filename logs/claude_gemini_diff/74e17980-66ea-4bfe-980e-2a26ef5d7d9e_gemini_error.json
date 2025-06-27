@@ -1,0 +1,33 @@
+{
+  "structure_id": "74e17980-66ea-4bfe-980e-2a26ef5d7d9e",
+  "timestamp": "2025-06-24T17:44:41.723155",
+  "error_type": "gemini_syntax_error",
+  "error_message": "JSON抽出エラー: JSON構成の解析に失敗しました",
+  "gemini_raw_response": "{\n  \"title\": \"食事管理アプリ\",\n  \"modules\": [\n    {\n      \"name\": \"食事記録\",\n      \"description\": \"一日の食事内容を記録する機能。食べたもの、量、時間などを記録できます。\",\n      \"features\": [\n        \"食事の入力\",\n        \"写真撮影による記録\",\n        \"食事内容の検索機能\"\n      ]\n    },\n    {\n      \"name\": \"食事提案\",\n      \"description\": \"ユーザーの健康状態、目標、好みに基づいたパーソナライズされた食事メニューを提案します。\",\n      \"features\": [\n        \"カロリー計算\",\n        \"栄養バランスの考慮\",\n        \"アレルギー対応\",\n        \"レシピ検索との連携\"\n      ]\n    },\n    {\n      \"name\": \"レポートと分析\",\n      \"description\": \"食事摂取量、栄養バランス、目標達成度などのレポートをグラフや表で分かりやすく表示します。\",\n      \"features\": [\n        \"日別、週別、月別のレポート表示\",\n        \"栄養素の摂取状況の可視化\",\n        \"目標達成度に関するフィードバック\"\n      ]\n    }\n  ]\n}\n",
+  "original_content": {
+    "features": [
+      {
+        "name": "食事記録機能",
+        "description": "一日の食事内容を記録できます。"
+      },
+      {
+        "name": "食事提案機能",
+        "description": "ユーザーの健康状態に合わせた食事メニューを提案します。"
+      },
+      {
+        "name": "レポート表示機能",
+        "description": "食事の摂取量や栄養バランスのレポートを定期的に表示します。"
+      }
+    ]
+  },
+  "claude_analysis": null,
+  "validation_result": {
+    "has_title": true,
+    "has_modules": true,
+    "is_valid_structure": true,
+    "missing_keys": [],
+    "validation_result": "valid"
+  },
+  "claude_repair_attempted": false,
+  "claude_repair_result": null
+}

@@ -109,6 +109,7 @@ def call_claude_evaluation(structure: Dict[str, Any]) -> Dict[str, Any]:
     try:
         # プロンプトマネージャーから評価用プロンプトを取得
         prompt_manager.register_builtin_templates()
+        # TODO: Unused template - review/delete - evaluation_template is not registered in templates
         evaluation_template = prompt_manager.get_prompt("claude", "evaluation_template")
         if not evaluation_template:
             raise ValueError("Evaluation template not found for Claude")

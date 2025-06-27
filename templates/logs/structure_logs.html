@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>履歴一覧 - {{ structure_id }}</title>
+    <style>
+        body { background: #1e1e1e; color: #ccc; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        .container { max-width: 1200px; margin: 40px auto; background: #252526; border-radius: 8px; padding: 32px; }
+        h1 { color: #4ec9b0; margin-bottom: 8px; }
+        .meta { color: #888; font-size: 14px; margin-bottom: 24px; }
+        .back-link { color: #4ec9b0; text-decoration: none; font-size: 14px; margin-bottom: 24px; display: inline-block; }
+        .back-link:hover { text-decoration: underline; }
+        .nav-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #3e3e42; }
+        .nav-tab { background: none; border: none; color: #888; padding: 10px 20px; cursor: pointer; border-bottom: 2px solid transparent; text-decoration: none; }
+        .nav-tab.active { color: #4ec9b0; border-bottom-color: #4ec9b0; }
+        .nav-tab:hover { color: #ccc; }
+        .filter-buttons { margin-bottom: 20px; }
+        .filter-btn { background: #2d2d30; border: 1px solid #3e3e42; color: #ccc; padding: 8px 16px; margin-right: 10px; cursor: pointer; border-radius: 4px; }
+        .filter-btn.active { background: #4ec9b0; color: white; border-color: #4ec9b0; }
+        .filter-btn:hover { background: #3e3e42; }
+        .history-section { margin-bottom: 30px; }
+        .history-title { color: #4ec9b0; font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid #3e3e42; padding-bottom: 8px; }
+        .history-list { list-style: none; padding: 0; margin: 0; }
+        .history-item { background: #2d2d30; border-radius: 6px; margin-bottom: 15px; padding: 20px; }
+        .history-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .history-meta { flex: 1; }
+        .history-timestamp { color: #aaa; font-size: 13px; margin-bottom: 5px; }
+        .history-type { color: #4ec9b0; font-size: 14px; font-weight: bold; }
+        .history-actions { display: flex; gap: 10px; }
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .btn-apply { background: #4ec9b0; color: white; }
+        .btn-apply:hover { background: #45b8a0; }
+        .btn-diff { background: #2d2d30; color: #ccc; border: 1px solid #3e3e42; }
+        .btn-diff:hover { background: #3e3e42; }
+        .history-content { color: #ccc; line-height: 1.5; margin-bottom: 15px; }
+        .diff-controls { background: #2d2d30; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        .diff-row { display: flex; gap: 15px; align-items: center; margin-bottom: 10px; }
+        .diff-select { background: #1e1e1e; border: 1px solid #3e3e42; color: #ccc; padding: 8px 12px; border-radius: 4px; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #888; }
+        .empty-state h3 { margin-bottom: 10px; color: #ccc; }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .history-timestamp {
+            color: #4ec9b0;
+            font-size: 12px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        .history-section {
+            margin-bottom: 16px;
+        }
+        
+        .history-section h4 {
+            color: #ccc;
+            font-size: 14px;
+            margin: 0 0 8px 0;
+            border-bottom: 1px solid #3e3e42;
+            padding-bottom: 4px;
+        }
+        
+        .eval-item, .comp-item {
+            background: #2d2d30;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            border-left: 3px solid #4ec9b0;
+        }
+        
+        .eval-score {
+            color: #4ec9b0;
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+        
+        .eval-feedback {
+            color: #ccc;
+            font-size: 12px;
+            line-height: 1.3;
+        }
+        
+        .comp-content {
+            color: #ccc;
+            font-size: 11px;
+            line-height: 1.3;
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .no-diff, .no-content {
+            color: #888;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .error {
+            color: #ff6b6b;
+            text-align: center;
+            padding: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/unified/{{ structure_id }}" class="btn btn-sm btn-secondary" style="margin-bottom: 16px; display: inline-block;">← 構成画面に戻る</a>
+    <h1>📊 履歴一覧</h1>
+    <div class="meta">
+        <span>構成ID: <b>{{ structure_id }}</b></span>
+        {% if structure and structure.title %} | <span>タイトル: <b>{{ structure.title }}</b></span>{% endif %}
+    </div>
+    
+    <!-- ナビゲーションタブ -->
+    <div class="nav-tabs">
+        <a href="/logs/structure/{{ structure_id }}" class="nav-tab active">📊 全体履歴</a>
+        <a href="/logs/structure/{{ structure_id }}/evaluations" class="nav-tab">🧠 評価履歴</a>
+        <a href="/logs/structure/{{ structure_id }}/completions" class="nav-tab">🔁 補完履歴</a>
+    </div>
+    
+    <!-- フィルターボタン -->
+    <div class="filter-buttons">
+        <button class="filter-btn active" onclick="filterHistory('all')">📋 すべて</button>
+        <button class="filter-btn" onclick="filterHistory('evaluations')">🧠 評価のみ</button>
+        <button class="filter-btn" onclick="filterHistory('completions')">🔁 補完のみ</button>
+    </div>
+    
+    <!-- 差分比較コントロール -->
+    <div class="diff-controls">
+        <div class="diff-row">
+            <span style="color: #888;">差分比較:</span>
+            <select id="diffV1" class="diff-select">
+                <option value="">バージョン1を選択</option>
+                {% for history in histories %}
+                <option value="{{ history.timestamp }}">{{ history.timestamp[:19].replace('T', ' ') }}</option>
+                {% endfor %}
+            </select>
+            <span style="color: #888;">vs</span>
+            <select id="diffV2" class="diff-select">
+                <option value="">バージョン2を選択</option>
+                {% for history in histories %}
+                <option value="{{ history.timestamp }}">{{ history.timestamp[:19].replace('T', ' ') }}</option>
+                {% endfor %}
+            </select>
+            <button onclick="compareDiff()" class="btn btn-diff">🔍 差分表示</button>
+        </div>
+    </div>
+    
+    <!-- 履歴差分表示パネル -->
+    <div class="diff-panel" style="margin: 24px 0; padding: 16px; background: #232323; border-radius: 6px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <button class="btn btn-outline btn-sm" data-history-index="prev" disabled>◀ 前の履歴へ</button>
+            <div class="diff-info" style="font-size: 13px; color: #aaa; text-align: center;">
+                履歴差分表示
+            </div>
+            <button class="btn btn-outline btn-sm" data-history-index="next" disabled>次の履歴へ ▶</button>
+        </div>
+        
+        <!-- ローディング表示 -->
+        <div class="diff-loading" style="display: none; text-align: center; padding: 20px;">
+            <div class="loading-spinner" style="width: 20px; height: 20px; border: 2px solid #3e3e42; border-top: 2px solid #4ec9b0; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+            <p style="color: #888; margin: 0;">履歴を読み込み中...</p>
+        </div>
+        
+        <div style="display: flex; gap: 16px;">
+            <div style="flex:1;">
+                <div style="font-size: 12px; color: #888; margin-bottom: 8px;">前の履歴</div>
+                <div id="previousContent" style="background:#252526; padding:12px; border-radius:4px; min-height:120px; font-size:13px; line-height:1.4;"></div>
+            </div>
+            <div style="flex:1;">
+                <div style="font-size: 12px; color: #888; margin-bottom: 8px;">現在の履歴</div>
+                <div id="currentContent" style="background:#252526; padding:12px; border-radius:4px; min-height:120px; font-size:13px; line-height:1.4;"></div>
+            </div>
+        </div>
+    </div>
+    
+    {% if histories %}
+    <!-- 評価履歴セクション -->
+    <div class="history-section" id="evaluations-section">
+        <div class="history-title">🧠 評価履歴</div>
+        <ul class="history-list">
+            {% for history in histories %}
+            {% if history.evaluations %}
+            {% for eval in history.evaluations %}
+            <li class="history-item evaluation-item" data-type="evaluation" data-timestamp="{{ history.timestamp }}">
+                <div class="history-header">
+                    <div class="history-meta">
+                        <div class="history-timestamp">{{ history.timestamp[:19].replace('T', ' ') }}</div>
+                        <div class="history-type">評価 - スコア: {{ "%.1f"|format(eval.score * 100) if eval.score else "N/A" }}</div>
+                    </div>
+                    <div class="history-actions">
+                        <button class="btn btn-apply" onclick="applyHistory('{{ structure_id }}', '{{ history.timestamp }}')">
+                            ✅ 再適用
+                        </button>
+                        <a href="/unified/{{ structure_id }}?restore={{ loop.index0 }}" class="btn btn-outline" style="text-decoration: none;">
+                            📝 この構成を開く
+                        </a>
+                    </div>
+                </div>
+                <div class="history-content">
+                    {{ eval.feedback[:100] + "..." if eval.feedback and eval.feedback|length > 100 else eval.feedback or "フィードバックなし" }}
+                </div>
+            </li>
+            {% endfor %}
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <!-- 補完履歴セクション -->
+    <div class="history-section" id="completions-section">
+        <div class="history-title">🔁 補完履歴</div>
+        <ul class="history-list">
+            {% for history in histories %}
+            {% if history.completions %}
+            <div class="completion-history">
+                <h4>✨ 補完履歴</h4>
+                {% for completion in history.completions %}
+                <div class="completion-item {% if completion.status == 'error' %}error{% endif %}">
+                    <div class="completion-header">
+                        <span class="provider">{{ completion.provider }}</span>
+                        <span class="timestamp">{{ completion.timestamp }}</span>
+                        {% if completion.status == 'error' %}
+                        <span class="error-badge" style="background: #ff6b6b; color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px;">構文エラー</span>
+                        <button class="btn btn-repair" onclick="triggerClaudeRepair('{{ structure_id }}', '{{ completion.timestamp }}')" style="background: #4ec9b0; color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px; border: none; cursor: pointer; margin-left: 8px;">
+                            🔧 Claudeで修復
+                        </button>
+                        {% endif %}
+                        {% if completion.fallback %}
+                        <span class="repair-badge" style="background: #4ec9b0; color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px;">Claude修復済</span>
+                        {% endif %}
+                    </div>
+                    <div class="completion-content">
+                        {% if completion.status == 'error' %}
+                        <div class="error-content" style="background: #fff5f5; border-left: 4px solid #ff6b6b; padding: 8px; margin: 8px 0;">
+                            <strong>エラー内容:</strong> {{ completion.error_message }}<br>
+                            {% if completion.error_log_path %}
+                            <a href="{{ completion.error_log_path }}" target="_blank" style="color: #ff6b6b; text-decoration: underline;">📄 エラーログを確認</a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Gemini元出力 -->
+                        <div class="gemini-original" style="margin-bottom: 12px;">
+                            <h5 style="color: #888; margin: 0 0 8px 0; font-size: 13px;">🔸 Gemini元出力:</h5>
+                            <pre style="background: #1e1e1e; padding: 8px; border-radius: 4px; font-size: 11px; overflow-x: auto;">{{ completion.content }}</pre>
+                        </div>
+                        
+                        <!-- Claude修復結果 -->
+                        {% if completion.fallback %}
+                        <div class="claude-repair" style="margin-top: 16px; border-top: 1px solid #3e3e42; padding-top: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <h5 style="color: #4ec9b0; margin: 0; font-size: 13px;">🔧 Claude修復結果:</h5>
+                                <button class="btn btn-sm" onclick="toggleDiff('{{ loop.index0 }}')" style="background: #2d2d30; color: #ccc; border: 1px solid #3e3e42; padding: 4px 8px; font-size: 11px;">
+                                    📊 差分表示
+                                </button>
+                            </div>
+                            
+                            <!-- 修復結果の詳細 -->
+                            <div class="repair-details" style="background: #1a1a1a; padding: 12px; border-radius: 6px; border-left: 4px solid #4ec9b0;">
+                                <div style="margin-bottom: 8px;">
+                                    <span style="color: #888; font-size: 12px;">修復方法:</span>
+                                    <span style="color: #4ec9b0; font-size: 12px; margin-left: 8px;">{{ completion.fallback.repair_method }}</span>
+                                </div>
+                                <div style="margin-bottom: 8px;">
+                                    <span style="color: #888; font-size: 12px;">修復時刻:</span>
+                                    <span style="color: #ccc; font-size: 12px; margin-left: 8px;">{{ completion.fallback.timestamp[:19].replace('T', ' ') }}</span>
+                                </div>
+                                <div>
+                                    <span style="color: #888; font-size: 12px;">修復結果:</span>
+                                    <pre style="background: #252526; padding: 8px; border-radius: 4px; font-size: 11px; overflow-x: auto; margin: 8px 0 0 0;">{{ completion.fallback.content }}</pre>
+                                </div>
+                            </div>
+                            
+                            <!-- 差分表示エリア -->
+                            <div id="diff-{{ loop.index0 }}" class="diff-area" style="display: none; margin-top: 12px; background: #1a1a1a; padding: 12px; border-radius: 6px;">
+                                <div style="display: flex; gap: 12px;">
+                                    <div style="flex: 1;">
+                                        <div style="font-size: 11px; color: #888; margin-bottom: 6px;">❌ Gemini元出力</div>
+                                        <div class="before-content" style="background: #252526; padding: 8px; border-radius: 4px; font-size: 10px; line-height: 1.3; max-height: 200px; overflow-y: auto; border-left: 3px solid #ff6b6b;">
+                                            {{ completion.content }}
+                                        </div>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <div style="font-size: 11px; color: #888; margin-bottom: 6px;">✅ Claude修復後</div>
+                                        <div class="after-content" style="background: #252526; padding: 8px; border-radius: 4px; font-size: 10px; line-height: 1.3; max-height: 200px; overflow-y: auto; border-left: 3px solid #4ec9b0;">
+                                            {{ completion.fallback.content }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>📭 履歴がありません</h3>
+        <p>この構成の履歴はまだ保存されていません。</p>
+        <p>統合インターフェースで評価を実行してから、履歴を保存してください。</p>
+    </div>
+    {% endif %}
+</div>
+
+<script src="{{ url_for('static', filename='js/history_diff.js') }}"></script>
+<script>
+// フィルター機能
+function filterHistory(type) {
+    // フィルターボタンの状態更新
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    const evaluationItems = document.querySelectorAll('.evaluation-item');
+    const completionItems = document.querySelectorAll('.completion-item');
+    
+    switch (type) {
+        case 'evaluations':
+            evaluationItems.forEach(item => item.style.display = 'block');
+            completionItems.forEach(item => item.style.display = 'none');
+            break;
+        case 'completions':
+            evaluationItems.forEach(item => item.style.display = 'none');
+            completionItems.forEach(item => item.style.display = 'block');
+            break;
+        default: // 'all'
+            evaluationItems.forEach(item => item.style.display = 'block');
+            completionItems.forEach(item => item.style.display = 'block');
+            break;
+    }
+}
+
+// 履歴再適用
+function applyHistory(structureId, timestamp) {
+    if (confirm('この履歴を再適用しますか？')) {
+        fetch(`/logs/apply/${structureId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ timestamp: timestamp })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = `/unified/${structureId}`;
+            } else {
+                alert('再適用に失敗しました: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('再適用エラー:', error);
+            alert('再適用中にエラーが発生しました');
+        });
+    }
+}
+
+// 差分比較
+function compareDiff() {
+    const v1 = document.getElementById('diffV1').value;
+    const v2 = document.getElementById('diffV2').value;
+    
+    if (!v1 || !v2) {
+        alert('比較する2つのバージョンを選択してください');
+        return;
+    }
+    
+    if (v1 === v2) {
+        alert('異なるバージョンを選択してください');
+        return;
+    }
+    
+    window.location.href = `/logs/diff/{{ structure_id }}?v1=${v1}&v2=${v2}`;
+}
+
+// Claude修復結果の差分表示切り替え
+function toggleDiff(index) {
+    const diffArea = document.getElementById(`diff-${index}`);
+    if (diffArea.style.display === 'none') {
+        diffArea.style.display = 'block';
+    } else {
+        diffArea.style.display = 'none';
+    }
+}
+
+// Claude修復トリガー
+function triggerClaudeRepair(structureId, timestamp) {
+    if (!confirm('Claudeによる構文修復を実行しますか？\n\n修復結果は新しい構成として保存されます。')) {
+        return;
+    }
+    
+    // 修復ボタンを無効化
+    const repairBtn = event.target;
+    const originalText = repairBtn.textContent;
+    repairBtn.disabled = true;
+    repairBtn.textContent = '🔧 修復中...';
+    repairBtn.style.opacity = '0.6';
+    
+    // 修復APIを呼び出し
+    fetch(`/unified/repair_structure/${structureId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            timestamp: timestamp,
+            structure_id: structureId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 修復成功
+            showNotification('✅ Claudeによる修復を適用しました', 'success');
+            
+            // 修復結果を表示
+            if (data.repaired_content) {
+                showRepairResult(data.repaired_content, data.original_content);
+            }
+            
+            // ページをリロードして最新状態を表示
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            // 修復失敗
+            showNotification('❌ 修復に失敗しました: ' + (data.error || '不明なエラー'), 'error');
+            
+            if (data.claude_output) {
+                showClaudeOutput(data.claude_output);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('修復エラー:', error);
+        showNotification('❌ 修復中にエラーが発生しました', 'error');
+    })
+    .finally(() => {
+        // ボタンを復元
+        repairBtn.disabled = false;
+        repairBtn.textContent = originalText;
+        repairBtn.style.opacity = '1';
+    });
+}
+
+// 通知表示
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 16px;
+        border-radius: 6px;
+        color: white;
+        font-weight: bold;
+        z-index: 1000;
+        max-width: 300px;
+        word-wrap: break-word;
+    `;
+    
+    if (type === 'success') {
+        notification.style.background = '#4ec9b0';
+    } else if (type === 'error') {
+        notification.style.background = '#ff6b6b';
+    } else {
+        notification.style.background = '#007acc';
+    }
+    
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // 3秒後に自動削除
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
+}
+
+// 修復結果表示
+function showRepairResult(repairedContent, originalContent) {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1001;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: #252526; border-radius: 8px; padding: 20px; max-width: 80%; max-height: 80%; overflow: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="color: #4ec9b0; margin: 0;">🔧 Claude修復結果</h3>
+                <button onclick="this.closest('.modal').remove()" style="background: none; border: none; color: #ccc; font-size: 20px; cursor: pointer;">×</button>
+            </div>
+            <div style="display: flex; gap: 16px;">
+                <div style="flex: 1;">
+                    <h4 style="color: #ff6b6b; margin: 0 0 8px 0;">❌ 修復前</h4>
+                    <pre style="background: #1e1e1e; padding: 12px; border-radius: 4px; font-size: 12px; overflow-x: auto; max-height: 300px;">${JSON.stringify(originalContent, null, 2)}</pre>
+                </div>
+                <div style="flex: 1;">
+                    <h4 style="color: #4ec9b0; margin: 0 0 8px 0;">✅ 修復後</h4>
+                    <pre style="background: #1e1e1e; padding: 12px; border-radius: 4px; font-size: 12px; overflow-x: auto; max-height: 300px;">${JSON.stringify(repairedContent, null, 2)}</pre>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    modal.className = 'modal';
+    document.body.appendChild(modal);
+}
+
+// Claude出力表示
+function showClaudeOutput(claudeOutput) {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1001;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: #252526; border-radius: 8px; padding: 20px; max-width: 80%; max-height: 80%; overflow: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="color: #ff9800; margin: 0;">⚠️ Claude出力</h3>
+                <button onclick="this.closest('.modal').remove()" style="background: none; border: none; color: #ccc; font-size: 20px; cursor: pointer;">×</button>
+            </div>
+            <div style="color: #ccc; margin-bottom: 12px;">
+                Claudeの出力を確認し、手動修正が必要です。
+            </div>
+            <pre style="background: #1e1e1e; padding: 12px; border-radius: 4px; font-size: 12px; overflow-x: auto; max-height: 400px;">${claudeOutput}</pre>
+        </div>
+    `;
+    
+    modal.className = 'modal';
+    document.body.appendChild(modal);
+}
+</script>
+</body>
+</html> 

@@ -1,0 +1,26 @@
+{
+  "timestamp": "2025-06-27T15:00:40.409852",
+  "structure_id": "959cddea-4e3e-4e46-8187-31fc5b0eb5b0",
+  "error_type": "KeyError",
+  "error_message": "'error_message'",
+  "stack_trace": "Traceback (most recent call last):\n  File \"C:\\dev\\aide_x\\src\\routes\\unified_routes.py\", line 413, in apply_gemini_completion\n    logger.warning(f\"⚠️ 構文チェック失敗: {validation_result['error_message']}\")\n                                           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\nKeyError: 'error_message'\n",
+  "structure_content": {
+    "functions": [
+      {
+        "name": "食事記録",
+        "detail": "1日の食事内容を写真や文字で簡易記録"
+      },
+      {
+        "name": "栄養素管理",
+        "detail": "食事から得られる栄養素を自動計算し、バランスの良い食事をサポート"
+      },
+      {
+        "name": "レシピ提案",
+        "detail": "ユーザーの好みや必要な栄養素に基づいたレシピを提案"
+      }
+    ]
+  },
+  "claude_feedback": "Claude評価が利用できません",
+  "retry_count": 2,
+  "max_retries": 2
+}

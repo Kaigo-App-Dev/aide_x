@@ -1,41 +1,150 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <!-- 基本メタ情報 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- CSRFトークン（セキュリティ対策） -->
+    {% if csrf_token is defined %}
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    {% endif %}
+    
+    <!-- ページタイトル -->
     <title>{% block title %}AIDE-X{% endblock %}</title>
-
-    <!-- Bootstrap CSS CDN追加 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- 共通CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+    
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" 
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" 
+            crossorigin="anonymous"></script>
+    
+    <!-- 追加のhead要素（子テンプレートで使用） -->
+    {% block head %}{% endblock %}
 </head>
 <body>
-    <div class="container">
-        <!-- フラッシュメッセージ表示 -->
+    <!-- メインコンテナ -->
+    <div id="main-container">
+        <!-- フラッシュメッセージ表示エリア -->
         {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="flash flash-{{ category }}">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
+            {% if messages %}
+                <div id="flash-messages" class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">
+                            <span class="flash-text">{{ message }}</span>
+                            <button class="flash-close" onclick="this.parentElement.remove()">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         {% endwith %}
-
+        
         <!-- ナビゲーションバー -->
-        <nav style="background-color: #f0f0f0; padding: 10px; border-bottom: 1px solid #ccc;">
-          <a href="{{ url_for('chat.chat_prompt') }}" style="margin-right: 15px;">🧠 構成チャット</a>
-          <a href="{{ url_for('structure.list_structures') }}" style="margin-right: 15px;">📁 保存済み構成</a>
-          <!-- 🔍 プレビューは構成を開かないと使えないため、一時的に非表示 -->
-          {# <a href="{{ url_for('preview.index') }}" style="margin-right: 15px;">🔍 プレビュー</a> #}
-          <a href="{{ url_for('evolve.index') }}" style="margin-right: 15px;">🔄 進化</a>
+        <nav id="main-nav" class="main-navigation">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <a href="{{ url_for('chat.chat_prompt') }}" class="nav-link">
+                        🧠 AIDE-X
+                    </a>
+                </div>
+                
+                <div class="nav-menu">
+                    <a href="{{ url_for('chat.chat_prompt') }}" class="nav-link">
+                        💬 チャット
+                    </a>
+                    <a href="{{ url_for('structure.list_structures') }}" class="nav-link">
+                        📁 構成一覧
+                    </a>
+                    <a href="{{ url_for('structure.unified_interface', structure_id='test') }}" class="nav-link">
+                        🔧 統合画面
+                    </a>
+                    <a href="{{ url_for('evolve.index') }}" class="nav-link">
+                        🔄 進化
+                    </a>
+                </div>
+                
+                <!-- モバイル用ハンバーガーメニュー -->
+                <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="メニュー">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
         </nav>
-
-
-        {% block content %}{% endblock %}
+        
+        <!-- メインコンテンツエリア -->
+        <main id="main-content" class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+        
+        <!-- フッター -->
+        <footer id="main-footer" class="main-footer">
+            <div class="footer-container">
+                <p>&copy; 2024 AIDE-X. All rights reserved.</p>
+            </div>
+        </footer>
     </div>
-
-    <!-- Bootstrap JS（必要に応じて） -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 追加のスクリプト（子テンプレートで使用） -->
+    {% block scripts %}{% endblock %}
+    
+    <!-- 共通JavaScript -->
+    <script>
+        // モバイルメニューの制御
+        $(document).ready(function() {
+            $('#mobile-menu-toggle').on('click', function() {
+                $('.nav-menu').toggleClass('active');
+                $(this).toggleClass('active');
+            });
+            
+            // フラッシュメッセージの自動消去
+            $('.flash-message').each(function() {
+                var $message = $(this);
+                setTimeout(function() {
+                    $message.fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                }, 5000);
+            });
+            
+            // レスポンシブ対応：ウィンドウリサイズ時の処理
+            $(window).on('resize', function() {
+                if ($(window).width() > 768) {
+                    $('.nav-menu').removeClass('active');
+                    $('#mobile-menu-toggle').removeClass('active');
+                }
+            });
+        });
+        
+        // グローバルエラーハンドリング
+        window.addEventListener('error', function(e) {
+            console.error('JavaScript Error:', e.error);
+        });
+        
+        // Ajax通信の共通設定
+        $.ajaxSetup({
+            beforeSend: function(xhr) {
+                // CSRFトークンの自動付与
+                var token = $('meta[name="csrf-token"]').attr('content');
+                if (token) {
+                    xhr.setRequestHeader('X-CSRFToken', token);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Ajax Error:', status, error);
+                // エラー時の共通処理
+                if (xhr.status === 401) {
+                    alert('認証が必要です。ログインしてください。');
+                } else if (xhr.status === 403) {
+                    alert('アクセス権限がありません。');
+                } else if (xhr.status >= 500) {
+                    alert('サーバーエラーが発生しました。');
+                }
+            }
+        });
+    </script>
 </body>
 </html>

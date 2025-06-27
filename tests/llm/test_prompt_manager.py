@@ -5,51 +5,46 @@
 """
 
 import pytest
-from src.llm.prompts import prompt_manager, PromptManager
-from src.llm.prompts.types import PromptTemplate
+from src.llm.prompts.manager import PromptManager, PromptAlreadyExistsError
+from src.llm.prompts.prompt import Prompt
+from src.exceptions import PromptNotFoundError, TemplateFormatError
 
-def test_prompt_manager_initialization():
+def test_prompt_manager_initialization(prompt_manager):
     """プロンプトマネージャーの初期化テスト"""
-    manager = prompt_manager
-    assert isinstance(manager, PromptManager)
+    assert isinstance(prompt_manager, PromptManager)
 
-def test_register_builtin_templates():
-    """組み込みテンプレートの登録テスト"""
-    manager = prompt_manager
-    manager.register_builtin_templates()
-    
-    # Claude用のテンプレート確認
-    claude_template = manager.get_prompt("evaluation", "claude")
-    assert isinstance(claude_template, PromptTemplate)
-    assert "structure" in claude_template.template
-    assert claude_template.template is not None
-    
-    # Gemini用のテンプレート確認
-    gemini_template = manager.get_prompt("evaluation", "gemini")
-    assert isinstance(gemini_template, PromptTemplate)
-    assert "structure" in gemini_template.template
-    assert gemini_template.template is not None
+def test_register_and_get_template(prompt_manager):
+    """テンプレートの登録と取得テスト"""
+    prompt_manager.register_template("claude", "test", "Hello, {name}!")
+    prompt = prompt_manager.get("claude.test")
+    assert isinstance(prompt, str)
+    assert "{name}" in prompt
 
-def test_get_prompt_nonexistent():
-    """存在しないプロンプトの取得テスト"""
-    manager = prompt_manager
-    manager.register_builtin_templates()
-    
-    # 存在しないプロンプト名
-    template = manager.get_prompt("nonexistent", "claude")
-    assert template is None
-    
-    # 存在しないプロバイダー
-    template = manager.get_prompt("evaluation", "nonexistent")
-    assert template is None
+def test_register_duplicate_template(prompt_manager):
+    """重複テンプレート登録時の例外テスト"""
+    prompt_manager.register_template("claude", "dup", "Hi {name}!")
+    with pytest.raises(PromptAlreadyExistsError):
+        prompt_manager.register_template("claude", "dup", "Hi again {name}!")
 
-def test_prompt_template_format():
-    """プロンプトテンプレートのフォーマットテスト"""
-    template = PromptTemplate(
-        id="test-id",
-        provider="test-provider",
-        description="test-desc",
-        template="Hello, {placeholder}!"
-    )
-    formatted = template.format(placeholder="World")
-    assert formatted == "Hello, World!" 
+def test_get_nonexistent_template(prompt_manager):
+    """存在しないテンプレート取得時の例外テスト"""
+    with pytest.raises(PromptNotFoundError):
+        prompt_manager.get("claude.nonexistent")
+
+def test_prompt_format_success():
+    """Promptオブジェクトのformat成功テスト"""
+    prompt = Prompt(template="Hello, {placeholder}!")
+    formatted = prompt.format(placeholder="World")
+    assert formatted == "Hello, World!"
+
+def test_prompt_format_missing_key():
+    """Promptオブジェクトのformatでキー不足時の例外テスト"""
+    prompt = Prompt(template="Hello, {placeholder}!")
+    with pytest.raises(ValueError):
+        prompt.format()  # placeholderが無いので例外
+
+def test_register_invalid_template():
+    """無効なテンプレート登録時の例外テスト"""
+    manager = PromptManager()
+    with pytest.raises(TemplateFormatError):
+        manager.register_template("claude", "invalid", "Hello {name") 
