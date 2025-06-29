@@ -1,0 +1,27 @@
+{
+  "id": "f4666861-cf96-43e8-8a13-2cc3569e2ddb",
+  "title": "新規構成",
+  "description": "新しく作成された構成です",
+  "content": {},
+  "metadata": {
+    "created_at": "2025-06-27T23:16:45.609829",
+    "updated_at": "2025-06-27T23:16:45.609829",
+    "version": "1.0"
+  },
+  "history": [],
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "こんにちは！新しい構成を作成しましょう。何を作りたいですか？",
+      "type": "assistant",
+      "timestamp": "2025-06-27T23:16:45.609829",
+      "source": "chat"
+    }
+  ],
+  "evaluations": {},
+  "gemini_output": {
+    "status": "not_executed",
+    "reason": "移行時にGemini補完データが見つかりませんでした",
+    "timestamp": "2025-06-28T13:55:46.981925"
+  }
+}

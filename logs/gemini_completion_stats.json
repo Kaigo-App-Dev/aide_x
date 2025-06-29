@@ -1,6 +1,6 @@
 {
-  "total_completions": 27,
-  "successful_completions": 17,
+  "total_completions": 60,
+  "successful_completions": 50,
   "failed_completions": 10,
   "skipped_completions": 0,
   "error_types": {
@@ -82,5 +82,5 @@
     "skip_prevented_errors": 0,
     "effectiveness_rate": 0.0
   },
-  "success_rate": 62.96
+  "success_rate": 83.33
 }

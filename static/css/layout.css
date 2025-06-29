@@ -1,0 +1,341 @@
+/* AIDE-X Layout CSS - 3ペイン構造（改善版） */
+
+/* メインコンテナ */
+.main-container {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    flex: 1;
+    overflow: hidden;
+    align-items: stretch;
+    justify-content: space-between;
+    min-height: 100vh;
+}
+
+/* 3ペイン構造の基本スタイル */
+.chat-pane, .center-pane, .right-pane {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 33.3%;
+    min-width: 0;
+    min-height: 90vh;
+    overflow: hidden;
+    background: var(--bg-primary, #ffffff);
+    border: 1px solid var(--border-color, #dee2e6);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* ペイン共通スタイル */
+.pane {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-secondary, #f8f9fa);
+    border-right: 1px solid var(--border-color, #dee2e6);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.pane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-secondary, #f8f9fa);
+    border-bottom: 1px solid var(--border-color, #dee2e6);
+    border-radius: 8px 8px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    flex-shrink: 0;
+    min-height: 48px;
+    transition: all 0.3s ease;
+}
+
+.pane-header:hover {
+    background: var(--bg-tertiary, #e9ecef);
+    border-bottom-color: var(--primary-color, #007bff);
+}
+
+.pane-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-primary, #212529);
+    margin: 0;
+    flex: 1;
+    transition: color 0.3s ease;
+}
+
+.pane-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 改善されたペイン開閉ボタン */
+.pane-toggle {
+    position: relative;
+    background: var(--secondary-color, #6c757d);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    outline: none;
+    z-index: 100;
+}
+
+.pane-toggle:hover {
+    background: var(--dark-color, #495057);
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.pane-toggle:focus {
+    background: var(--dark-color, #495057);
+    box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.3);
+    transform: scale(1.05);
+}
+
+.pane-toggle:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+}
+
+/* 開閉ボタンのアイコン */
+.pane-toggle::before {
+    content: '◀';
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.pane-toggle.expanded::before {
+    content: '▶';
+}
+
+/* 折りたたみ時のボタンアイコン */
+.pane.collapsed .pane-toggle::before {
+    content: '▶';
+    transform: rotate(-90deg);
+}
+
+.pane-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary, #ffffff);
+    border-radius: 0 0 8px 8px;
+    transition: all 0.3s ease;
+    opacity: 1;
+    max-height: none;
+    min-height: 400px;
+}
+
+/* 折りたたみ時のコンテンツ */
+.pane.collapsed .pane-content {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0;
+    transition: opacity 0.3s ease, max-height 0.3s ease, padding 0.3s ease;
+}
+
+/* ペインリサイザー */
+.pane-resizer {
+    width: 4px;
+    background: var(--border-color, #dee2e6);
+    cursor: col-resize;
+    transition: background-color 0.3s ease;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.pane-resizer:hover {
+    background: var(--primary-color, #007bff);
+    width: 6px;
+}
+
+.pane-resizer::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 2px;
+    height: 20px;
+    background: var(--border-color, #dee2e6);
+    border-radius: 1px;
+    transition: background-color 0.3s ease;
+}
+
+.pane-resizer:hover::after {
+    background: var(--primary-color, #007bff);
+}
+
+.pane-collapsed + .pane-resizer {
+    display: none;
+}
+
+.left-resizer {
+    margin-left: -1px;
+}
+
+.right-resizer {
+    margin-right: -1px;
+}
+
+.center-resizer {
+    margin: 0 -1px;
+    background: var(--border-light, #f1f3f4);
+}
+
+.center-resizer:hover {
+    background: var(--primary-color, #007bff);
+}
+
+/* アニメーション効果 */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+}
+
+.pane.slide-in {
+    animation: slideIn 0.3s ease-in-out;
+}
+
+.pane.slide-out {
+    animation: slideOut 0.3s ease-in-out;
+}
+
+/* アクセシビリティ向上 */
+.pane-toggle:focus-visible {
+    outline: 2px solid var(--primary-color, #007bff);
+    outline-offset: 2px;
+}
+
+/* スクリーンリーダー用の非表示テキスト */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 1200px) {
+    .chat-pane {
+        flex: 1 1 30%;
+        min-width: 250px;
+    }
+    
+    .center-pane {
+        flex: 1 1 40%;
+        min-width: 300px;
+    }
+    
+    .right-pane {
+        flex: 1 1 30%;
+        min-width: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column !important;
+        height: auto !important;
+    }
+    
+    .chat-pane,
+    .center-pane,
+    .right-pane {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        margin-bottom: 8px;
+    }
+    
+    .pane-resizer {
+        display: none;
+    }
+    
+    .pane-toggle {
+        padding: 6px 10px;
+        font-size: 12px;
+        min-width: 28px;
+        height: 28px;
+    }
+    
+    .pane-header {
+        padding: 8px 12px;
+        min-height: 40px;
+    }
+    
+    .pane-title {
+        font-size: 14px;
+    }
+}
+
+/* 高コントラストモード対応 */
+@media (prefers-contrast: high) {
+    .pane-toggle {
+        border: 2px solid currentColor;
+    }
+    
+    .pane-header {
+        border-bottom: 2px solid currentColor;
+    }
+    
+    .pane-resizer {
+        background: currentColor;
+    }
+}
+
+/* アニメーション軽減設定 */
+@media (prefers-reduced-motion: reduce) {
+    .pane-toggle,
+    .pane-header,
+    .pane-content,
+    .chat-pane,
+    .center-pane,
+    .right-pane,
+    .pane-resizer {
+        transition: none;
+        animation: none;
+    }
+} 

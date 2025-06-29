@@ -1,0 +1,6 @@
+{"structure_id": "test_structure_002", "provider": "claude", "score": 0.8, "comment": "テスト評価0", "structure": {"title": "テスト構成0", "modules": {"module0": {"title": "テストモジュール0"}}}, "timestamp": "2025-06-29T07:34:19.478940"}
+{"structure_id": "test_structure_002", "provider": "gemini", "score": 0.8500000000000001, "comment": "テスト評価1", "structure": {"title": "テスト構成1", "modules": {"module1": {"title": "テストモジュール1"}}}, "timestamp": "2025-06-29T07:34:19.479934"}
+{"structure_id": "test_structure_002", "provider": "claude", "score": 0.9, "comment": "テスト評価2", "structure": {"title": "テスト構成2", "modules": {"module2": {"title": "テストモジュール2"}}}, "timestamp": "2025-06-29T07:34:19.479934"}
+{"structure_id": "test_structure_002", "provider": "claude", "score": 0.8, "comment": "テスト評価0", "structure": {"title": "テスト構成0", "modules": {"module0": {"title": "テストモジュール0"}}}, "timestamp": "2025-06-29T07:34:32.296857"}
+{"structure_id": "test_structure_002", "provider": "gemini", "score": 0.8500000000000001, "comment": "テスト評価1", "structure": {"title": "テスト構成1", "modules": {"module1": {"title": "テストモジュール1"}}}, "timestamp": "2025-06-29T07:34:32.296857"}
+{"structure_id": "test_structure_002", "provider": "claude", "score": 0.9, "comment": "テスト評価2", "structure": {"title": "テスト構成2", "modules": {"module2": {"title": "テストモジュール2"}}}, "timestamp": "2025-06-29T07:34:32.297864"}

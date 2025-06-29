@@ -4,20 +4,37 @@
 
 {% block head %}
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/unified.css') }}">
+    <!-- 分割されたCSSファイル -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}?v={{ timestamp }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}?v={{ timestamp }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}?v={{ timestamp }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/structure.css') }}?v={{ timestamp }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/completion.css') }}?v={{ timestamp }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pane_toggle.css') }}?v={{ timestamp }}">
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="main-container">
+        <!-- ローディングオーバーレイを完全に非表示に -->
+        <div id="loading-overlay" style="display: none !important; visibility: hidden !important; opacity: 0 !important; z-index: -9999 !important; pointer-events: none !important;"></div>
+        
         <!-- 左ペイン：チャット -->
-        <div class="chat-pane">
+        <div class="chat-pane" id="chat-pane" style="display: flex; visibility: visible; opacity: 1; pointer-events: auto;">
             <div class="pane-header">
                 <div class="pane-title">
                     💬 チャット
                 </div>
                 <div class="pane-actions">
-                    <button class="pane-toggle" onclick="toggleChatPane()">◀</button>
+                    <button 
+                        class="pane-toggle" 
+                        title="Chatペインの折りたたみ/展開 (Ctrl+1)"
+                        aria-expanded="true"
+                        aria-controls="chat-pane"
+                        aria-label="チャットペインを折りたたむ">
+                        <span class="sr-only">チャットペインを折りたたむ</span>
+                        ◀
+                    </button>
                 </div>
             </div>
             <div class="pane-content">
@@ -27,100 +44,338 @@
                   {% set msg_list_safe = [] %}
                 {% endif %}
                 
-                <!-- チャット専用テンプレートをinclude -->
-                {% include 'structure/chat.html' %}
+                <!-- チャットパネルコンポーネント -->
+                {% include 'components/chat_panel.html' %}
             </div>
         </div>
         
-        <!-- 中央ペイン：構成 -->
-        <div class="center-pane">
-            <!-- 構成専用テンプレートをinclude -->
-            {% include 'structure/structure.html' %}
-        </div>
+        <!-- 左ペインリサイザー -->
+        <div class="pane-resizer left-resizer" data-resize="chat-pane"></div>
         
-        <!-- 右ペイン：補助UI -->
-        <div class="right-pane">
+        <!-- 中央ペイン：構成 -->
+        <div class="center-pane" id="center-pane" style="display: flex; visibility: visible; opacity: 1; pointer-events: auto;">
             <div class="pane-header">
                 <div class="pane-title">
-                    🛠️ 補助ツール
+                    📋 構成
                 </div>
                 <div class="pane-actions">
-                    <button class="pane-toggle" onclick="toggleRightPane()">▶</button>
+                    <button 
+                        class="pane-toggle" 
+                        title="中央ペインの折りたたみ/展開 (Ctrl+2)"
+                        aria-expanded="true"
+                        aria-controls="center-pane"
+                        aria-label="中央ペインを折りたたむ">
+                        <span class="sr-only">中央ペインを折りたたむ</span>
+                        ◀▶
+                    </button>
                 </div>
             </div>
             <div class="pane-content">
-                <!-- 補助UI専用テンプレートをinclude -->
-                {% include 'structure/structure_ui.html' %}
+                <!-- 構造パネルコンポーネント -->
+                {% include 'components/structure_panel.html' %}
+            </div>
+        </div>
+        
+        <!-- 中央ペインリサイザー -->
+        <div class="pane-resizer center-resizer" data-resize="center-pane"></div>
+        
+        <!-- 右ペイン：Gemini補完 -->
+        <div class="gemini-pane" id="gemini-pane" style="display: flex; visibility: visible; opacity: 1; pointer-events: auto;">
+            <div class="pane-header">
+                <div class="pane-title">
+                    🤖 Gemini補完
+                </div>
+                <div class="pane-actions">
+                    <button 
+                        class="pane-toggle" 
+                        title="Geminiペインの折りたたみ/展開 (Ctrl+3)"
+                        aria-expanded="true"
+                        aria-controls="gemini-pane"
+                        aria-label="Geminiペインを折りたたむ">
+                        <span class="sr-only">Geminiペインを折りたたむ</span>
+                        ▶
+                    </button>
+                </div>
+            </div>
+            <div class="pane-content">
+                <!-- Gemini補完パネルコンポーネント -->
+                {% include 'components/completion_panel.html' %}
             </div>
         </div>
     </div>
 </div>
+
+<!-- デバッグモード切り替えUI -->
+<div id="debug-mode-toggle" style="position: fixed; top: 10px; left: 10px; z-index: 9999; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 12px; font-family: monospace;">
+    <div style="margin-bottom: 5px;">
+        <strong>🔧 デバッグモード制御</strong>
+    </div>
+    <div style="margin-bottom: 5px;">
+        <label>
+            <input type="checkbox" id="debug-mode-checkbox" style="margin-right: 5px;">
+            デバッグモード
+        </label>
+    </div>
+    <div style="margin-bottom: 5px;">
+        <button id="toggle-debug-mode" style="background: #007bff; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;">
+            モード切替
+        </button>
+        <button id="reload-page" style="background: #28a745; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; font-size: 11px; margin-left: 5px;">
+            再読み込み
+        </button>
+    </div>
+    <div style="font-size: 10px; opacity: 0.8;">
+        現在: <span id="current-mode">確認中...</span>
+    </div>
+</div>
+
+<!-- 構造データをJSONとして埋め込み -->
+<script id="structure-data" type="application/json">
+{% if structure_data and structure_data.content %}
+{{ structure_data | tojson }}
+{% elif request.args.get('debug') == 'true' or request.args.get('test_mode') == 'true' %}
+{
+  "id": "test-structure-001",
+  "content": {
+    "sections": [
+      {
+        "title": "テストセクション",
+        "description": "これは構成の表示と評価用のテストです。",
+        "components": [
+          {
+            "type": "text",
+            "content": "サンプルテキストです。"
+          }
+        ]
+      }
+    ]
+  },
+  "gemini_output": {
+    "测试セクション": {
+      "title": "テストセクション",
+      "output": "これはGeminiのデバッグ出力です。"
+    }
+  },
+  "created_at": "{{ timestamp }}",
+  "status": "test",
+  "test_mode": true
+}
+{% else %}
+null
+{% endif %}
+</script>
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/unified.js') }}?v=1.0.4"></script>
+<!-- スクリプト読み込み順序を最適化 -->
+<!-- 1. gemini_parser.js -->
+<script src="{{ url_for('static', filename='js/gemini_parser.js') }}?v={{ timestamp }}"></script>
+
+<!-- 2. layout_manager.js -->
+<script src="{{ url_for('static', filename='js/layout_manager.js') }}?v={{ timestamp }}"></script>
+
+<!-- 3. その他のJSファイル -->
+<script src="{{ url_for('static', filename='js/utils.js') }}?v={{ timestamp }}"></script>
+<script src="{{ url_for('static', filename='js/chat_handler.js') }}?v={{ timestamp }}"></script>
+<script src="{{ url_for('static', filename='js/claude_renderer.js') }}?v={{ timestamp }}"></script>
+<script src="{{ url_for('static', filename='js/structure_cards.js') }}?v={{ timestamp }}"></script>
+<script src="{{ url_for('static', filename='js/diff_renderer.js') }}?v={{ timestamp }}"></script>
+<script src="{{ url_for('static', filename='js/history_handler.js') }}?v={{ timestamp }}"></script>
+<script src="{{ url_for('static', filename='js/module_diff.js') }}?v={{ timestamp }}"></script>
+<script src="{{ url_for('static', filename='js/renderer.js') }}?v={{ timestamp }}"></script>
+
 <script>
-// ペイン切り替え機能
-function toggleChatPane() {
-    const chatPane = document.querySelector('.chat-pane');
-    chatPane.classList.toggle('collapsed');
+// JSファイル読み込み確認
+console.log('📦 JSファイル読み込み確認:', {
+    GeminiParserExists: typeof GeminiParser !== 'undefined',
+    LayoutManagerExists: typeof LayoutManager !== 'undefined',
+    AppInitializerExists: typeof AppInitializer !== 'undefined',
+    UtilsExists: typeof Utils !== 'undefined',
+    ChatHandlerExists: typeof ChatHandler !== 'undefined',
+    ClaudeRendererExists: typeof ClaudeRenderer !== 'undefined',
+    StructureCardsExists: typeof StructureCards !== 'undefined',
+    DiffRendererExists: typeof DiffRenderer !== 'undefined',
+    HistoryHandlerExists: typeof HistoryHandler !== 'undefined',
+    ModuleDiffExists: typeof ModuleDiff !== 'undefined',
+    RendererExists: typeof Renderer !== 'undefined'
+});
+
+// GeminiParser読み込み確認（重要）
+if (typeof GeminiParser !== 'undefined') {
+    console.log('✅ GeminiParserクラスが正常に読み込まれています');
+    console.log('🧪 GeminiParser詳細:', {
+        constructor: GeminiParser.constructor.name,
+        prototype: !!GeminiParser.prototype,
+        hasInit: typeof GeminiParser.prototype.init === 'function',
+        hasUpdateGeminiOutput: typeof GeminiParser.prototype.updateGeminiOutput === 'function'
+    });
+} else {
+    console.error('❌ GeminiParserクラスが読み込まれていません');
 }
 
-function toggleRightPane() {
-    const rightPane = document.querySelector('.right-pane');
-    rightPane.classList.toggle('collapsed');
+// デバッグモード設定
+window.isDebugMode = {{ 'true' if request.args.get('debug') == 'true' else 'false' }};
+window.isTestMode = {{ 'true' if request.args.get('test_mode') == 'true' else 'false' }};
+
+console.log('🔍 デバッグモード状態:', {
+    isDebugMode: window.isDebugMode,
+    isTestMode: window.isTestMode,
+    debugParam: '{{ request.args.get("debug") }}',
+    testModeParam: '{{ request.args.get("test_mode") }}'
+});
+
+// 構造データの設定
+const structureDataElement = document.getElementById('structure-data');
+if (structureDataElement) {
+    try {
+        window.structureData = JSON.parse(structureDataElement.textContent);
+        console.log('✅ 構造データを設定完了:', {
+            id: window.structureData?.id,
+            hasContent: !!(window.structureData && window.structureData.content),
+            hasGeminiOutput: !!(window.structureData && window.structureData.gemini_output),
+            sections: window.structureData?.content?.sections?.length || 0
+        });
+    } catch (error) {
+        console.error('❌ 構造データの解析エラー:', error);
+        window.structureData = null;
+    }
+} else {
+    console.warn('⚠️ 構造データ要素が見つかりません');
+    window.structureData = null;
 }
 
-function toggleOutputPane() {
-    const outputPane = document.getElementById('output-pane');
-    const toggleBtn = document.getElementById('output-toggle-icon');
+// デバッグモード時の仮データ注入
+if (window.isDebugMode || window.isTestMode) {
+    console.log('🧪 デバッグモード: 仮データを注入');
     
-    if (outputPane.classList.contains('visible')) {
-        outputPane.classList.remove('visible');
-        toggleBtn.textContent = '▼';
+    if (!window.structureData) {
+        window.structureData = {
+            id: 'debug-structure',
+            content: {
+                sections: [
+                    {
+                        title: "テストセクション",
+                        description: "これは構成の表示と評価用のテストです。",
+                        components: [
+                            {
+                                type: "text",
+                                content: "サンプルテキストです。"
+                            }
+                        ]
+                    }
+                ]
+            },
+            gemini_output: {
+                "テストセクション": {
+                    title: "テストセクション",
+                    output: "これはGeminiのデバッグ出力です。"
+                }
+            },
+            created_at: new Date().toISOString(),
+            status: "test",
+            test_mode: true
+        };
+    }
+    
+    // gemini_outputが存在しない場合は追加
+    if (!window.structureData.gemini_output) {
+        window.structureData.gemini_output = {
+            "テストセクション": {
+                title: "テストセクション",
+                output: "これはGeminiのデバッグ出力です。"
+            }
+        };
+        console.log('✅ デバッグ用gemini_outputを追加');
+    }
+    
+    console.log('🧪 デバッグデータ確認:', {
+        structureData: window.structureData,
+        geminiOutput: window.structureData?.gemini_output
+    });
+}
+
+// 初期化完了後の処理
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 DOMContentLoaded: 初期化開始');
+    
+    // 即座にローディングオーバーレイを非表示
+    const loadingOverlays = document.querySelectorAll('#loading-overlay, .loading-overlay, .aide-loading, .screen-mask, .overlay');
+    loadingOverlays.forEach(overlay => {
+        overlay.style.display = 'none';
+        overlay.style.visibility = 'hidden';
+        overlay.style.opacity = '0';
+        overlay.style.zIndex = '-9999';
+        overlay.style.pointerEvents = 'none';
+    });
+    
+    // 即座にペインを表示
+    const panes = document.querySelectorAll('#chat-pane, #center-pane, #gemini-pane');
+    panes.forEach(pane => {
+        pane.style.display = 'flex';
+        pane.style.visibility = 'visible';
+        pane.style.opacity = '1';
+        pane.style.pointerEvents = 'auto';
+        pane.style.position = 'relative';
+        pane.style.zIndex = '1';
+        pane.classList.remove('hidden', 'collapsed');
+    });
+    
+    // AppInitializerが存在する場合は初期化
+    if (typeof AppInitializer !== 'undefined') {
+        console.log('✅ AppInitializerを使用して初期化');
+        const appInitializer = new AppInitializer();
+        appInitializer.init();
     } else {
-        outputPane.classList.add('visible');
-        toggleBtn.textContent = '◀';
+        console.warn('⚠️ AppInitializerが見つかりません - 手動初期化');
+        
+        // 手動初期化
+        if (typeof LayoutManager !== 'undefined') {
+            console.log('✅ LayoutManagerを手動初期化');
+            window.layoutManager = new LayoutManager();
+        }
+        
+        if (typeof GeminiParser !== 'undefined') {
+            console.log('✅ GeminiParserを手動初期化');
+            window.geminiParser = new GeminiParser();
+        }
     }
-}
-
-// カード展開/折りたたみ機能
-function toggleCard(header) {
-    const card = header.closest('.structure-card');
-    card.classList.toggle('expanded');
-}
-
-function renderDiffHighlight(currentData, previousData) {
-  if (!currentData || !previousData) return;
-  const ignoreKeys = ['evaluations', 'completions', 'timestamp'];
-  const allKeys = Array.from(new Set([...Object.keys(currentData), ...Object.keys(previousData)]));
-  let prevHtml = '';
-  let currHtml = '';
-  allKeys.forEach(key => {
-    if (ignoreKeys.includes(key)) return;
-    const prevVal = previousData[key];
-    const currVal = currentData[key];
-    let prevClass = 'unchanged', currClass = 'unchanged';
-    if (prevVal !== currVal) {
-      prevClass = 'changed';
-      currClass = 'changed';
-    }
-    prevHtml += `<div class="diff-line ${prevClass}"><strong>${key}:</strong> ${prevVal ?? '-'}</div>`;
-    currHtml += `<div class="diff-line ${currClass}"><strong>${key}:</strong> ${currVal ?? '-'}</div>`;
-  });
-  document.getElementById('previousContent').innerHTML = prevHtml || '<div class="no-diff">構成情報なし</div>';
-  document.getElementById('currentContent').innerHTML = currHtml || '<div class="no-diff">構成情報なし</div>';
-}
-
-window.addEventListener('DOMContentLoaded', function() {
-  // ペインレイアウト初期化（unifiedInterfaceが初期化された後に実行）
-  setTimeout(function() {
-    if (window.unifiedInterface) {
-      window.unifiedInterface.initializePaneLayout();
-    } else {
-      console.warn('⚠️ unifiedInterfaceが初期化されていません');
-    }
-  }, 100);
+    
+    // 最終確認（遅延実行）
+    setTimeout(() => {
+        console.log('🔍 最終UI状態確認');
+        
+        // ローディングオーバーレイの最終確認
+        const finalLoadingOverlays = document.querySelectorAll('#loading-overlay, .loading-overlay, .aide-loading, .screen-mask, .overlay');
+        finalLoadingOverlays.forEach(overlay => {
+            if (overlay.style.display !== 'none') {
+                console.log('⚠️ ローディングオーバーレイがまだ表示されています:', overlay);
+                overlay.style.display = 'none';
+                overlay.style.visibility = 'hidden';
+                overlay.style.opacity = '0';
+                overlay.style.zIndex = '-9999';
+                overlay.style.pointerEvents = 'none';
+            }
+        });
+        
+        // ペインの最終確認
+        const finalPanes = document.querySelectorAll('#chat-pane, #center-pane, #gemini-pane');
+        finalPanes.forEach(pane => {
+            if (pane.style.display !== 'flex') {
+                console.log('⚠️ ペインがまだ非表示です:', pane.id);
+                pane.style.display = 'flex';
+                pane.style.visibility = 'visible';
+                pane.style.opacity = '1';
+                pane.style.pointerEvents = 'auto';
+                pane.style.position = 'relative';
+                pane.style.zIndex = '1';
+                pane.classList.remove('hidden', 'collapsed');
+            }
+        });
+        
+        console.log('✅ 最終UI状態確認完了');
+    }, 200);
+    
+    console.log('✅ 初期化完了');
 });
 </script>
 {% endblock %} 

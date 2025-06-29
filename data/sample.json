@@ -6,5 +6,10 @@
   "is_final": false,
   "intent_match": 85,
   "quality_score": 75,
-  "intent_reason": "Claudeによる構成意図の説明（仮）"
+  "intent_reason": "Claudeによる構成意図の説明（仮）",
+  "gemini_output": {
+    "status": "not_executed",
+    "reason": "移行時にGemini補完データが見つかりませんでした",
+    "timestamp": "2025-06-28T13:55:47.031235"
+  }
 }

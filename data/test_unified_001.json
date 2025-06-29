@@ -51,5 +51,10 @@
         }
       }
     }
+  },
+  "gemini_output": {
+    "status": "not_executed",
+    "reason": "移行時にGemini補完データが見つかりませんでした",
+    "timestamp": "2025-06-28T13:55:47.037531"
   }
 }

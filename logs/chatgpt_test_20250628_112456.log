@@ -1,0 +1,85 @@
+2025-06-28 11:24:56,690 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-28 11:24:56,690 - src.llm.prompts.templates - INFO - 🔄 register_all_templates 開始
+2025-06-28 11:24:56,690 - src.llm.prompts.templates - INFO - 📝 テンプレート辞書作成完了
+2025-06-28 11:24:56,691 - src.llm.prompts.templates - INFO - 🔄 chatgpt テンプレート登録開始
+2025-06-28 11:24:56,691 - src.llm.prompts.templates - INFO -   📝 chatgpt.chat 登録中...
+2025-06-28 11:24:56,691 - src.llm.prompts.templates - INFO -   ✅ chatgpt.chat 登録完了
+2025-06-28 11:24:56,691 - src.llm.prompts.templates - INFO -   📝 chatgpt.evaluation 登録中...
+2025-06-28 11:24:56,693 - src.llm.prompts.templates - INFO -   ✅ chatgpt.evaluation 登録完了
+2025-06-28 11:24:56,693 - src.llm.prompts.templates - INFO -   📝 chatgpt.structure_generation 登録中...
+2025-06-28 11:24:56,693 - src.llm.prompts.templates - INFO -   ✅ chatgpt.structure_generation 登録完了
+2025-06-28 11:24:56,693 - src.llm.prompts.templates - INFO - 🔄 claude テンプレート登録開始
+2025-06-28 11:24:56,693 - src.llm.prompts.templates - INFO -   📝 claude.chat 登録中...
+2025-06-28 11:24:56,693 - src.llm.prompts.templates - INFO -   ✅ claude.chat 登録完了
+2025-06-28 11:24:56,693 - src.llm.prompts.templates - INFO -   📝 claude.evaluation 登録中...
+2025-06-28 11:24:56,694 - src.llm.prompts.templates - INFO -   ✅ claude.evaluation 登録完了
+2025-06-28 11:24:56,694 - src.llm.prompts.templates - INFO -   📝 claude.structure_evaluation 登録中...
+2025-06-28 11:24:56,694 - src.llm.prompts.templates - INFO -   ✅ claude.structure_evaluation 登録完了
+2025-06-28 11:24:56,694 - src.llm.prompts.templates - INFO - 🔄 gemini テンプレート登録開始
+2025-06-28 11:24:56,694 - src.llm.prompts.templates - INFO -   📝 gemini.chat 登録中...
+2025-06-28 11:24:56,694 - src.llm.prompts.templates - INFO -   ✅ gemini.chat 登録完了
+2025-06-28 11:24:56,694 - src.llm.prompts.templates - INFO -   📝 gemini.evaluation 登録中...
+2025-06-28 11:24:56,695 - src.llm.prompts.templates - INFO -   ✅ gemini.evaluation 登録完了
+2025-06-28 11:24:56,695 - src.llm.prompts.templates - INFO -   📝 gemini.completion 登録中...
+2025-06-28 11:24:56,695 - src.llm.prompts.templates - INFO -   ✅ gemini.completion 登録完了
+2025-06-28 11:24:56,695 - src.llm.prompts.templates - INFO - 🔄 基本テンプレート登録完了
+2025-06-28 11:24:56,695 - src.llm.prompts.templates - INFO - 🔄 汎用テンプレート登録開始
+2025-06-28 11:24:56,695 - src.llm.prompts.templates - INFO -   📝 汎用テンプレート 'claude_check_structure' 登録完了
+2025-06-28 11:24:56,695 - src.llm.prompts.templates - INFO -   📝 汎用テンプレート 'structure_from_input' 登録完了
+2025-06-28 11:24:56,695 - src.llm.prompts.templates - INFO - ✅ register_all_templates 完了 - 登録済みテンプレート数: 9, 汎用テンプレート数: 2
+2025-06-28 11:24:56,695 - src.llm.prompts.manager - INFO - ✅ テンプレート自動登録完了
+2025-06-28 11:24:56,695 - src.llm.prompts.templates - INFO - 🔄 register_all_templates 開始
+2025-06-28 11:24:56,696 - src.llm.prompts.templates - INFO - 📝 テンプレート辞書作成完了
+2025-06-28 11:24:56,696 - src.llm.prompts.templates - INFO - 🔄 chatgpt テンプレート登録開始
+2025-06-28 11:24:56,696 - src.llm.prompts.templates - INFO -   📝 chatgpt.chat 登録中...
+2025-06-28 11:24:56,696 - src.llm.prompts.templates - INFO -   ✅ chatgpt.chat 登録完了
+2025-06-28 11:24:56,696 - src.llm.prompts.templates - INFO -   📝 chatgpt.evaluation 登録中...
+2025-06-28 11:24:56,696 - src.llm.prompts.templates - INFO -   ✅ chatgpt.evaluation 登録完了
+2025-06-28 11:24:56,696 - src.llm.prompts.templates - INFO -   📝 chatgpt.structure_generation 登録中...
+2025-06-28 11:24:56,696 - src.llm.prompts.templates - INFO -   ✅ chatgpt.structure_generation 登録完了
+2025-06-28 11:24:56,696 - src.llm.prompts.templates - INFO - 🔄 claude テンプレート登録開始
+2025-06-28 11:24:56,696 - src.llm.prompts.templates - INFO -   📝 claude.chat 登録中...
+2025-06-28 11:24:56,697 - src.llm.prompts.templates - INFO -   ✅ claude.chat 登録完了
+2025-06-28 11:24:56,697 - src.llm.prompts.templates - INFO -   📝 claude.evaluation 登録中...
+2025-06-28 11:24:56,697 - src.llm.prompts.templates - INFO -   ✅ claude.evaluation 登録完了
+2025-06-28 11:24:56,697 - src.llm.prompts.templates - INFO -   📝 claude.structure_evaluation 登録中...
+2025-06-28 11:24:56,697 - src.llm.prompts.templates - INFO -   ✅ claude.structure_evaluation 登録完了
+2025-06-28 11:24:56,697 - src.llm.prompts.templates - INFO - 🔄 gemini テンプレート登録開始
+2025-06-28 11:24:56,697 - src.llm.prompts.templates - INFO -   📝 gemini.chat 登録中...
+2025-06-28 11:24:56,697 - src.llm.prompts.templates - INFO -   ✅ gemini.chat 登録完了
+2025-06-28 11:24:56,697 - src.llm.prompts.templates - INFO -   📝 gemini.evaluation 登録中...
+2025-06-28 11:24:56,697 - src.llm.prompts.templates - INFO -   ✅ gemini.evaluation 登録完了
+2025-06-28 11:24:56,697 - src.llm.prompts.templates - INFO -   📝 gemini.completion 登録中...
+2025-06-28 11:24:56,697 - src.llm.prompts.templates - INFO -   ✅ gemini.completion 登録完了
+2025-06-28 11:24:56,697 - src.llm.prompts.templates - INFO - 🔄 基本テンプレート登録完了
+2025-06-28 11:24:56,699 - src.llm.prompts.templates - INFO - 🔄 汎用テンプレート登録開始
+2025-06-28 11:24:56,699 - src.llm.prompts.templates - INFO -   📝 汎用テンプレート 'claude_check_structure' 登録完了
+2025-06-28 11:24:56,699 - src.llm.prompts.templates - INFO -   📝 汎用テンプレート 'structure_from_input' 登録完了
+2025-06-28 11:24:56,699 - src.llm.prompts.templates - INFO - ✅ register_all_templates 完了 - 登録済みテンプレート数: 9, 汎用テンプレート数: 2
+2025-06-28 11:24:56,699 - src.llm.controller - INFO - AIControllerを初期化しました
+2025-06-28 11:24:56,699 - src.llm.providers.chatgpt - INFO - ChatGPTProvider initialized with PromptManager and API Key
+2025-06-28 11:24:56,699 - src.llm.controller - INFO - ✅ chatgptプロバイダを登録しました
+2025-06-28 11:24:56,700 - src.llm.providers.chatgpt - INFO - ChatGPT API call started
+2025-06-28 11:25:09,827 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-28 11:25:09,829 - src.llm.providers.chatgpt - INFO - ✅ ChatGPT API call finished in 12.92 seconds.
+2025-06-28 11:25:09,830 - src.llm.providers.chatgpt - INFO - ChatGPT API call successful: 「ブログサイトの構成について考えてみました。主な要素としては、ホームページ、各記事のページ、カテゴリー別のページ、お問い合わせページなどが考えられます。また、ユーザーが自分の記事を見つけやすいように検...
+2025-06-28 11:25:09,832 - src.utils.files - INFO - 🔍 extract_json_part: 入力テキスト長 = 470
+2025-06-28 11:25:09,835 - src.utils.files - INFO - 📝 ChatGPT原文を保存: logs/chatgpt_raw_output_20250628_112509.txt
+2025-06-28 11:25:09,835 - src.utils.files - INFO - 🔍 extract_json_part: コードブロックからJSONを抽出（パターン: ```(?:json)?\s*(\{[\...）
+2025-06-28 11:25:09,837 - src.utils.files - INFO - ✅ extract_json_part: コードブロックJSON抽出成功
+2025-06-28 11:25:09,839 - src.llm.providers.chatgpt - INFO - ChatGPT API call started
+2025-06-28 11:25:25,787 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-28 11:25:25,789 - src.llm.providers.chatgpt - INFO - ✅ ChatGPT API call finished in 15.75 seconds.
+2025-06-28 11:25:25,790 - src.llm.providers.chatgpt - INFO - ChatGPT API call successful: 「ECサイトの構成について考えてみました。まず、トップページには人気の商品や新商品を表示することで、ユーザーの興味を惹きつけることができます。次に、商品詳細ページでは、商品の写真や説明、価格、レビュー...
+2025-06-28 11:25:25,792 - src.utils.files - INFO - 🔍 extract_json_part: 入力テキスト長 = 509
+2025-06-28 11:25:25,793 - src.utils.files - INFO - 📝 ChatGPT原文を保存: logs/chatgpt_raw_output_20250628_112525.txt
+2025-06-28 11:25:25,794 - src.utils.files - INFO - 🔍 extract_json_part: コードブロックからJSONを抽出（パターン: ```(?:json)?\s*(\{[\...）
+2025-06-28 11:25:25,794 - src.utils.files - INFO - ✅ extract_json_part: コードブロックJSON抽出成功
+2025-06-28 11:25:25,796 - src.llm.providers.chatgpt - INFO - ChatGPT API call started
+2025-06-28 11:25:41,829 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-06-28 11:25:41,833 - src.llm.providers.chatgpt - INFO - ✅ ChatGPT API call finished in 15.84 seconds.
+2025-06-28 11:25:41,834 - src.llm.providers.chatgpt - INFO - ChatGPT API call successful: 「ポートフォリオサイトの構成について、以下のように提案します。まず、"Home"ページでは、あなた自身の紹介と、サイトの目的を明確に伝えるようにしましょう。次に、"About"ページでは、あなたのバッ...
+2025-06-28 11:25:41,838 - src.utils.files - INFO - 🔍 extract_json_part: 入力テキスト長 = 823
+2025-06-28 11:25:41,839 - src.utils.files - INFO - 📝 ChatGPT原文を保存: logs/chatgpt_raw_output_20250628_112541.txt
+2025-06-28 11:25:41,839 - src.utils.files - INFO - 🔍 extract_json_part: コードブロックからJSONを抽出（パターン: ```(?:json)?\s*(\{[\...）
+2025-06-28 11:25:41,840 - src.utils.files - INFO - ✅ extract_json_part: コードブロックJSON抽出成功

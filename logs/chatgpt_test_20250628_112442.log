@@ -1,0 +1,59 @@
+2025-06-28 11:24:42,338 - src.llm.prompts.manager - INFO - PromptManager initialized
+2025-06-28 11:24:42,339 - src.llm.prompts.templates - INFO - 🔄 register_all_templates 開始
+2025-06-28 11:24:42,339 - src.llm.prompts.templates - INFO - 📝 テンプレート辞書作成完了
+2025-06-28 11:24:42,339 - src.llm.prompts.templates - INFO - 🔄 chatgpt テンプレート登録開始
+2025-06-28 11:24:42,339 - src.llm.prompts.templates - INFO -   📝 chatgpt.chat 登録中...
+2025-06-28 11:24:42,340 - src.llm.prompts.templates - INFO -   ✅ chatgpt.chat 登録完了
+2025-06-28 11:24:42,341 - src.llm.prompts.templates - INFO -   📝 chatgpt.evaluation 登録中...
+2025-06-28 11:24:42,341 - src.llm.prompts.templates - INFO -   ✅ chatgpt.evaluation 登録完了
+2025-06-28 11:24:42,341 - src.llm.prompts.templates - INFO -   📝 chatgpt.structure_generation 登録中...
+2025-06-28 11:24:42,341 - src.llm.prompts.templates - INFO -   ✅ chatgpt.structure_generation 登録完了
+2025-06-28 11:24:42,341 - src.llm.prompts.templates - INFO - 🔄 claude テンプレート登録開始
+2025-06-28 11:24:42,342 - src.llm.prompts.templates - INFO -   📝 claude.chat 登録中...
+2025-06-28 11:24:42,342 - src.llm.prompts.templates - INFO -   ✅ claude.chat 登録完了
+2025-06-28 11:24:42,342 - src.llm.prompts.templates - INFO -   📝 claude.evaluation 登録中...
+2025-06-28 11:24:42,342 - src.llm.prompts.templates - INFO -   ✅ claude.evaluation 登録完了
+2025-06-28 11:24:42,342 - src.llm.prompts.templates - INFO -   📝 claude.structure_evaluation 登録中...
+2025-06-28 11:24:42,342 - src.llm.prompts.templates - INFO -   ✅ claude.structure_evaluation 登録完了
+2025-06-28 11:24:42,342 - src.llm.prompts.templates - INFO - 🔄 gemini テンプレート登録開始
+2025-06-28 11:24:42,342 - src.llm.prompts.templates - INFO -   📝 gemini.chat 登録中...
+2025-06-28 11:24:42,342 - src.llm.prompts.templates - INFO -   ✅ gemini.chat 登録完了
+2025-06-28 11:24:42,343 - src.llm.prompts.templates - INFO -   📝 gemini.evaluation 登録中...
+2025-06-28 11:24:42,343 - src.llm.prompts.templates - INFO -   ✅ gemini.evaluation 登録完了
+2025-06-28 11:24:42,343 - src.llm.prompts.templates - INFO -   📝 gemini.completion 登録中...
+2025-06-28 11:24:42,343 - src.llm.prompts.templates - INFO -   ✅ gemini.completion 登録完了
+2025-06-28 11:24:42,343 - src.llm.prompts.templates - INFO - 🔄 基本テンプレート登録完了
+2025-06-28 11:24:42,343 - src.llm.prompts.templates - INFO - 🔄 汎用テンプレート登録開始
+2025-06-28 11:24:42,343 - src.llm.prompts.templates - INFO -   📝 汎用テンプレート 'claude_check_structure' 登録完了
+2025-06-28 11:24:42,343 - src.llm.prompts.templates - INFO -   📝 汎用テンプレート 'structure_from_input' 登録完了
+2025-06-28 11:24:42,344 - src.llm.prompts.templates - INFO - ✅ register_all_templates 完了 - 登録済みテンプレート数: 9, 汎用テンプレート数: 2
+2025-06-28 11:24:42,344 - src.llm.prompts.manager - INFO - ✅ テンプレート自動登録完了
+2025-06-28 11:24:42,344 - src.llm.prompts.templates - INFO - 🔄 register_all_templates 開始
+2025-06-28 11:24:42,344 - src.llm.prompts.templates - INFO - 📝 テンプレート辞書作成完了
+2025-06-28 11:24:42,344 - src.llm.prompts.templates - INFO - 🔄 chatgpt テンプレート登録開始
+2025-06-28 11:24:42,344 - src.llm.prompts.templates - INFO -   📝 chatgpt.chat 登録中...
+2025-06-28 11:24:42,344 - src.llm.prompts.templates - INFO -   ✅ chatgpt.chat 登録完了
+2025-06-28 11:24:42,344 - src.llm.prompts.templates - INFO -   📝 chatgpt.evaluation 登録中...
+2025-06-28 11:24:42,344 - src.llm.prompts.templates - INFO -   ✅ chatgpt.evaluation 登録完了
+2025-06-28 11:24:42,344 - src.llm.prompts.templates - INFO -   📝 chatgpt.structure_generation 登録中...
+2025-06-28 11:24:42,344 - src.llm.prompts.templates - INFO -   ✅ chatgpt.structure_generation 登録完了
+2025-06-28 11:24:42,345 - src.llm.prompts.templates - INFO - 🔄 claude テンプレート登録開始
+2025-06-28 11:24:42,345 - src.llm.prompts.templates - INFO -   📝 claude.chat 登録中...
+2025-06-28 11:24:42,345 - src.llm.prompts.templates - INFO -   ✅ claude.chat 登録完了
+2025-06-28 11:24:42,345 - src.llm.prompts.templates - INFO -   📝 claude.evaluation 登録中...
+2025-06-28 11:24:42,345 - src.llm.prompts.templates - INFO -   ✅ claude.evaluation 登録完了
+2025-06-28 11:24:42,345 - src.llm.prompts.templates - INFO -   📝 claude.structure_evaluation 登録中...
+2025-06-28 11:24:42,345 - src.llm.prompts.templates - INFO -   ✅ claude.structure_evaluation 登録完了
+2025-06-28 11:24:42,345 - src.llm.prompts.templates - INFO - 🔄 gemini テンプレート登録開始
+2025-06-28 11:24:42,345 - src.llm.prompts.templates - INFO -   📝 gemini.chat 登録中...
+2025-06-28 11:24:42,345 - src.llm.prompts.templates - INFO -   ✅ gemini.chat 登録完了
+2025-06-28 11:24:42,345 - src.llm.prompts.templates - INFO -   📝 gemini.evaluation 登録中...
+2025-06-28 11:24:42,346 - src.llm.prompts.templates - INFO -   ✅ gemini.evaluation 登録完了
+2025-06-28 11:24:42,346 - src.llm.prompts.templates - INFO -   📝 gemini.completion 登録中...
+2025-06-28 11:24:42,346 - src.llm.prompts.templates - INFO -   ✅ gemini.completion 登録完了
+2025-06-28 11:24:42,346 - src.llm.prompts.templates - INFO - 🔄 基本テンプレート登録完了
+2025-06-28 11:24:42,346 - src.llm.prompts.templates - INFO - 🔄 汎用テンプレート登録開始
+2025-06-28 11:24:42,346 - src.llm.prompts.templates - INFO -   📝 汎用テンプレート 'claude_check_structure' 登録完了
+2025-06-28 11:24:42,346 - src.llm.prompts.templates - INFO -   📝 汎用テンプレート 'structure_from_input' 登録完了
+2025-06-28 11:24:42,346 - src.llm.prompts.templates - INFO - ✅ register_all_templates 完了 - 登録済みテンプレート数: 9, 汎用テンプレート数: 2
+2025-06-28 11:24:42,346 - src.llm.controller - INFO - AIControllerを初期化しました

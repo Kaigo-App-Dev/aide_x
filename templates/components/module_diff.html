@@ -1,0 +1,127 @@
+<!-- モジュール差分表示専用テンプレート -->
+<div class="module-diff-container">
+    <div class="module-diff-header">
+        <h3 class="module-diff-title">
+            🔍 モジュール差分
+        </h3>
+        <div class="module-diff-summary">
+            <span class="diff-summary-item added">
+                🟢 追加: {{ diff.added|length }}
+            </span>
+            <span class="diff-summary-item removed">
+                🔴 削除: {{ diff.removed|length }}
+            </span>
+            <span class="diff-summary-item changed">
+                🟡 変更: {{ diff.changed|length }}
+            </span>
+        </div>
+    </div>
+
+    <div class="module-diff-content">
+        <!-- 追加されたモジュール -->
+        {% if diff.added %}
+        <div class="diff-section added-section">
+            <h4 class="diff-section-title added">
+                🟢 追加されたモジュール
+            </h4>
+            <ul class="diff-module-list added-list">
+                {% for module in diff.added %}
+                <li class="diff-module-item added">
+                    <div class="module-name">
+                        <span class="diff-icon">＋</span>
+                        {{ module.name if module.name else module.title if module.title else "無名モジュール" }}
+                    </div>
+                    {% if module.description %}
+                    <div class="module-description">
+                        {{ module.description }}
+                    </div>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- 削除されたモジュール -->
+        {% if diff.removed %}
+        <div class="diff-section removed-section">
+            <h4 class="diff-section-title removed">
+                🔴 削除されたモジュール
+            </h4>
+            <ul class="diff-module-list removed-list">
+                {% for module in diff.removed %}
+                <li class="diff-module-item removed">
+                    <div class="module-name">
+                        <span class="diff-icon">−</span>
+                        {{ module.name if module.name else module.title if module.title else "無名モジュール" }}
+                    </div>
+                    {% if module.description %}
+                    <div class="module-description">
+                        {{ module.description }}
+                    </div>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- 変更されたモジュール -->
+        {% if diff.changed %}
+        <div class="diff-section changed-section">
+            <h4 class="diff-section-title changed">
+                🟡 内容が変更されたモジュール
+            </h4>
+            <ul class="diff-module-list changed-list">
+                {% for module in diff.changed %}
+                <li class="diff-module-item changed">
+                    <div class="module-name">
+                        <span class="diff-icon">±</span>
+                        {{ module.name }}
+                    </div>
+                    {% if module.changes %}
+                    <div class="module-changes">
+                        <details class="changes-details">
+                            <summary class="changes-summary">
+                                変更内容を表示
+                            </summary>
+                            <ul class="changes-list">
+                                {% for change in module.changes %}
+                                <li class="change-item">
+                                    <span class="change-field">{{ change.field }}:</span>
+                                    <div class="change-values">
+                                        <div class="change-before">
+                                            <span class="change-label">変更前:</span>
+                                            <span class="change-value">{{ change.before|tojson }}</span>
+                                        </div>
+                                        <div class="change-after">
+                                            <span class="change-label">変更後:</span>
+                                            <span class="change-value">{{ change.after|tojson }}</span>
+                                        </div>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </details>
+                    </div>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- 変更なしの場合 -->
+        {% if not diff.added and not diff.removed and not diff.changed %}
+        <div class="diff-section no-changes-section">
+            <div class="no-changes-message">
+                <span class="no-changes-icon">✅</span>
+                <h4 class="no-changes-title">変更なし</h4>
+                <p class="no-changes-description">
+                    Claude構成とGemini補完の間にモジュールの変更はありません。
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div> 

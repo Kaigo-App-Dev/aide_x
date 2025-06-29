@@ -1,0 +1,162 @@
+<!-- 構造パネルコンポーネント -->
+<div class="center-content">
+    <!-- 構成タイトル表示（画面上部） -->
+    <div id="structure-title" class="structure-title-section">
+        <h2 class="structure-title">
+            {{ structure.title if structure and structure.title else "無題の構成" }}
+        </h2>
+    </div>
+
+    <!-- 構成カード（常時表示、優先領域） -->
+    <div class="structure-cards-section">
+        <div class="section-header">
+            <h3>📋 構成カード</h3>
+            <div class="section-actions">
+                <span class="auto-update-status" style="display: none;">更新中...</span>
+            </div>
+        </div>
+        <div class="structure-cards" id="structureCards">
+            {% set structure_card_count = 0 %}
+            {% for msg in msg_list_safe %}
+                {% if msg.type == "structure_proposal" %}
+                    {% set structure_card_count = structure_card_count + 1 %}
+                    <div class="structure-card" data-type="{{ msg.type }}" data-testid="structure-card">
+                        <div class="structure-label">
+                            🔍 Claude構成評価
+                        </div>
+                        <div class="structure-content">{{ msg.content|safe }}</div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            {% if structure_card_count == 0 %}
+                <div class="empty-structure-cards" id="structure-placeholder">
+                    <div class="empty-message">
+                        <h4>📋 構成データがありません</h4>
+                        <p>ChatGPTに構成について質問すると、ここに構成カードが表示されます。</p>
+                        <div class="suggestion-examples">
+                            <p><strong>質問例:</strong></p>
+                            <ul>
+                                <li>「Webアプリの構成をJSON形式で出力してください」</li>
+                                <li>「ブログサイトの構成を作成してください」</li>
+                                <li>「ECサイトの機能構成を提案してください」</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 構成詳細（折りたたみ式） -->
+    <div class="structure-details-section">
+        <div class="section-header collapsible" onclick="toggleSection('structure-details')">
+            <h3>🔽 構成の詳細を見る</h3>
+            <div class="section-actions">
+                <button class="btn btn-sm btn-outline-secondary" onclick="event.stopPropagation(); toggleStructureView()">
+                    <span id="structure-toggle-icon">▼</span>
+                </button>
+            </div>
+        </div>
+        <div class="section-content" id="structure-details-content">
+            <!-- 構成表示エリア -->
+            <div class="structure-view">
+                <div class="structure-header">
+                    <h3>📋 構成</h3>
+                    <div class="structure-toolbar">
+                        <button class="btn btn-sm btn-outline-primary" onclick="addTemplate()">
+                            ➕ テンプレート追加
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeTemplate()">
+                            ➖ テンプレート削除
+                        </button>
+                    </div>
+                </div>
+                <div class="structure-content" id="structure-content">
+                    {% if structure and structure.content and structure.content|length > 0 %}
+                        {% if structure.content is mapping and structure.content.error %}
+                            <!-- エラー構成の場合 -->
+                            <div class="error-structure">
+                                <div class="error-message">
+                                    <h4>⚠️ 構成エラー</h4>
+                                    <p><strong>{{ structure.content.error }}</strong></p>
+                                    {% if structure.content.reason %}
+                                        <p><em>理由: {{ structure.content.reason }}</em></p>
+                                    {% endif %}
+                                    {% if structure.content.original_text %}
+                                        <details>
+                                            <summary>元のテキスト（最初の200文字）</summary>
+                                            <pre>{{ structure.content.original_text }}</pre>
+                                        </details>
+                                    {% endif %}
+                                </div>
+                                <div class="error-actions">
+                                    <p>💡 解決方法:</p>
+                                    <ul>
+                                        <li>ChatGPTに「JSON形式で構成を出力してください」と明示的に指示する</li>
+                                        <li>構成の内容を具体的に指定する</li>
+                                        <li>別の質問で構成を再生成する</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        {% else %}
+                            <!-- 正常な構成の場合 -->
+                            <pre><code id="structure-display">{{ structure.content | tojson(indent=2) }}</code></pre>
+                        {% endif %}
+                    {% else %}
+                        <!-- 構成が存在しない場合 -->
+                        <div class="empty-structure">
+                            <div class="empty-message">
+                                <h4>📋 構成がまだ生成されていません</h4>
+                                <p>ChatGPTに構成について質問すると、ここに構成が表示されます。</p>
+                                <div class="suggestion-examples">
+                                    <p><strong>質問例:</strong></p>
+                                    <ul>
+                                        <li>「Webアプリの構成をJSON形式で出力してください」</li>
+                                        <li>「ブログサイトの構成を作成してください」</li>
+                                        <li>「ECサイトの機能構成を提案してください」</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最下段：ログ・補足情報（折りたたみ式） -->
+    <div class="logs-section">
+        <div class="section-header collapsible" onclick="toggleSection('logs')">
+            <h3>📊 ログ・補足情報</h3>
+            <div class="section-actions">
+                <button class="btn btn-sm btn-outline-secondary" onclick="event.stopPropagation(); toggleCodeEditor()">
+                    <span id="editor-toggle-icon">▼</span>
+                </button>
+            </div>
+        </div>
+        <div class="section-content" id="logs-content">
+            <!-- コードエディタ -->
+            <div class="code-editor">
+                <div class="editor-header">
+                    <h3>✏️ コードエディタ</h3>
+                </div>
+                <div class="editor-content" id="editor-content">
+                    <textarea id="code-editor" placeholder="ここにコードを入力してください..."></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modules-section">
+        {% if structure.modules and structure.modules|length > 0 %}
+            {% for module in structure.modules %}
+                <div class="module-card">
+                    <div class="module-title">{{ module.title or "未設定" }}</div>
+                    <div class="module-desc">{{ module.description or "未設定" }}</div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-modules">モジュールがありません</div>
+        {% endif %}
+    </div>
+</div> 

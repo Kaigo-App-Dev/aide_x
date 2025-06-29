@@ -1,0 +1,38 @@
+{
+  "id": "test-structure-001",
+  "title": "テスト構成",
+  "description": "デバッグモードテスト用の構成です",
+  "content": {
+    "sections": [
+      {
+        "title": "テストセクション",
+        "description": "これは構成の表示と評価用のテストです。",
+        "components": [
+          {
+            "type": "text",
+            "content": "サンプルテキストです。"
+          }
+        ]
+      }
+    ]
+  },
+  "gemini_output": {
+    "status": "success",
+    "content": "<div style=\"padding: 20px; font-family: Arial, sans-serif;\"><h2 style=\"color: #4285f4; margin-bottom: 16px;\">🤖 Gemini補完結果</h2><div style=\"background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 16px;\"><h3 style=\"color: #34a853; margin-top: 0;\">📋 サンプルUI構成</h3><p>これはGeminiの補完結果です。</p><ul><li>✅ ヘッダーセクション</li><li>✅ メインコンテンツエリア</li><li>✅ サイドバーナビゲーション</li><li>✅ フッター情報</li></ul></div><div style=\"background: #e8f5e8; padding: 12px; border-radius: 6px; border-left: 4px solid #34a853;\"><strong>🎯 期待される動作:</strong> このサンプルデータが右ペインに表示されることで、Gemini出力の表示機能が正常に動作していることを確認できます。</div></div>",
+    "timestamp": "2025-01-28T12:00:00.000Z",
+    "provider": "gemini",
+    "debug_mode": false
+  },
+  "evaluation": {
+    "score": 85,
+    "feedback": "構成は良好ですが、いくつかの改善点があります。",
+    "details": "詳細な評価内容がここに表示されます。",
+    "provider": "claude",
+    "timestamp": "2025-01-28T12:00:00.000Z"
+  },
+  "messages": [],
+  "created_at": "2025-01-28T12:00:00.000Z",
+  "updated_at": "2025-01-28T12:00:00.000Z",
+  "status": "active",
+  "test_mode": false
+} 

@@ -153,5 +153,17 @@
       "timestamp": "2025-06-23T16:20:00.542110",
       "status": "success"
     }
-  ]
+  ],
+  "gemini_output": {
+    "status": "success",
+    "content": "Gemini response placeholder",
+    "extracted_json": {
+      "error": "JSON構成が検出できませんでした",
+      "reason": "テキストに有効なJSONオブジェクトが含まれていません",
+      "original_text": "Gemini response placeholder",
+      "text_length": 27
+    },
+    "modules": [],
+    "timestamp": "2025-06-23T16:20:00.542110"
+  }
 }

@@ -1,0 +1,106 @@
+<!-- チャット専用テンプレート -->
+<div class="chat-messages" id="chatMessages">
+  {% set conversation_count = 0 %}
+  {% set notification_count = 0 %}
+  
+  <!-- 会話メッセージ（ユーザーとアシスタントのやり取り） -->
+  {% for msg in msg_list_safe %}
+    {% if msg.type in ["user", "assistant_reply", "chat"] %}
+      {% set conversation_count = conversation_count + 1 %}
+      <div class="message {{ msg.role }} {{ msg.type }}"
+           data-source="{{ msg.source }}"
+           data-type="{{ msg.type }}"
+           {% if msg.type == 'assistant_reply' %}data-testid="assistant-reply"{% endif %}
+           {% if msg.role == 'user' %}data-testid="user-message"{% endif %}>
+        <div class="message-header">
+          {% if msg.type == "assistant_reply" %}🤖 ChatGPT{% endif %}
+          {% if msg.role == "user" %}👤 あなた{% endif %}
+        </div>
+        <div class="message-content">{{ (msg.content if msg.content is defined else msg.text) | safe }}</div>
+        {% if msg.timestamp %}
+        <div class="message-time">{{ msg.timestamp }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endfor %}
+  
+  <!-- 通知メッセージ（確認、修正依頼、承認など） -->
+  {% for msg in msg_list_safe %}
+    {% if msg.type in ["note", "confirmation", "revision_request", "confirmation_accepted", "notification", "evaluation", "completion"] %}
+      {% set notification_count = notification_count + 1 %}
+      <div class="message notification {{ msg.type }}"
+           data-source="{{ msg.source }}"
+           data-type="{{ msg.type }}"
+           {% if msg.type == 'confirmation' %}data-testid="confirmation-message"{% endif %}>
+        <div class="message-header">
+          {% if msg.type == "confirmation" %}⚠️ 確認{% endif %}
+          {% if msg.type == "revision_request" %}💡 修正依頼{% endif %}
+          {% if msg.type == "confirmation_accepted" %}✅ 承認{% endif %}
+          {% if msg.type == "note" %}📝 メモ{% endif %}
+          {% if msg.type == "notification" %}🔔 通知{% endif %}
+          {% if msg.type == "evaluation" %}🔍 評価{% endif %}
+          {% if msg.type == "completion" %}✨ 補完{% endif %}
+        </div>
+        <div class="message-content">{{ (msg.content if msg.content is defined else msg.text) | safe }}</div>
+        {% if msg.timestamp %}
+        <div class="message-time">{{ msg.timestamp }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endfor %}
+  
+  <!-- メッセージがない場合の表示 -->
+  {% if conversation_count == 0 and notification_count == 0 %}
+    <div id="no-message-placeholder" class="chat-placeholder">
+      <div class="placeholder-icon">💬</div>
+      <div class="placeholder-text">
+        <h4>💬 チャット</h4>
+        <p>ここに会話が表示されます</p>
+        <p class="text-muted">構成について質問してみましょう！</p>
+        <div class="placeholder-actions">
+          <button class="btn btn-sm btn-primary" onclick="suggestChatMessage()">
+            💡 質問を提案
+          </button>
+        </div>
+      </div>
+    </div>
+  {% elif conversation_count == 0 %}
+    <div id="no-message-placeholder" class="chat-placeholder">
+      <div class="placeholder-icon">💬</div>
+      <div class="placeholder-text">
+        <h4>💬 チャット</h4>
+        <p>会話がありません</p>
+        <p class="text-muted">構成について質問してみましょう！</p>
+        <div class="placeholder-actions">
+          <button class="btn btn-sm btn-primary" onclick="suggestChatMessage()">
+            💡 質問を提案
+          </button>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- チャット入力エリア -->
+<div class="chat-input-container">
+    <div class="chat-input">
+        <input type="text" id="chat-input" placeholder="構成について質問してください...">
+        <button type="button" id="send-button">送信</button>
+    </div>
+</div>
+
+<!-- AI操作ボタン -->
+<div class="ai-action-bar">
+    <button id="saveStructureBtn" class="btn btn-primary">
+        💾 構成保存
+    </button>
+    <button id="completeGeminiBtn" class="btn btn-complete">
+        ✨ Gemini補完
+    </button>
+    <button id="generateUIBtn" class="btn btn-ui">
+        🎨 UI生成
+    </button>
+</div>
+
+<!-- 操作フィードバック表示エリア -->
+<div id="operationFeedback"></div> 

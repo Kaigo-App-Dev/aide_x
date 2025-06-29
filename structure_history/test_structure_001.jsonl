@@ -1,0 +1,1 @@
+{"structure_id": "test_structure_001", "provider": "claude", "score": 0.85, "comment": "テスト評価", "structure": {"title": "テスト構成", "modules": {"module1": {"title": "テストモジュール"}}}, "timestamp": "2025-06-29T07:35:08.216393"}

@@ -1,0 +1,40 @@
+<!-- 履歴詳細モーダル -->
+<div class="history-modal" id="historyModal">
+    <div class="history-modal-overlay" onclick="closeHistoryModal()"></div>
+    <div class="history-modal-content">
+        <div class="history-modal-header">
+            <h3 id="historyModalTitle">📋 履歴詳細</h3>
+            <button class="history-modal-close" onclick="closeHistoryModal()">
+                <span>&times;</span>
+            </button>
+        </div>
+        <div class="history-modal-body" id="historyModalBody">
+            <!-- 動的に内容が挿入される -->
+        </div>
+        <div class="history-modal-footer">
+            <button class="btn btn-secondary" onclick="closeHistoryModal()">閉じる</button>
+            <button class="btn btn-primary" id="historyModalCompareBtn" onclick="compareWithCurrent()" style="display: none;">
+                🔄 現在と比較
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 履歴比較モーダル -->
+<div class="history-compare-modal" id="historyCompareModal">
+    <div class="history-compare-modal-overlay" onclick="closeHistoryCompareModal()"></div>
+    <div class="history-compare-modal-content">
+        <div class="history-compare-modal-header">
+            <h3>🔄 履歴比較</h3>
+            <button class="history-compare-modal-close" onclick="closeHistoryCompareModal()">
+                <span>&times;</span>
+            </button>
+        </div>
+        <div class="history-compare-modal-body" id="historyCompareModalBody">
+            <!-- 比較結果が動的に挿入される -->
+        </div>
+        <div class="history-compare-modal-footer">
+            <button class="btn btn-secondary" onclick="closeHistoryCompareModal()">閉じる</button>
+        </div>
+    </div>
+</div> 

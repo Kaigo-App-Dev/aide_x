@@ -57,5 +57,10 @@
     "status": "skipped",
     "reason": "構成が空のため評価をスキップしました",
     "timestamp": "2025-06-24T17:44:42.765532"
+  },
+  "gemini_output": {
+    "status": "not_executed",
+    "reason": "移行時にGemini補完データが見つかりませんでした",
+    "timestamp": "2025-06-28T13:55:46.668666"
   }
 }

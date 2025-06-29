@@ -1,0 +1,285 @@
+<!-- 補助UI専用テンプレート -->
+<div class="structure-ui" id="structureUI">
+    <!-- Claude評価結果表示エリア -->
+    <div class="claude-evaluation-section">
+        <div class="section-header">
+            <h3>🧠 Claude評価結果</h3>
+            <div class="section-actions">
+                <button class="btn btn-sm btn-primary" onclick="triggerClaudeEvaluation()" id="evaluate-btn">
+                    🔄 再評価
+                </button>
+                <span class="auto-update-status" style="display: none;">評価中...</span>
+            </div>
+        </div>
+        <div class="section-content" id="claude-evaluation-content">
+            <!-- Claude評価結果がここに動的に表示される -->
+            <div class="evaluation-placeholder">
+                <div class="empty-message">
+                    <h4>🧠 Claude評価</h4>
+                    <p>評価がまだ実行されていません</p>
+                    <p class="text-muted">「再評価」ボタンを押すと、Claudeによる評価が実行されます。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 差分表示ボタンとパネル -->
+    <div class="diff-display-section">
+        <div class="diff-display-header">
+            <h3>🔍 構成差分</h3>
+            <div class="diff-display-actions">
+                <button id="toggle-diff-btn" class="btn btn-sm btn-outline-primary" onclick="toggleDiffPanel()">
+                    差分を表示 🔍
+                </button>
+            </div>
+        </div>
+        <!-- 差分パネル（初期は非表示） -->
+        <div id="diff-panel" class="diff-panel hidden">
+            {% if structure and structure.diff_html %}
+                <div class="diff-content">
+                    {{ structure.diff_html | safe }}
+                </div>
+            {% else %}
+                <div class="diff-placeholder">
+                    <div class="diff-placeholder-icon">🔍</div>
+                    <div class="diff-placeholder-text">
+                        <h4>差分が未生成です</h4>
+                        <p>Gemini補完実行後に差分が自動生成されます。</p>
+                        <p class="text-muted">Claude評価とGemini補完の差分がここに表示されます。</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- モジュール差分表示ボタンとパネル -->
+    <div class="module-diff-display-section">
+        <div class="module-diff-display-header">
+            <h3>🔍 モジュール差分</h3>
+            <div class="module-diff-display-actions">
+                <button id="toggle-module-diff-btn" class="btn btn-sm btn-outline-primary" onclick="toggleModuleDiffPanel()">
+                    モジュール差分を表示 🔍
+                </button>
+            </div>
+        </div>
+        <!-- モジュール差分パネル（初期は非表示） -->
+        <div id="module-diff-panel" class="module-diff-panel hidden">
+            <div id="module-diff-container" class="module-diff-container">
+                <div class="module-diff-header">
+                    <h3 class="module-diff-title">🔍 モジュール差分</h3>
+                    <div class="module-diff-summary">
+                        <span class="diff-summary-item">データなし</span>
+                    </div>
+                </div>
+                <div class="module-diff-content">
+                    <div class="diff-section no-changes-section">
+                        <div class="no-changes-message">
+                            <span class="no-changes-icon">📋</span>
+                            <h4 class="no-changes-title">差分データがありません</h4>
+                            <p class="no-changes-description">
+                                Claude構成とGemini補完のモジュール差分を比較してください。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 差分表示エリア -->
+    <div class="diff-pane" id="diff-pane">
+        <div class="diff-header">
+            <h3>🔍 構成差分</h3>
+            <div class="diff-actions">
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleDiffPane()">
+                    <span id="diff-toggle-icon">▼</span>
+                </button>
+            </div>
+        </div>
+        <div class="diff-content" id="diff-content">
+            <div class="diff-placeholder">
+                <div class="diff-placeholder-icon">🔍</div>
+                <div class="diff-placeholder-text">
+                    <h4>構成差分</h4>
+                    <p>Claude評価とGemini補完の差分がここに表示されます。</p>
+                    <p class="text-muted">Gemini補完実行後に差分が自動表示されます。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 履歴一覧表示エリア -->
+    <div class="history-pane" id="history-pane">
+        <div class="history-header">
+            <h3>📋 評価履歴</h3>
+            <div class="history-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="refreshHistoryList()">
+                    🔄 更新
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleHistoryPane()">
+                    <span id="history-toggle-icon">▼</span>
+                </button>
+            </div>
+        </div>
+        <div class="history-content" id="history-content">
+            <div class="history-placeholder">
+                <div class="history-placeholder-icon">📋</div>
+                <div class="history-placeholder-text">
+                    <h4>評価履歴</h4>
+                    <p>Claude評価とGemini補完の履歴がここに表示されます。</p>
+                    <p class="text-muted">「更新」ボタンを押すと履歴を読み込みます。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gemini補完履歴表示エリア -->
+    <div class="completion-history-pane" id="completion-history-pane">
+        <div class="completion-history-header">
+            <h3>✨ Gemini補完履歴</h3>
+            <div class="completion-history-actions">
+                <select id="completion-history-select" class="form-select form-select-sm" onchange="selectCompletionHistory(this.value)">
+                    <option value="">最新の補完</option>
+                </select>
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleCompletionHistoryPane()">
+                    <span id="completion-history-toggle-icon">▼</span>
+                </button>
+            </div>
+        </div>
+        <div class="completion-history-content" id="completion-history-content">
+            <!-- 履歴選択時の表示エリア -->
+            <div class="completion-history-placeholder">
+                <div class="empty-message">
+                    <h4>🎨 Gemini補完履歴</h4>
+                    <p>Gemini補完履歴がここに表示されます。</p>
+                    <p class="text-muted">上記のセレクトボックスから履歴を選択してください。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gemini補完結果表示エリア（従来の表示） -->
+    <div class="output-pane" id="output-pane">
+        <div class="output-header">
+            <h3>✨ Gemini補完結果</h3>
+            <button class="btn btn-sm btn-outline-secondary" onclick="toggleOutputPane()">
+                <span id="output-toggle-icon">▼</span>
+            </button>
+        </div>
+        <div class="output-content" id="completion-content">
+            {% if structure and structure.gemini_output %}
+                {% if structure.gemini_output.status == "success" %}
+                    <div class="completion-success">
+                        <h4>✨ Gemini補完完了</h4>
+                        <div class="completion-content">
+                            <pre>{{ structure.gemini_output.content }}</pre>
+                        </div>
+                    </div>
+                {% elif structure.gemini_output.status == "failed" %}
+                    <div class="completion-error">
+                        <h4>⚠️ Gemini補完失敗</h4>
+                        <p>{{ structure.gemini_output.reason }}</p>
+                        {% if structure.gemini_output.error_details %}
+                            <details>
+                                <summary>エラー詳細</summary>
+                                <pre>{{ structure.gemini_output.error_details }}</pre>
+                            </details>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="empty-supplemental">
+                    <div class="empty-message">
+                        <h4>🎨 Gemini補完</h4>
+                        <p>Gemini補完はまだ生成されていません。</p>
+                        <p class="text-muted">「UIを生成」ボタンを押すと、ここにGeminiの補完結果が表示されます。</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Gemini出力コンテナ（GeminiParser用） -->
+    <div id="gemini-output" style="display: block !important; width: 100%; min-width: 300px; background: #f7f7f7; border-left: 1px solid #ccc; padding: 1rem; overflow-y: auto; position: relative; z-index: 10; visibility: visible !important; opacity: 1 !important;">
+        <!-- GeminiParserがここに出力します -->
+        <div class="gemini-output-placeholder" style="display: flex !important;">
+            <div class="placeholder-icon">✨</div>
+            <div class="placeholder-text">
+                <h4>🎨 Gemini補完結果</h4>
+                <p>Gemini補完はまだ実行されていません。</p>
+                <p class="text-muted">チャットで「UIを生成してください」と入力すると、ここにGeminiの補完結果が表示されます。</p>
+                <div class="placeholder-actions">
+                    <button class="btn btn-sm btn-primary" onclick="suggestGeminiCompletion()">
+                        🚀 Gemini補完を提案
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 補助情報エリア -->
+    <div class="reference-area">
+        <div class="reference-header">
+            <h3>📚 参考情報</h3>
+        </div>
+        <div class="reference-content">
+            <div class="quick-actions">
+                <h4>🚀 クイックアクション</h4>
+                <div class="action-buttons">
+                    <button class="btn btn-sm btn-outline-primary" onclick="suggestTemplate('web')">
+                        🌐 Webアプリ
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="suggestTemplate('mobile')">
+                        📱 モバイルアプリ
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="suggestTemplate('api')">
+                        🔌 API設計
+                    </button>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h4>💡 使い方ヒント</h4>
+                <ul>
+                    <li>具体的な要件を伝えると、より良い構成が生成されます</li>
+                    <li>「JSON形式で出力してください」と明示すると確実です</li>
+                    <li>構成が気に入らない場合は「修正してください」と伝えてください</li>
+                </ul>
+            </div>
+            
+            <div class="status-info">
+                <h4>📊 現在の状態</h4>
+                <div class="status-item">
+                    <span class="status-label">構成生成:</span>
+                    <span class="status-value">
+                        {% if structure and structure.content %}
+                            ✅ 完了
+                        {% else %}
+                            ⏳ 未生成
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Claude評価:</span>
+                    <span class="status-value">
+                        {% if structure and structure.evaluation %}
+                            ✅ 完了
+                        {% else %}
+                            ⏳ 未実行
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Gemini補完:</span>
+                    <span class="status-value">
+                        {% if structure and structure.gemini_output %}
+                            ✅ 完了
+                        {% else %}
+                            ⏳ 未実行
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

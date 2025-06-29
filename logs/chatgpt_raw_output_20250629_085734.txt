@@ -1,0 +1,19 @@
+「請求書を自動で作成するシステムの構成を考えてみました。まず、注文情報を収集する機能が必要です。そのために、注文管理システムと連携する形で注文データを取得します。次に、取得した注文データをもとに請求書を作成する機能が必要です。その際、顧客情報や商品情報、注文数などを考慮して請求書を自動生成します。最後に、作成した請求書をメールや郵送などで送付する機能が必要です。これらを組み合わせることで、手間をかけずに請求書を作成し、送付することが可能になります。こんな内容でいかがでしょうか？
+
+```json
+{
+  "title": "Automatic Invoice Creation System",
+  "description": "A system that automatically creates and sends invoices based on order data.",
+  "content": {
+    "order_data_collection": {
+      "description": "Collects order data from the order management system."
+    },
+    "invoice_creation": {
+      "description": "Automatically generates invoices based on the collected order data, considering customer information, product information, and order quantity."
+    },
+    "invoice_distribution": {
+      "description": "Sends the created invoice via email or postal mail."
+    }
+  }
+}
+```」

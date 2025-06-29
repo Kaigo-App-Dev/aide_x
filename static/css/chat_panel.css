@@ -258,11 +258,87 @@
 .aide-error-message {
     background: #f8d7da;
     color: #721c24;
+    padding: 12px;
     border: 1px solid #f5c6cb;
-    border-radius: 6px;
-    padding: 10px;
+    border-radius: 8px;
     margin: 10px 0;
     font-size: 14px;
+}
+
+.aide-error-message h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.aide-error-message p {
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+}
+
+.aide-error-message details {
+    margin-top: 8px;
+}
+
+.aide-error-message summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #495057;
+    padding: 4px 0;
+}
+
+.aide-error-message code {
+    background: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #721c24;
+}
+
+/* 構成なしメッセージ */
+.no-content {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.no-content.error {
+    text-align: left;
+    padding: 20px;
+    color: #721c24;
+    font-style: normal;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.no-content.error p {
+    margin: 0 0 10px 0;
+    font-weight: 600;
+}
+
+.no-content.error details {
+    margin-top: 10px;
+}
+
+.no-content.error summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #495057;
+    padding: 4px 0;
+}
+
+.no-content.error code {
+    background: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #721c24;
+    word-break: break-all;
 }
 
 /* 成功メッセージ */
@@ -274,4 +350,179 @@
     padding: 10px;
     margin: 10px 0;
     font-size: 14px;
+}
+
+/* エラーカード用スタイル */
+.error-card {
+    border: 2px solid #ff6b6b;
+    background-color: #fff5f5;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);
+}
+
+.error-card .error-header {
+    background-color: #ff6b6b;
+    color: white;
+    border-radius: 8px 8px 0 0;
+}
+
+.error-card .error-title {
+    color: white;
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.error-card .error-content {
+    padding: 16px;
+    background-color: #fff5f5;
+}
+
+.error-card .error-message {
+    color: #d63031;
+    font-weight: 500;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.error-card .error-details {
+    margin-top: 12px;
+    border-top: 1px solid #ffa5a5;
+    padding-top: 12px;
+}
+
+.error-card .error-details summary {
+    color: #e17055;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 0;
+}
+
+.error-card .error-details summary:hover {
+    color: #d63031;
+}
+
+.error-card .error-details pre {
+    background-color: #ffe8e8;
+    border: 1px solid #ffa5a5;
+    border-radius: 4px;
+    padding: 12px;
+    margin: 8px 0;
+    font-size: 0.9em;
+    color: #d63031;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* データソース表示用スタイル */
+.card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    font-size: 0.8em;
+    color: #666;
+}
+
+.card-meta .data-source {
+    background-color: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.card-meta .structure-id {
+    color: #999;
+    font-family: monospace;
+}
+
+/* 既存のno-contentエラースタイル強化 */
+.no-content.error {
+    border: 2px solid #ff6b6b;
+    background-color: #fff5f5;
+    color: #d63031;
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+}
+
+.no-content.error p {
+    margin: 0 0 12px 0;
+    font-weight: 500;
+}
+
+.no-content.error details {
+    margin-top: 12px;
+}
+
+.no-content.error summary {
+    color: #e17055;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 0;
+}
+
+.no-content.error pre {
+    background-color: #ffe8e8;
+    border: 1px solid #ffa5a5;
+    border-radius: 4px;
+    padding: 12px;
+    margin: 8px 0;
+    font-size: 0.9em;
+    color: #d63031;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* チャット入力欄（chat_handler.js用） */
+#chat-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    background: #f8f9fa;
+}
+
+#chat-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 36px;
+}
+
+#chat-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+#send-button {
+    padding: 8px 16px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    align-self: flex-end;
+}
+
+#send-button:hover {
+    background: #0056b3;
+}
+
+#send-button:active {
+    background: #004085;
+}
+
+#send-button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
 } 

@@ -1,0 +1,22 @@
+{
+  "id": "d29b2f19-e469-4e12-90a0-9998746cc56e",
+  "title": "新規構成",
+  "description": "新しく作成された構成です",
+  "content": {},
+  "metadata": {
+    "created_at": "2025-06-29T04:47:30.812871",
+    "updated_at": "2025-06-29T04:47:30.812871",
+    "version": "1.0"
+  },
+  "history": [],
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "こんにちは！新しい構成を作成しましょう。何を作りたいですか？",
+      "type": "assistant",
+      "timestamp": "2025-06-29T04:47:30.812871",
+      "source": "chat"
+    }
+  ],
+  "evaluations": {}
+}

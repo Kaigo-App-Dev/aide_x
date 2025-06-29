@@ -23,26 +23,33 @@ def create_app() -> Flask:
     """Flaskアプリケーションを作成して返す"""
     logger.info("🚀 Flaskアプリケーション作成開始...")
     
-    # プロジェクトルートディレクトリを取得
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    template_folder = os.path.join(project_root, 'templates')
-    static_folder = os.path.join(project_root, 'static')
+    # プロジェクトルートを取得
+    root_dir = os.path.abspath(os.path.dirname(__file__) + "/..")
+    static_dir = os.path.join(root_dir, "static")
+    template_dir = os.path.join(root_dir, "templates")
     
     # テンプレートフォルダの存在確認
-    if not os.path.exists(template_folder):
-        logger.warning(f"⚠️ 警告: テンプレートフォルダが見つかりません: {template_folder}")
+    if not os.path.exists(template_dir):
+        logger.warning(f"⚠️ 警告: テンプレートフォルダが見つかりません: {template_dir}")
     else:
-        logger.info(f"✅ テンプレートフォルダを検出: {template_folder}")
+        logger.info(f"✅ テンプレートフォルダを検出: {template_dir}")
     
     # 静的ファイルフォルダの存在確認
-    if not os.path.exists(static_folder):
-        logger.warning(f"⚠️ 警告: 静的ファイルフォルダが見つかりません: {static_folder}")
+    if not os.path.exists(static_dir):
+        logger.warning(f"⚠️ 警告: 静的ファイルフォルダが見つかりません: {static_dir}")
     else:
-        logger.info(f"✅ 静的ファイルフォルダを検出: {static_folder}")
+        logger.info(f"✅ 静的ファイルフォルダを検出: {static_dir}")
     
-    app = Flask(__name__, 
-                template_folder=template_folder,
-                static_folder=static_folder)
+    app = Flask(
+        __name__,
+        static_folder=static_dir,
+        static_url_path='/static',
+        template_folder=template_dir
+    )
+    
+    # デバッグモードを有効にしてテンプレートキャッシュを無効化
+    app.config['DEBUG'] = True
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
     
     # セキュリティ設定
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-for-csrf')
@@ -52,13 +59,17 @@ def create_app() -> Flask:
     # ルートを登録
     register_routes(app)
     
+    @app.route("/test-static")
+    def test_static():
+        return "Static endpoint OK"
+    
     logger.info("✅ Flaskアプリケーション作成完了")
     return app
 
 if __name__ == "__main__":
     app = create_app()
     # デバッグモードは環境変数 `FLASK_DEBUG=1` で制御
-    app.run(debug=os.getenv("FLASK_DEBUG") == "1")
+    app.run(debug=os.getenv("FLASK_DEBUG") == "1", port=5000)
 
 # テスト用にappインスタンスをエクスポート
 app = create_app() 

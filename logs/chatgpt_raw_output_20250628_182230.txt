@@ -1,0 +1,5 @@
+=== ChatGPT Raw Output at 2025-06-28T18:22:30.778222 ===
+Text Length: 629
+Text Content:
+{ "title": "ブログサイト構成", "description": "個人ブログサイトの基本構成", "modules": [ { "id": "header-001", "type": "component", "title": "ヘッダー", "description": "サイトのヘッダー部分", "component_config": { "logo": "サイトロゴ", "navigation": ["ホーム", "記事", "カテゴリ", "お問い合わせ"], "search": true } }, { "id": "article-list-001", "type": "table", "title": "記事一覧", "description": "最新記事の表示", "columns": [ {"key": "title", "label": "タイトル", "type": "text"}, {"key": "author", "label": "著者", "type": "text"}, {"key": "date", "label": "投稿日", "type": "date"}, {"key": "category", "label": "カテゴリ", "type": "badge"}, {"key": "actions", "label": "操作", "type": "actions"} ] } ] }
+==================================================

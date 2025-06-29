@@ -44,18 +44,76 @@ def register_all_templates(prompt_manager: PromptManager) -> None:
 
 要求内容：{{ user_input }}
 
-**重要**: 以下の形式で必ずJSON形式で構成を出力してください。自然文での説明、リスト形式、その他の形式は一切含めないでください。
+**重要**: 以下の厳密な形式で必ずJSON形式で構成を出力してください。自然文での説明、リスト形式、その他の形式は一切含めないでください。
 
 ```json
 {{
   "title": "構成タイトル",
   "description": "構成の説明（任意）",
-  "content": {{
-    "セクション名": {{
-      "項目": "内容"
+  "modules": [
+    {{
+      "id": "module-001",
+      "type": "form",
+      "title": "ユーザー登録フォーム",
+      "description": "利用者の基本情報を入力する画面",
+      "fields": [
+        {{"label": "名前", "name": "name", "type": "text", "required": true}},
+        {{"label": "メールアドレス", "name": "email", "type": "email", "required": true}},
+        {{"label": "生年月日", "name": "birthdate", "type": "date", "required": false}}
+      ]
+    }},
+    {{
+      "id": "module-002", 
+      "type": "table",
+      "title": "ユーザー一覧",
+      "description": "登録済みユーザーの一覧表示",
+      "columns": [
+        {{"key": "id", "label": "ID", "type": "text"}},
+        {{"key": "name", "label": "名前", "type": "text"}},
+        {{"key": "email", "label": "メール", "type": "text"}},
+        {{"key": "actions", "label": "操作", "type": "actions"}}
+      ]
     }}
-  }}
+  ]
 }}
+```
+
+**必須項目**:
+- `title`: 構成のタイトル（必須）
+- `modules`: モジュール配列（必須、最低1個以上）
+- 各モジュールの `id`: ユニークなID（必須）
+- 各モジュールの `type`: モジュールタイプ（必須）
+- 各モジュールの `title`: モジュールタイトル（必須）
+- 各モジュールの `fields` または `columns`: フィールド/カラム定義（必須）
+
+**モジュールタイプ（type）の指定**:
+- `form`: 入力フォーム（fields配列が必要）
+- `table`: データテーブル（columns配列が必要）
+- `api`: APIエンドポイント（endpoints配列が必要）
+- `chart`: グラフ・チャート（chart_configが必要）
+- `auth`: 認証機能（auth_configが必要）
+- `database`: データベース（tables配列が必要）
+- `config`: 設定画面（settings配列が必要）
+- `page`: ページ・ビュー（layoutが必要）
+- `component`: コンポーネント（component_configが必要）
+
+**フィールド定義（fields）の例**:
+```json
+"fields": [
+  {{"label": "フィールド名", "name": "field_name", "type": "text", "required": true}},
+  {{"label": "選択肢", "name": "options", "type": "select", "options": ["選択肢1", "選択肢2"]}},
+  {{"label": "チェックボックス", "name": "checkbox", "type": "checkbox", "default": false}}
+]
+```
+
+**カラム定義（columns）の例**:
+```json
+"columns": [
+  {{"key": "id", "label": "ID", "type": "text"}},
+  {{"key": "name", "label": "名前", "type": "text"}},
+  {{"key": "status", "label": "ステータス", "type": "badge"}},
+  {{"key": "actions", "label": "操作", "type": "actions"}}
+]
 ```
 
 **出力ルール**:
@@ -63,10 +121,10 @@ def register_all_templates(prompt_manager: PromptManager) -> None:
 2. 自然文での説明は一切含めない
 3. リスト形式や箇条書きは使用しない
 4. コードブロック（```json）で囲む
-5. titleとcontentは必須フィールド
+5. titleとmodulesは必須フィールド
 6. descriptionは任意フィールド
-7. キー名は日本語でも英語でも可
-8. 値は文字列、数値、真偽値、配列、オブジェクトのいずれか
+7. 各モジュールにid、type、titleは必須
+8. モジュールタイプに応じてfields、columns、endpointsなどを含める
 
 **禁止事項**:
 - 自然文での説明
@@ -74,35 +132,64 @@ def register_all_templates(prompt_manager: PromptManager) -> None:
 - 箇条書きでの出力
 - JSON以外の形式
 - コードブロック外での説明
+- 不完全なモジュール定義（id、type、titleの欠落）
 
-**例示**:
+**具体例**:
 ユーザーが「ブログサイトの構成を作成してください」と言った場合：
 
 ```json
 {{
   "title": "ブログサイト構成",
   "description": "個人ブログサイトの基本構成",
-  "content": {{
-    "ヘッダー": {{
-      "ロゴ": "サイトロゴ",
-      "ナビゲーション": "メニュー項目",
-      "検索機能": "検索ボックス"
+  "modules": [
+    {{
+      "id": "header-001",
+      "type": "component",
+      "title": "ヘッダー",
+      "description": "サイトのヘッダー部分",
+      "component_config": {{
+        "logo": "サイトロゴ",
+        "navigation": ["ホーム", "記事", "カテゴリ", "お問い合わせ"],
+        "search": true
+      }}
     }},
-    "メインコンテンツ": {{
-      "記事一覧": "最新記事の表示",
-      "記事詳細": "個別記事ページ",
-      "カテゴリ": "記事分類"
+    {{
+      "id": "article-list-001",
+      "type": "table",
+      "title": "記事一覧",
+      "description": "最新記事の表示",
+      "columns": [
+        {{"key": "title", "label": "タイトル", "type": "text"}},
+        {{"key": "author", "label": "著者", "type": "text"}},
+        {{"key": "date", "label": "投稿日", "type": "date"}},
+        {{"key": "category", "label": "カテゴリ", "type": "badge"}},
+        {{"key": "actions", "label": "操作", "type": "actions"}}
+      ]
     }},
-    "サイドバー": {{
-      "プロフィール": "著者情報",
-      "カテゴリ一覧": "カテゴリメニュー",
-      "最新記事": "最新記事リスト"
+    {{
+      "id": "article-form-001",
+      "type": "form",
+      "title": "記事投稿フォーム",
+      "description": "新しい記事を投稿するフォーム",
+      "fields": [
+        {{"label": "タイトル", "name": "title", "type": "text", "required": true}},
+        {{"label": "カテゴリ", "name": "category", "type": "select", "options": ["技術", "生活", "趣味"], "required": true}},
+        {{"label": "本文", "name": "content", "type": "textarea", "required": true}},
+        {{"label": "公開設定", "name": "published", "type": "checkbox", "default": false}}
+      ]
     }},
-    "フッター": {{
-      "コピーライト": "著作権表示",
-      "リンク": "関連リンク"
+    {{
+      "id": "sidebar-001",
+      "type": "component",
+      "title": "サイドバー",
+      "description": "サイトのサイドバー部分",
+      "component_config": {{
+        "profile": "著者情報",
+        "categories": "カテゴリメニュー",
+        "recent_posts": "最新記事リスト"
+      }}
     }}
-  }}
+  ]
 }}
 ```
 
@@ -111,8 +198,10 @@ def register_all_templates(prompt_manager: PromptManager) -> None:
 - 自然文やMarkdownは一切含めない
 - コードブロック（```json）で囲む
 - 有効なJSON構文であることを確認
+- 各モジュールにid、type、titleが含まれていることを確認
+- モジュールタイプに応じた適切な配列（fields、columns等）が含まれていることを確認
 
-必ず上記のJSON形式で出力してください。"""
+必ず上記の厳密なJSON形式で出力してください。"""
         }
         
         chatgpt_descriptions = {
