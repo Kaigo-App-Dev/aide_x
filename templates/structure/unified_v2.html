@@ -1,0 +1,202 @@
+{% extends "base_layout.html" %}
+
+{% block title %}AIDE-X 統合インターフェース v2 - {{ structure_id }}{% endblock %}
+
+{% block head %}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- 新UI用のCSSファイル -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}?v={{ timestamp }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/unified_v2.css') }}?v={{ timestamp }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}?v={{ timestamp }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/structure.css') }}?v={{ timestamp }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/completion.css') }}?v={{ timestamp }}">
+{% endblock %}
+
+{% block content %}
+<div class="unified-v2-container">
+    <!-- ヘッダー -->
+    <div class="unified-v2-header">
+        <div class="header-title">
+            <h1>🤖 AIDE-X 統合インターフェース v2</h1>
+            <span class="structure-id">ID: {{ structure_id }}</span>
+        </div>
+        <div class="header-controls">
+            <button id="expand-all-panes" class="btn btn-primary" title="全ペイン展開 (Ctrl+0)">
+                📋 全展開
+            </button>
+            <button id="reset-layout" class="btn btn-secondary" title="レイアウトリセット">
+                🔄 リセット
+            </button>
+        </div>
+    </div>
+
+    <!-- メインコンテンツエリア -->
+    <div class="unified-v2-main">
+        <!-- 左ペイン：チャット -->
+        <div class="unified-v2-pane" id="chat-pane" data-pane="chat">
+            <div class="pane-header">
+                <div class="pane-title">
+                    💬 チャット
+                </div>
+                <div class="pane-actions">
+                    <button class="pane-toggle" data-pane="chat" title="チャットペイン切り替え (Ctrl+1)">
+                        ◀
+                    </button>
+                </div>
+            </div>
+            <div class="pane-content">
+                {% if messages is not none %}
+                    {% set msg_list_safe = messages %}
+                {% else %}
+                    {% set msg_list_safe = [] %}
+                {% endif %}
+                
+                <!-- チャットパネルコンポーネント -->
+                {% include 'components/chat_panel.html' %}
+            </div>
+        </div>
+
+        <!-- 左ペインリサイザー -->
+        <div class="pane-resizer" data-resize="chat-pane"></div>
+
+        <!-- 中央ペイン：構成 -->
+        <div class="unified-v2-pane" id="structure-pane" data-pane="structure">
+            <div class="pane-header">
+                <div class="pane-title">
+                    📋 構成
+                </div>
+                <div class="pane-actions">
+                    <button class="pane-toggle" data-pane="structure" title="構成ペイン切り替え (Ctrl+2)">
+                        ◀▶
+                    </button>
+                </div>
+            </div>
+            <div class="pane-content">
+                <!-- 構造パネルコンポーネント -->
+                {% include 'components/structure_panel.html' %}
+            </div>
+        </div>
+
+        <!-- 中央ペインリサイザー -->
+        <div class="pane-resizer" data-resize="structure-pane"></div>
+
+        <!-- 右ペイン：Gemini補完 -->
+        <div class="unified-v2-pane" id="gemini-pane" data-pane="gemini">
+            <div class="pane-header">
+                <div class="pane-title">
+                    🤖 Gemini補完
+                </div>
+                <div class="pane-actions">
+                    <button class="pane-toggle" data-pane="gemini" title="Geminiペイン切り替え (Ctrl+3)">
+                        ▶
+                    </button>
+                </div>
+            </div>
+            <div class="pane-content">
+                <!-- Gemini補完パネルコンポーネント -->
+                {% include 'components/completion_panel.html' %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ステータスバー -->
+    <div class="unified-v2-statusbar">
+        <div class="status-left">
+            <span class="status-indicator" id="connection-status">🟢 接続中</span>
+            <span class="status-text" id="current-status">初期化完了</span>
+        </div>
+        <div class="status-right">
+            <span class="version-info">v2.0.0</span>
+        </div>
+    </div>
+</div>
+
+<!-- 構造データをJSONとして埋め込み -->
+<script id="structure-data" type="application/json">
+{% if structure_data and structure_data.content %}
+{{ structure_data | tojson }}
+{% elif request.args.get('debug') == 'true' or request.args.get('test_mode') == 'true' %}
+{
+  "id": "test-structure-v2",
+  "content": {
+    "sections": [
+      {
+        "title": "テストセクション",
+        "description": "v2用のテスト構成です。",
+        "components": [
+          {
+            "type": "text",
+            "content": "サンプルテキストです。"
+          }
+        ]
+      }
+    ]
+  },
+  "gemini_output": {
+    "テストセクション": {
+      "title": "テストセクション",
+      "output": "これはGeminiのv2デバッグ出力です。"
+    }
+  },
+  "created_at": "{{ timestamp }}",
+  "status": "test",
+  "test_mode": true
+}
+{% else %}
+null
+{% endif %}
+</script>
+{% endblock %}
+
+{% block scripts %}
+<!-- 新UI用のJavaScriptファイル -->
+<script src="{{ url_for('static', filename='js/layout_manager_v2.js') }}?v={{ timestamp }}"></script>
+<script src="{{ url_for('static', filename='js/gemini_parser_v2.js') }}?v={{ timestamp }}"></script>
+<script src="{{ url_for('static', filename='js/unified_v2_app.js') }}?v={{ timestamp }}"></script>
+
+<!-- 既存のJSファイル（必要に応じて） -->
+<script src="{{ url_for('static', filename='js/utils.js') }}?v={{ timestamp }}"></script>
+<script src="{{ url_for('static', filename='js/chat_handler.js') }}?v={{ timestamp }}"></script>
+<script src="{{ url_for('static', filename='js/claude_renderer.js') }}?v={{ timestamp }}"></script>
+<script src="{{ url_for('static', filename='js/structure_cards.js') }}?v={{ timestamp }}"></script>
+<script src="{{ url_for('static', filename='js/diff_renderer.js') }}?v={{ timestamp }}"></script>
+<script src="{{ url_for('static', filename='js/history_handler.js') }}?v={{ timestamp }}"></script>
+
+<script>
+// 新UI初期化
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Unified v2 初期化開始');
+    
+    // 構造データの設定
+    const structureDataElement = document.getElementById('structure-data');
+    if (structureDataElement) {
+        try {
+            window.structureData = JSON.parse(structureDataElement.textContent);
+            console.log('✅ 構造データ設定完了:', {
+                id: window.structureData?.id,
+                hasContent: !!(window.structureData && window.structureData.content),
+                hasGeminiOutput: !!(window.structureData && window.structureData.gemini_output)
+            });
+        } catch (error) {
+            console.error('❌ 構造データ解析エラー:', error);
+            window.structureData = null;
+        }
+    }
+    
+    // デバッグモード設定
+    window.isDebugMode = {{ 'true' if request.args.get('debug') == 'true' else 'false' }};
+    window.isTestMode = {{ 'true' if request.args.get('test_mode') == 'true' else 'false' }};
+    
+    // 新UIアプリケーション初期化
+    if (typeof UnifiedV2App !== 'undefined') {
+        console.log('✅ UnifiedV2Appを使用して初期化');
+        window.unifiedV2App = new UnifiedV2App();
+        window.unifiedV2App.init();
+    } else {
+        console.error('❌ UnifiedV2Appが見つかりません');
+    }
+    
+    console.log('✅ Unified v2 初期化完了');
+});
+</script>
+{% endblock %} 

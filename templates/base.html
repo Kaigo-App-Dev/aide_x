@@ -46,22 +46,22 @@
         <nav id="main-nav" class="main-navigation">
             <div class="nav-container">
                 <div class="nav-brand">
-                    <a href="{{ url_for('chat.chat_prompt') }}" class="nav-link">
+                    <a href="{{ url_for('base.index') }}" class="nav-link">
                         🧠 AIDE-X
                     </a>
                 </div>
                 
                 <div class="nav-menu">
-                    <a href="{{ url_for('chat.chat_prompt') }}" class="nav-link">
+                    <a href="{{ url_for('base.index') }}" class="nav-link">
                         💬 チャット
                     </a>
-                    <a href="{{ url_for('structure.list_structures') }}" class="nav-link">
+                    <a href="{{ url_for('unified.unified_interface', structure_id='test') }}" class="nav-link">
                         📁 構成一覧
                     </a>
-                    <a href="{{ url_for('structure.unified_interface', structure_id='test') }}" class="nav-link">
+                    <a href="{{ url_for('unified.unified_interface', structure_id='test') }}" class="nav-link">
                         🔧 統合画面
                     </a>
-                    <a href="{{ url_for('evolve.index') }}" class="nav-link">
+                    <a href="{{ url_for('base.index') }}" class="nav-link">
                         🔄 進化
                     </a>
                 </div>

@@ -4,7 +4,7 @@
 このモジュールは、AIDE-Xの統合インターフェース用のルートを提供します。
 """
 
-from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash
+from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash, current_app
 import json
 import os
 from typing import Dict, Any, List, Optional, cast, Sequence, TypedDict, Literal, Union
@@ -13,8 +13,10 @@ import traceback
 from datetime import datetime, timedelta
 import uuid
 import threading
+import re
+from flask_cors import cross_origin
 
-from src.structure.utils import load_structure_by_id, save_structure, StructureDict, is_ui_ready
+from src.structure.utils import load_structure_by_id, save_structure, StructureDict, is_ui_ready, load_structure
 from src.structure.diff_utils import generate_diff_html
 from src.llm.prompts.manager import PromptManager, PromptNotFoundError
 from src.llm.prompts.prompt import Prompt
@@ -27,6 +29,10 @@ from src.structure.evaluator import evaluate_structure_with
 from src.structure.feedback import call_gemini_ui_generator
 from src.structure.history_manager import load_evaluation_completion_history, load_structure_history, save_evaluation_completion_history, save_structure_history
 from src.common.logging_utils import log_exception, log_request
+from src.structure.helpers import get_minimum_structure_with_gpt
+from src.utils.files import validate_json_string
+from src.structure.structure_analysis import analyze_structure_state as analyze_structure_completeness
+from src.structure.history import get_structure_history, get_latest_structure_history
 
 
 # ロガーの取得
@@ -52,6 +58,16 @@ MessageParam = TypedDict('MessageParam', {
 })
 
 unified_bp = Blueprint('unified', __name__, url_prefix='/unified')
+
+@unified_bp.route('/health', methods=['GET'])
+def health_check():
+    """ヘルスチェック用エンドポイント"""
+    return jsonify({
+        "status": "ok",
+        "blueprint": "unified",
+        "url_prefix": "/unified",
+        "message": "Unified routes are working"
+    })
 
 def chat_message_to_dict(message: ChatMessage) -> Dict[str, str]:
     """ChatMessageをDict[str, str]に変換する"""
@@ -126,7 +142,7 @@ def _is_placeholder_response(response: str) -> bool:
 
 def _is_structure_json(content: str) -> bool:
     """
-    コンテンツが構成JSONかどうかを判定する
+    コンテンツが構成JSONかどうかを判定する（強化版）
     
     Args:
         content: 判定対象のコンテンツ
@@ -146,9 +162,44 @@ def _is_structure_json(content: str) -> bool:
         try:
             # JSONとしてパースできるかチェック
             parsed = json.loads(content.strip())
-            # titleとcontentフィールドが存在するかチェック
+            
+            # 新しい厳密な構造チェック（modules配列）
+            if isinstance(parsed, dict) and "title" in parsed and "modules" in parsed:
+                modules = parsed.get("modules", [])
+                if isinstance(modules, list) and len(modules) > 0:
+                    # 各モジュールの必須項目をチェック
+                    for module in modules:
+                        if not isinstance(module, dict):
+                            continue
+                        if not all(key in module for key in ["id", "type", "title"]):
+                            continue
+                        # モジュールタイプに応じた必須配列をチェック
+                        module_type = module.get("type", "")
+                        if module_type == "form" and "fields" not in module:
+                            continue
+                        elif module_type == "table" and "columns" not in module:
+                            continue
+                        elif module_type == "api" and "endpoints" not in module:
+                            continue
+                        elif module_type == "chart" and "chart_config" not in module:
+                            continue
+                        elif module_type == "auth" and "auth_config" not in module:
+                            continue
+                        elif module_type == "database" and "tables" not in module:
+                            continue
+                        elif module_type == "config" and "settings" not in module:
+                            continue
+                        elif module_type == "page" and "layout" not in module:
+                            continue
+                        elif module_type == "component" and "component_config" not in module:
+                            continue
+                        # 少なくとも1つのモジュールが有効な場合
+                        return True
+            
+            # 旧形式の構造チェック（contentフィールド）
             if isinstance(parsed, dict) and "title" in parsed and "content" in parsed:
                 return True
+                
         except (json.JSONDecodeError, TypeError):
             pass
     
@@ -163,7 +214,7 @@ def create_message_param(
     source: Optional[str] = None
 ) -> MessageParam:
     """メッセージパラメータを作成する"""
-    param = {
+    param: Dict[str, Any] = {
         "role": role,
         "content": content,
         "timestamp": timestamp or datetime.now().isoformat()
@@ -180,11 +231,11 @@ def create_message_param(
     elif type is not None:
         param["type"] = type
     
-    return param
+    return cast(MessageParam, param)
 
 def _retry_structure_generation(original_message: str, failed_response: str) -> Optional[str]:
     """
-    JSON抽出失敗時にChatGPTに対して再プロンプトを送る
+    JSON抽出失敗時にChatGPTに対して再プロンプトを送る（強化版）
     
     Args:
         original_message: 元のユーザーメッセージ
@@ -203,27 +254,66 @@ def _retry_structure_generation(original_message: str, failed_response: str) -> 
 
 前回の応答（失敗）: {failed_response[:500]}...
 
-**重要**: 必ず以下のJSON形式で構成を出力してください。自然文での説明は一切含めないでください。
+**重要**: 必ず以下の厳密なJSON形式で構成を出力してください。自然文での説明は一切含めないでください。
 
 ```json
 {{
   "title": "構成タイトル",
   "description": "構成の説明（任意）",
-  "content": {{
-    "セクション名": {{
-      "項目": "内容"
+  "modules": [
+    {{
+      "id": "module-001",
+      "type": "form",
+      "title": "ユーザー登録フォーム",
+      "description": "利用者の基本情報を入力する画面",
+      "fields": [
+        {{"label": "名前", "name": "name", "type": "text", "required": true}},
+        {{"label": "メールアドレス", "name": "email", "type": "email", "required": true}}
+      ]
+    }},
+    {{
+      "id": "module-002",
+      "type": "table",
+      "title": "ユーザー一覧",
+      "description": "登録済みユーザーの一覧表示",
+      "columns": [
+        {{"key": "id", "label": "ID", "type": "text"}},
+        {{"key": "name", "label": "名前", "type": "text"}},
+        {{"key": "email", "label": "メール", "type": "text"}}
+      ]
     }}
-  }}
+  ]
 }}
 ```
+
+**必須項目**:
+- `title`: 構成のタイトル（必須）
+- `modules`: モジュール配列（必須、最低1個以上）
+- 各モジュールの `id`: ユニークなID（必須）
+- 各モジュールの `type`: モジュールタイプ（必須）
+- 各モジュールの `title`: モジュールタイトル（必須）
+- 各モジュールの `fields` または `columns`: フィールド/カラム定義（必須）
+
+**モジュールタイプ（type）の指定**:
+- `form`: 入力フォーム（fields配列が必要）
+- `table`: データテーブル（columns配列が必要）
+- `api`: APIエンドポイント（endpoints配列が必要）
+- `chart`: グラフ・チャート（chart_configが必要）
+- `auth`: 認証機能（auth_configが必要）
+- `database`: データベース（tables配列が必要）
+- `config`: 設定画面（settings配列が必要）
+- `page`: ページ・ビュー（layoutが必要）
+- `component`: コンポーネント（component_configが必要）
 
 **出力ルール**:
 1. 必ずJSON形式のみで出力
 2. 自然文での説明は一切含めない
 3. コードブロック（```json）で囲む
-4. titleとcontentは必須フィールド
+4. titleとmodulesは必須フィールド
+5. 各モジュールにid、type、titleは必須
+6. モジュールタイプに応じてfields、columns、endpointsなどを含める
 
-必ず上記のJSON形式で出力してください。"""
+必ず上記の厳密なJSON形式で出力してください。"""
         
         # ChatGPTに再プロンプトを送信
         retry_messages = [
@@ -242,6 +332,19 @@ def _retry_structure_generation(original_message: str, failed_response: str) -> 
             
         if retry_response_content:
             logger.info("✅ 再プロンプト成功")
+            
+            # 再プロンプト結果の構造検証
+            try:
+                extracted_json = extract_json_part(retry_response_content)
+                if extracted_json and "error" not in extracted_json:
+                    validation_result = _validate_structure_completeness(extracted_json)
+                    if validation_result["is_valid"]:
+                        logger.info("✅ 再プロンプト結果の構造検証成功")
+                    else:
+                        logger.warning(f"⚠️ 再プロンプト結果の構造検証失敗: {validation_result}")
+            except Exception as e:
+                logger.warning(f"⚠️ 再プロンプト結果の構造検証エラー: {str(e)}")
+            
             return retry_response_content
         else:
             logger.warning("⚠️ 再プロンプト応答が空です")
@@ -253,12 +356,21 @@ def _retry_structure_generation(original_message: str, failed_response: str) -> 
 
 def apply_gemini_completion(structure: Dict[str, Any]):
     """
-    Gemini補完を実行し、結果をstructure["completions"]に保存する
+    Gemini補完を実行し、結果をstructure["modules"]に統一保存する
     予防機能付きで構文エラーを抑制し、成功率を向上させる
     """
     logger.info(f"🔁 Gemini補完処理を呼び出します")
     logger.info(f"📋 structure内容確認: {list(structure.keys())}")
     logger.info(f"📋 structure['messages']の数: {len(structure.get('messages', []))}")
+    
+    # 構成の妥当性チェック（空でも実行可能に修正）
+    content = structure.get("content", {})
+    if not content or (isinstance(content, dict) and not content):
+        logger.info("ℹ️ 構成が空ですが、Gemini補完を実行します（初期構成生成）")
+        # 空の構成でも初期構成を生成するため、スキップしない
+        content = {}
+    else:
+        logger.info(f"✅ 構成が存在します - キー数: {len(content) if isinstance(content, dict) else 'not_dict'}")
     
     # 初期化
     if "completions" not in structure:
@@ -283,7 +395,7 @@ def apply_gemini_completion(structure: Dict[str, Any]):
         # 2. 元の構成内容の取得
         original_content = structure.get("content", {})
         if not original_content:
-            logger.warning("⚠️ structure['content']が空です")
+            logger.info("ℹ️ structure['content']が空です - 初期構成生成モード")
             original_content = {}
         
         logger.info(f"📋 元の構成内容: {type(original_content)} - キー数: {len(original_content) if isinstance(original_content, dict) else 0}")
@@ -292,8 +404,43 @@ def apply_gemini_completion(structure: Dict[str, Any]):
         claude_feedback = claude_evaluation if claude_evaluation else "Claude評価が利用できません"
         logger.info(f"📋 Claudeフィードバック準備完了: {claude_feedback[:100]}...")
         
-        # 4. 最適化されたプロンプトの作成
-        optimized_prompt = f"""
+        # 4. 最適化されたプロンプトの作成（空の構成対応）
+        if not original_content:
+            # 空の構成の場合のプロンプト
+            optimized_prompt = f"""
+以下の要件に基づいて、新しい構成を生成してください。
+
+Claude評価フィードバック:
+{claude_feedback}
+
+生成要件:
+1. 実用的で実装可能な構成を作成する
+2. モジュール構造を明確にする
+3. 各セクションの詳細を充実させる
+4. 現代的なWebアプリケーションの構成を提案する
+
+生成結果は以下のJSON形式で返してください:
+{{
+  "title": "構成タイトル",
+  "description": "構成の説明",
+  "modules": {{
+    "module1": {{
+      "title": "モジュール1のタイトル",
+      "description": "モジュール1の説明",
+      "sections": {{
+        "section1": {{
+          "title": "セクション1のタイトル",
+          "content": "セクション1の詳細内容",
+          "implementation": "実装のポイント"
+        }}
+      }}
+    }}
+  }}
+}}
+"""
+        else:
+            # 既存の構成がある場合のプロンプト
+            optimized_prompt = f"""
 以下の構成を基に、より詳細で実装可能な構成に補完してください。
 
 元の構成:
@@ -327,6 +474,7 @@ Claude評価フィードバック:
   }}
 }}
 """
+        
         logger.info(f"📤 最適化されたプロンプト作成完了: {len(optimized_prompt)}文字")
         
         # 5. Gemini補完の実行
@@ -361,7 +509,7 @@ Claude評価フィードバック:
                             
                             # プロンプトパラメータの準備
                             prompt_params = {
-                                "structure": json.dumps(original_content, ensure_ascii=False, indent=2),
+                                "structure": json.dumps(original_content, ensure_ascii=False, indent=2) if original_content else "{}",
                                 "claude_feedback": claude_feedback
                             }
                             logger.debug(f"📋 プロンプトパラメータ: {list(prompt_params.keys())}")
@@ -438,12 +586,17 @@ Claude評価フィードバック:
                     "max_retries": max_retries
                 }
                 
-                # logs/claude_gemini_diff/にエラーログを保存
-                os.makedirs("logs/claude_gemini_diff", exist_ok=True)
-                error_log_path = f"logs/claude_gemini_diff/gemini_error_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{structure.get('id', 'unknown')}.json"
-                with open(error_log_path, "w", encoding="utf-8") as f:
-                    json.dump(error_dump, f, ensure_ascii=False, indent=2)
-                logger.info(f"📝 エラーログを保存: {error_log_path}")
+                # エラーログファイルに保存
+                error_log_dir = os.path.join(current_app.root_path, "..", "logs", "claude_gemini_diff")
+                os.makedirs(error_log_dir, exist_ok=True)
+                error_log_file = os.path.join(error_log_dir, f"{structure.get('id', 'unknown')}_gemini_error.json")
+                
+                try:
+                    with open(error_log_file, 'w', encoding='utf-8') as f:
+                        json.dump(error_dump, f, ensure_ascii=False, indent=2)
+                    logger.info(f"💾 エラーログを保存: {error_log_file}")
+                except Exception as log_error:
+                    logger.error(f"❌ エラーログ保存失敗: {log_error}")
                 
                 if retry_count < max_retries:
                     logger.info(f"🔄 リトライします (残り {max_retries - retry_count}回)")
@@ -451,158 +604,273 @@ Claude評価フィードバック:
                     continue
                 else:
                     logger.error("❌ 最大リトライ回数に達しました")
-                    raise
+                    break
         
-        # 5. JSON抽出と処理
-        try:
-            extracted_json = extract_json_part(gemini_response or "")
+        # 6. 結果の処理と保存
+        if gemini_response and validation_result and validation_result["validation_result"] == "valid":
+            logger.info("✅ Gemini補完成功 - 結果を処理中")
             
-            # エラーチェック
-            if extracted_json and "error" in extracted_json:
-                logger.warning(f"⚠️ JSON抽出でエラーが検出されました: {extracted_json['error']}")
-                logger.warning(f"⚠️ エラー詳細: {extracted_json.get('reason', '不明')}")
+            # JSON部分を抽出
+            extracted_json = extract_json_part(gemini_response)
+            
+            if extracted_json and "error" not in extracted_json:
+                logger.info(f"✅ JSON抽出成功: {list(extracted_json.keys())}")
                 
-                # エラー情報を含むcompletionを保存
-                completion = {
+                # structure["modules"]に統一保存
+                if "modules" in extracted_json:
+                    structure["modules"] = extracted_json["modules"]
+                    logger.info(f"✅ structure['modules']に保存完了 - モジュール数: {len(extracted_json['modules'])}")
+                else:
+                    # modulesがない場合は、抽出されたJSON全体をmodulesとして保存
+                    structure["modules"] = extracted_json
+                    logger.info(f"✅ structure['modules']にJSON全体を保存 - キー数: {len(extracted_json)}")
+                
+                # その他の情報も保存
+                if "title" in extracted_json:
+                    structure["title"] = extracted_json["title"]
+                    logger.info(f"✅ titleを保存: {extracted_json['title']}")
+                
+                if "description" in extracted_json:
+                    structure["description"] = extracted_json["description"]
+                    logger.info(f"✅ descriptionを保存: {extracted_json['description'][:100]}...")
+                
+                # gemini_outputにも保存（履歴用）
+                structure["gemini_output"] = {
+                    "status": "success",
+                    "content": gemini_response,
+                    "extracted_json": extracted_json,
+                    "modules": structure["modules"],  # 統一されたmodulesを参照
+                    "timestamp": datetime.now().isoformat()
+                }
+                
+                # 補完後の構成を取得（要求された形式で保存）
+                completed_structure = {
+                    "title": extracted_json.get("title", ""),
+                    "description": extracted_json.get("description", ""),
+                    "modules": structure["modules"]
+                }
+                
+                # Gemini補完結果を履歴として保存（要求された形式）
+                from src.structure.history import save_structure_history
+                save_structure_history(
+                    structure_id=structure["id"],
+                    structure=completed_structure,  # 補完後の構成を直接保存
+                    provider="gemini",
+                    comment=f"モジュール数: {len(structure['modules'])}"
+                )
+                
+                # Claude構成との差分生成の準備
+                if structure.get("claude_evaluation") and structure.get("claude_output"):
+                    try:
+                        from src.structure.diff_utils import generate_diff_html
+                        
+                        # Claude構成とGemini構成の差分を生成
+                        claude_content = structure.get("claude_output", {})
+                        gemini_content = completed_structure
+                        
+                        diff_html = generate_diff_html(
+                            before_content=claude_content,
+                            after_content=gemini_content
+                        )
+                        
+                        # 差分HTMLを保存（必要に応じて構成に追加）
+                        structure["diff_html"] = diff_html
+                        logger.info("✅ Claude構成とGemini構成の差分を生成しました")
+                        
+                    except Exception as diff_error:
+                        logger.warning(f"⚠️ 差分生成でエラーが発生: {diff_error}")
+                
+                # モジュール差分生成の追加
+                try:
+                    from src.structure.diff_utils import generate_module_diff
+                    
+                    # Claude構成とGemini構成のモジュールを取得
+                    claude_modules = []
+                    gemini_modules = []
+                    
+                    # Claude構成からモジュールを抽出
+                    if structure.get("content") and isinstance(structure["content"], dict):
+                        claude_content = structure["content"]
+                        if "modules" in claude_content:
+                            # modulesが辞書の場合はリストに変換
+                            if isinstance(claude_content["modules"], dict):
+                                claude_modules = [
+                                    {"name": key, **value} 
+                                    for key, value in claude_content["modules"].items()
+                                ]
+                            elif isinstance(claude_content["modules"], list):
+                                claude_modules = claude_content["modules"]
+                    
+                    # Gemini構成からモジュールを抽出
+                    if structure.get("modules"):
+                        if isinstance(structure["modules"], dict):
+                            gemini_modules = [
+                                {"name": key, **value} 
+                                for key, value in structure["modules"].items()
+                            ]
+                        elif isinstance(structure["modules"], list):
+                            gemini_modules = structure["modules"]
+                    
+                    logger.info(f"🔍 モジュール差分生成開始 - Claude: {len(claude_modules)}個, Gemini: {len(gemini_modules)}個")
+                    
+                    # モジュール差分を生成
+                    module_diff = generate_module_diff(claude_modules, gemini_modules)
+                    
+                    # モジュール差分を構成に保存
+                    structure["module_diff"] = module_diff
+                    logger.info(f"✅ モジュール差分を生成しました - 追加: {len(module_diff['added'])}, 削除: {len(module_diff['removed'])}, 変更: {len(module_diff['changed'])}")
+                    
+                except Exception as module_diff_error:
+                    logger.warning(f"⚠️ モジュール差分生成でエラーが発生: {module_diff_error}")
+                    import traceback
+                    logger.warning(f"⚠️ モジュール差分エラーの詳細: {traceback.format_exc()}")
+                
+                # completions配列にも保存（履歴用）
+                completion_entry = {
                     "provider": "gemini",
-                    "content": gemini_response or "",
+                    "content": gemini_response,
+                    "extracted_json": extracted_json,
+                    "modules": structure["modules"],
+                    "timestamp": datetime.now().isoformat(),
+                    "status": "success",
+                    "validation_result": validation_result
+                }
+                
+                if "completions" not in structure:
+                    structure["completions"] = []
+                structure["completions"].append(completion_entry)
+                
+                # 構成を保存
+                save_structure(structure["id"], cast(StructureDict, structure))
+                logger.info("💾 更新された構成を保存")
+                
+                logger.debug(f"[保存後] structure['modules']: {structure.get('modules')}")
+                logger.debug(f"[保存後] structure['gemini_output']: {structure.get('gemini_output')}")
+                logger.debug(f"[保存後] structure['completions']: {len(structure.get('completions', []))}件")
+                
+                return {
+                    "status": "success",
+                    "modules": structure["modules"],
+                    "message": "Gemini補完が正常に完了しました"
+                }
+            else:
+                logger.error("❌ JSON抽出失敗")
+                if extracted_json and "error" in extracted_json:
+                    logger.error(f"JSON抽出エラー: {extracted_json['error']}")
+                
+                structure["gemini_output"] = {
+                    "status": "failed",
+                    "reason": "JSON抽出に失敗しました",
+                    "raw_response": gemini_response,
+                    "extraction_error": extracted_json.get("error") if extracted_json else "Unknown error",
+                    "timestamp": datetime.now().isoformat()
+                }
+                
+                # 履歴保存（失敗時）
+                from src.structure.history import save_structure_history
+                save_structure_history(
+                    structure_id=structure["id"],
+                    structure=structure["gemini_output"],
+                    provider="gemini",
+                    comment="JSON抽出に失敗しました"
+                )
+                
+                # completions配列にも保存（エラーケース）
+                completion_entry = {
+                    "provider": "gemini",
+                    "content": gemini_response,
                     "extracted_json": extracted_json,
                     "timestamp": datetime.now().isoformat(),
                     "status": "failed",
-                    "error_message": extracted_json['error'],
-                    "error_reason": extracted_json.get('reason', '不明')
+                    "error": extracted_json.get("error") if extracted_json else "Unknown error"
                 }
                 
-                # 構造に補完結果を保存
-                structure["completions"].append(completion)
+                if "completions" not in structure:
+                    structure["completions"] = []
+                structure["completions"].append(completion_entry)
                 
-                # 統計を記録
-                record_gemini_completion_stats(
-                    structure.get("id", "unknown"),
-                    "error",
-                    extracted_json['error']
-                )
-                
-                logger.error("❌ JSON抽出エラーのため、Gemini補完を中止")
                 return {
-                    "status": "error",
-                    "error_message": extracted_json['error'],
-                    "error_reason": extracted_json.get('reason', '不明')
+                    "status": "failed",
+                    "reason": "JSON抽出に失敗しました",
+                    "error": extracted_json.get("error") if extracted_json else "Unknown error"
                 }
-            
-            if extracted_json:
-                # JSONが正常に抽出できた場合
-                logger.info("✅ JSON抽出成功")
-                
-                # 最終的な構造検証
-                final_validation = validate_gemini_response_structure(json.dumps(extracted_json))
-                
-                completion = {
-                    "provider": "gemini",
-                    "content": gemini_response or "",
-                    "extracted_json": extracted_json,
-                    "timestamp": datetime.now().isoformat(),
-                    "status": "success",
-                    "validation_result": final_validation
-                }
-                
-                # 構造に補完結果を保存
-                structure["completions"].append(completion)
-                
-                # Gemini補完結果を構成本体にマージ
-                try:
-                    logger.info("🔄 Gemini補完結果を構成本体にマージ開始")
-                    
-                    # 構成項目をマージ
-                    if "modules" in extracted_json:
-                        structure["modules"] = extracted_json["modules"]
-                        logger.info("✅ modulesを構成に反映")
-                    
-                    if "title" in extracted_json:
-                        structure["title"] = extracted_json["title"]
-                        logger.info("✅ titleを構成に反映")
-                    
-                    if "description" in extracted_json:
-                        structure["description"] = extracted_json["description"]
-                        logger.info("✅ descriptionを構成に反映")
-                    
-                    # その他の構成項目も反映
-                    for key in ["content", "metadata", "config", "settings"]:
-                        if key in extracted_json:
-                            structure[key] = extracted_json[key]
-                            logger.info(f"✅ {key}を構成に反映")
-                    
-                    # 構成を保存
-                    save_structure(structure["id"], cast(StructureDict, structure))
-                    logger.info("💾 更新された構成を保存")
-                    
-                except Exception as merge_error:
-                    logger.error(f"❌ 構成マージエラー: {merge_error}")
-                    completion["merge_error"] = str(merge_error)
-                
-                # 統計を記録
-                record_gemini_completion_stats(
-                    structure.get("id", "unknown"),
-                    "success"
-                )
-                
-                logger.info("✅ Gemini補完処理完了")
-                return {
-                    "status": "success",
-                    "content": gemini_response,
-                    "extracted_json": extracted_json
-                }
-            else:
-                logger.warning("⚠️ JSON抽出に失敗しました")
-                raise ValueError("JSON抽出に失敗しました")
-                
-        except Exception as json_error:
-            logger.error(f"❌ JSON処理エラー: {str(json_error)}")
-            logger.error(f"❌ エラータイプ: {type(json_error).__name__}")
-            import traceback
-            logger.error(f"❌ スタックトレース: {traceback.format_exc()}")
-            
-            # エラー詳細をログファイルに保存
-            error_dump = {
-                "timestamp": datetime.now().isoformat(),
-                "structure_id": structure.get("id", "unknown"),
-                "error_type": type(json_error).__name__,
-                "error_message": str(json_error),
-                "stack_trace": traceback.format_exc(),
-                "gemini_response": gemini_response,
-                "original_content": original_content
+        else:
+            logger.error("❌ Gemini補完失敗")
+            structure["gemini_output"] = {
+                "status": "failed",
+                "reason": "Gemini補完の実行に失敗しました",
+                "validation_result": validation_result,
+                "timestamp": datetime.now().isoformat()
             }
             
-            # logs/claude_gemini_diff/にエラーログを保存
-            os.makedirs("logs/claude_gemini_diff", exist_ok=True)
-            error_log_path = f"logs/claude_gemini_diff/gemini_json_error_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{structure.get('id', 'unknown')}.json"
-            with open(error_log_path, "w", encoding="utf-8") as f:
-                json.dump(error_dump, f, ensure_ascii=False, indent=2)
-            logger.info(f"📝 JSONエラーログを保存: {error_log_path}")
+            # 履歴保存（実行失敗時）
+            from src.structure.history import save_structure_history
+            save_structure_history(
+                structure_id=structure["id"],
+                structure=structure["gemini_output"],
+                provider="gemini",
+                comment="Gemini補完の実行に失敗しました"
+            )
             
-            raise
+            # completions配列にも保存（実行失敗ケース）
+            completion_entry = {
+                "provider": "gemini",
+                "timestamp": datetime.now().isoformat(),
+                "status": "failed",
+                "reason": "Gemini補完の実行に失敗しました",
+                "validation_result": validation_result
+            }
+            
+            if "completions" not in structure:
+                structure["completions"] = []
+            structure["completions"].append(completion_entry)
+            
+            return {
+                "status": "failed",
+                "reason": "Gemini補完の実行に失敗しました",
+                "validation_result": validation_result
+            }
             
     except Exception as e:
-        logger.error(f"❌ Gemini補完処理全体エラー: {str(e)}")
-        logger.error(f"❌ エラータイプ: {type(e).__name__}")
+        logger.error(f"❌ Gemini補完処理で予期しないエラー: {e}")
         import traceback
         logger.error(f"❌ スタックトレース: {traceback.format_exc()}")
         
-        # 統計を記録
-        record_gemini_completion_stats(
-            structure.get("id", "unknown"),
-            "error",
-            str(e)
+        structure["gemini_output"] = {
+            "status": "error",
+            "reason": f"予期しないエラーが発生しました: {str(e)}",
+            "error_details": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # 履歴保存（予期しないエラー時）
+        from src.structure.history import save_structure_history
+        save_structure_history(
+            structure_id=structure["id"],
+            structure=structure["gemini_output"],
+            provider="gemini",
+            comment=f"予期しないエラーが発生しました: {str(e)}"
         )
+        
+        # completions配列にも保存（予期しないエラーケース）
+        completion_entry = {
+            "provider": "gemini",
+            "timestamp": datetime.now().isoformat(),
+            "status": "error",
+            "reason": f"予期しないエラーが発生しました: {str(e)}"
+        }
+        
+        if "completions" not in structure:
+            structure["completions"] = []
+        structure["completions"].append(completion_entry)
         
         return {
             "status": "error",
-            "error_message": str(e),
-            "error_type": type(e).__name__
+            "reason": f"予期しないエラーが発生しました: {str(e)}"
         }
 
 def _evaluate_and_append_message(structure: Dict[str, Any]) -> None:
-    """Claude評価を実行し、結果をメッセージとして追加"""
+    """Claude評価を実行し、結果をevaluationsに保存（チャットメッセージには通知のみ追加）"""
     try:
         # 構成の妥当性チェック
         content = structure.get("content", {})
@@ -614,14 +882,19 @@ def _evaluate_and_append_message(structure: Dict[str, Any]) -> None:
                 "reason": "構成が空のため評価をスキップしました",
                 "timestamp": datetime.now().isoformat()
             }
-            structure["messages"].append(
-                create_message_param(
-                    role="system",
-                    content="⚠️ 構成が空のため、Claude評価をスキップしました。構成を生成してから再評価してください。",
-                    type="note",
-                    source="system"
-                )
-            )
+            # evaluations["claude"]にも保存（中央ペイン表示用）
+            if "evaluations" not in structure:
+                structure["evaluations"] = {}
+            structure["evaluations"]["claude"] = structure["evaluation"]
+            logger.debug(f"[保存後] structure['evaluations']: {structure.get('evaluations')}")
+            
+            # 通知メッセージのみをChat欄に追加
+            structure["messages"].append(create_message_param(
+                role="assistant",
+                content="⚠️ 構成が空のため、Claude評価をスキップしました",
+                source="claude",
+                type="notification"
+            ))
             return
         
         # エラー構成のチェック
@@ -633,14 +906,19 @@ def _evaluate_and_append_message(structure: Dict[str, Any]) -> None:
                 "reason": f"構成にエラーがあるため評価をスキップしました: {content['error']}",
                 "timestamp": datetime.now().isoformat()
             }
-            structure["messages"].append(
-                create_message_param(
-                    role="system",
-                    content=f"⚠️ 構成にエラーがあるため、Claude評価をスキップしました: {content['error']}",
-                    type="note",
-                    source="system"
-                )
-            )
+            # evaluations["claude"]にも保存（中央ペイン表示用）
+            if "evaluations" not in structure:
+                structure["evaluations"] = {}
+            structure["evaluations"]["claude"] = structure["evaluation"]
+            logger.debug(f"[保存後] structure['evaluations']: {structure.get('evaluations')}")
+            
+            # 通知メッセージのみをChat欄に追加
+            structure["messages"].append(create_message_param(
+                role="assistant",
+                content=f"⚠️ 構成にエラーがあるため、Claude評価をスキップしました: {content['error']}",
+                source="claude",
+                type="notification"
+            ))
             return
         
         logger.info(f"🔍 Claude評価開始 - 構成キー数: {len(content) if isinstance(content, dict) else 'not_dict'}")
@@ -660,16 +938,32 @@ def _evaluate_and_append_message(structure: Dict[str, Any]) -> None:
                 "timestamp": datetime.now().isoformat()
             }
             
-            # 評価メッセージを追加
-            structure["messages"].append(
-                create_message_param(
-                    role="assistant",
-                    content=f"🔍 **Claude評価結果**\n\nスコア: {structure['evaluation']['score']}\nフィードバック: {structure['evaluation']['feedback']}",
-                    type="evaluation",
-                    source="claude"
-                )
+            # evaluations["claude"]にも保存（中央ペイン表示用）
+            if "evaluations" not in structure:
+                structure["evaluations"] = {}
+            structure["evaluations"]["claude"] = structure["evaluation"]
+            
+            # 履歴保存
+            from src.structure.history import save_structure_history
+            save_structure_history(
+                structure_id=structure["id"],
+                structure=structure["evaluation"],
+                provider="claude",
+                score=getattr(evaluation_result, 'score', None),
+                comment=getattr(evaluation_result, 'feedback', '')[:200] + "..." if len(getattr(evaluation_result, 'feedback', '')) > 200 else getattr(evaluation_result, 'feedback', '')
             )
+            
+            # 成功通知メッセージのみをChat欄に追加
+            score_text = f"スコア: {(getattr(evaluation_result, 'score', 0) * 100):.1f}%" if hasattr(evaluation_result, 'score') else "評価完了"
+            structure["messages"].append(create_message_param(
+                role="assistant",
+                content=f"✅ Claude評価が完了しました - {score_text}",
+                source="claude",
+                type="notification"
+            ))
+            
             logger.info(f"✅ Claude評価完了 - スコア: {structure['evaluation']['score']}")
+            logger.debug(f"[保存後] structure['evaluations']: {structure.get('evaluations')}")
         else:
             logger.warning("⚠️ Claude評価結果が空です")
             structure["evaluation"] = {
@@ -678,14 +972,29 @@ def _evaluate_and_append_message(structure: Dict[str, Any]) -> None:
                 "reason": "評価結果が空でした",
                 "timestamp": datetime.now().isoformat()
             }
-            structure["messages"].append(
-                create_message_param(
-                    role="system",
-                    content="❌ Claudeによる構成評価に失敗しました。しばらくして再試行してください。",
-                    type="note",
-                    source="system"
-                )
+            # evaluations["claude"]にも保存（中央ペイン表示用）
+            if "evaluations" not in structure:
+                structure["evaluations"] = {}
+            structure["evaluations"]["claude"] = structure["evaluation"]
+            
+            # 履歴保存（失敗時）
+            from src.structure.history import save_structure_history
+            save_structure_history(
+                structure_id=structure["id"],
+                structure=structure["evaluation"],
+                provider="claude",
+                comment="評価結果が空でした"
             )
+            
+            logger.debug(f"[保存後] structure['evaluations']: {structure.get('evaluations')}")
+            
+            # エラー通知メッセージのみをChat欄に追加
+            structure["messages"].append(create_message_param(
+                role="assistant",
+                content="❌ Claude評価に失敗しました",
+                source="claude",
+                type="notification"
+            ))
         
     except Exception as e:
         logger.error(f"❌ Claude評価エラー: {e}")
@@ -696,17 +1005,32 @@ def _evaluate_and_append_message(structure: Dict[str, Any]) -> None:
             "error_details": str(e),
             "timestamp": datetime.now().isoformat()
         }
-        structure["messages"].append(
-            create_message_param(
-                role="system",
-                content=f"❌ Claudeによる構成評価に失敗しました。しばらくして再試行してください。\n\nエラー詳細: {str(e)}",
-                type="note",
-                source="system"
-            )
+        # evaluations["claude"]にも保存（中央ペイン表示用）
+        if "evaluations" not in structure:
+            structure["evaluations"] = {}
+        structure["evaluations"]["claude"] = structure["evaluation"]
+        
+        # 履歴保存（エラー時）
+        from src.structure.history import save_structure_history
+        save_structure_history(
+            structure_id=structure["id"],
+            structure=structure["evaluation"],
+            provider="claude",
+            comment=f"評価中にエラーが発生しました: {str(e)}"
         )
+        
+        logger.debug(f"[保存後] structure['evaluations']: {structure.get('evaluations')}")
+        
+        # エラー通知メッセージのみをChat欄に追加
+        structure["messages"].append(create_message_param(
+            role="assistant",
+            content=f"❌ Claude評価中にエラーが発生しました: {str(e)}",
+            source="claude",
+            type="notification"
+        ))
 
 def _apply_gemini_completion_auto(structure: Dict[str, Any]) -> None:
-    """Gemini補完を自動実行し、結果を保存"""
+    """Gemini補完を自動実行し、結果を保存（チャットメッセージには通知のみ追加）"""
     try:
         # Gemini補完を実行
         completion_result = call_gemini_ui_generator(structure.get("content", {}))
@@ -730,24 +1054,28 @@ def _apply_gemini_completion_auto(structure: Dict[str, Any]) -> None:
                 if gemini_output_dict and "error" not in gemini_output_dict:
                     logger.info(f"🔍 Gemini補完結果をJSONとして解析: {list(gemini_output_dict.keys())}")
                     
-                    # 構成項目をマージ
+                    # structure["modules"]に統一保存
                     if "modules" in gemini_output_dict:
                         structure["modules"] = gemini_output_dict["modules"]
-                        logger.info("✅ modulesを構成に反映")
+                        logger.info(f"✅ structure['modules']に保存完了 - モジュール数: {len(gemini_output_dict['modules'])}")
+                    else:
+                        # modulesがない場合は、抽出されたJSON全体をmodulesとして保存
+                        structure["modules"] = gemini_output_dict
+                        logger.info(f"✅ structure['modules']にJSON全体を保存 - キー数: {len(gemini_output_dict)}")
                     
+                    # その他の情報も保存
                     if "title" in gemini_output_dict:
                         structure["title"] = gemini_output_dict["title"]
-                        logger.info("✅ titleを構成に反映")
+                        logger.info(f"✅ titleを保存: {gemini_output_dict['title']}")
                     
                     if "description" in gemini_output_dict:
                         structure["description"] = gemini_output_dict["description"]
-                        logger.info("✅ descriptionを構成に反映")
+                        logger.info(f"✅ descriptionを保存: {gemini_output_dict['description'][:100]}...")
                     
-                    # その他の構成項目も反映
-                    for key in ["content", "metadata", "config", "settings"]:
-                        if key in gemini_output_dict:
-                            structure[key] = gemini_output_dict[key]
-                            logger.info(f"✅ {key}を構成に反映")
+                    # 旧フィールドは削除（統一のため）
+                    if "structure" in structure:
+                        del structure["structure"]
+                        logger.info("🗑️ 旧structureフィールドを削除")
                     
                     # 構成を保存
                     save_structure(structure["id"], cast(StructureDict, structure))
@@ -762,15 +1090,15 @@ def _apply_gemini_completion_auto(structure: Dict[str, Any]) -> None:
                 logger.error(f"❌ 構成マージエラー: {merge_error}")
                 structure["gemini_output"]["merge_error"] = str(merge_error)
             
-            # 補完メッセージを追加
-            structure["messages"].append(
-                create_message_param(
-                    role="assistant",
-                    content=f"✨ **Gemini補完完了**\n\n{completion_result}",
-                    type="completion",
-                    source="gemini"
-                )
-            )
+            # 成功通知メッセージのみをChat欄に追加
+            module_count = len(structure.get("modules", {}))
+            structure["messages"].append(create_message_param(
+                role="assistant",
+                content=f"✅ Gemini補完が完了しました - {module_count}個のモジュールを生成",
+                source="gemini",
+                type="notification"
+            ))
+            
             logger.info("✅ Gemini補完完了")
         else:
             logger.warning("⚠️ Gemini補完結果が空です")
@@ -780,14 +1108,14 @@ def _apply_gemini_completion_auto(structure: Dict[str, Any]) -> None:
                 "reason": "補完結果が空でした",
                 "timestamp": datetime.now().isoformat()
             }
-            structure["messages"].append(
-                create_message_param(
-                    role="system",
-                    content="⚠️ Geminiによる補完結果が取得できませんでした。",
-                    type="note",
-                    source="system"
-                )
-            )
+            
+            # エラー通知メッセージのみをChat欄に追加
+            structure["messages"].append(create_message_param(
+                role="assistant",
+                content="❌ Gemini補完に失敗しました",
+                source="gemini",
+                type="notification"
+            ))
         
     except Exception as e:
         logger.error(f"❌ Gemini補完エラー: {e}")
@@ -798,14 +1126,14 @@ def _apply_gemini_completion_auto(structure: Dict[str, Any]) -> None:
             "error_details": str(e),
             "timestamp": datetime.now().isoformat()
         }
-        structure["messages"].append(
-            create_message_param(
-                role="system",
-                content=f"⚠️ Geminiによる補完結果が取得できませんでした。\n\nエラー詳細: {str(e)}",
-                type="note",
-                source="system"
-            )
-        )
+        
+        # エラー通知メッセージのみをChat欄に追加
+        structure["messages"].append(create_message_param(
+            role="assistant",
+            content=f"❌ Gemini補完中にエラーが発生しました: {str(e)}",
+            source="gemini",
+            type="notification"
+        ))
 
 @unified_bp.route('/<structure_id>')
 def unified_interface(structure_id):
@@ -849,6 +1177,9 @@ def unified_interface(structure_id):
             logger.info(f"✅ 構成データ読み込み成功")
             # メッセージ履歴の初期化
             structure.setdefault("messages", [])
+            
+            # modulesの存在を保証
+            structure = ensure_modules_exist(structure)
             
             # restoreパラメータがある場合、履歴から復元
             if restore_index is not None:
@@ -912,48 +1243,113 @@ def unified_interface(structure_id):
     
     # 状況分析と介入メッセージの生成
     if structure:
-        analysis = analyze_structure_state(structure)
-        intervention_message = generate_intervention_message(analysis)
+        analysis = analyze_structure_completeness(structure)
+        logger.info(f"🔍 構成分析結果: {analysis.get('diagnostic_message', 'N/A')}")
         
-        if intervention_message:
+        # 分析結果に基づいてメッセージを生成（簡易版）
+        if analysis.get("is_empty", False):
+            intervention_message = create_message_param(
+                role="assistant",
+                content=f"🤖 **システム分析**\n\n{analysis.get('diagnostic_message', '構成の分析が完了しました')}\n\n構成生成を開始するには、チャットで構成の内容を説明してください。",
+                source="system",
+                type="intervention"
+            )
+            
             # 既存の介入メッセージがない場合のみ追加
             existing_interventions = [msg for msg in structure.get('messages', []) 
                                     if msg.get('type') == 'intervention']
             if not existing_interventions:
                 structure.setdefault('messages', []).append(intervention_message)
-                logger.info(f"🤖 介入メッセージを追加 - タイプ: {analysis.get('intervention_type')}")
+                logger.info(f"🤖 介入メッセージを追加 - 診断: {analysis.get('diagnostic_message', 'N/A')}")
     
     logger.info("🎨 テンプレートのレンダリング開始")
     return render_template(
         "structure/unified_interface.html",
         structure_id=structure_id,
         structure=structure,
+        structure_data=structure,  # JavaScript用の構造データ
         messages=structure.get("messages", []),
         evaluation=evaluation,
-        restore_index=restore_index
+        restore_index=restore_index,
+        timestamp=datetime.now().strftime("%Y%m%d_%H%M%S")  # キャッシュバイパス用タイムスタンプ
     )
 
 @unified_bp.route('/<structure_id>/evaluate', methods=['POST'])
 def evaluate_structure(structure_id):
-    """構造を評価する（Claude/他プロバイダ対応）"""
+    """Claude評価を実行する"""
     try:
-        provider = request.args.get('provider', 'claude')
-        _ = request.get_json(silent=True)  # 空bodyでもエラー防止
         structure = load_structure_by_id(structure_id)
         if not structure:
-            return jsonify({'success': False, 'error': '構造が見つかりません'})
-        # Claude評価
-        if provider == 'claude':
-            _evaluate_and_append_message(structure)
-            # 最後のメッセージを返す
-            last_msg = structure.get('messages', [])[-1] if structure.get('messages') else None
+            return jsonify({'success': False, 'error': '構造が見つかりません'}), 404
+        
+        logger.info(f"🔍 Claude評価開始: {structure_id}")
+        
+        # Claude評価を実行
+        from src.structure.evaluator import evaluate_structure_with
+        evaluation_result = evaluate_structure_with(structure, "claude")
+        
+        if evaluation_result and evaluation_result.is_valid:
+            # 評価結果を構造に保存
+            if "evaluations" not in structure:
+                structure["evaluations"] = {}
+            
+            structure["evaluations"]["claude"] = {
+                "score": evaluation_result.score,
+                "feedback": evaluation_result.feedback,
+                "details": evaluation_result.details,
+                "is_valid": evaluation_result.is_valid,
+                "provider": "claude",
+                "timestamp": datetime.now().isoformat(),
+                "status": "success"
+            }
+            
+            # 履歴に保存
+            save_evaluation_to_history(structure_id, {
+                "score": evaluation_result.score,
+                "feedback": evaluation_result.feedback,
+                "details": evaluation_result.details,
+                "provider": "claude",
+                "timestamp": datetime.now().isoformat()
+            })
+            
+            # 構造を保存
             save_structure(structure_id, cast(StructureDict, structure))
-            return jsonify({'success': True, 'message': last_msg})
+            
+            logger.info(f"✅ Claude評価完了: {structure_id}, スコア: {evaluation_result.score}")
+            
+            return jsonify({
+                'success': True,
+                'evaluation': structure["evaluations"]["claude"],
+                'message': 'Claude評価が正常に完了しました'
+            })
         else:
-            return jsonify({'success': False, 'error': f'未対応のprovider: {provider}'})
+            logger.warning(f"⚠️ Claude評価失敗: {structure_id}")
+            
+            # 失敗情報を保存
+            if "evaluations" not in structure:
+                structure["evaluations"] = {}
+            
+            structure["evaluations"]["claude"] = {
+                "status": "failed",
+                "reason": evaluation_result.feedback if evaluation_result else "評価の実行に失敗しました",
+                "provider": "claude",
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            save_structure(structure_id, cast(StructureDict, structure))
+            
+            return jsonify({
+                'success': False,
+                'evaluation': structure["evaluations"]["claude"],
+                'error': 'Claude評価の実行に失敗しました'
+            }), 500
+            
     except Exception as e:
-        logger.error(f"評価実行エラー: {str(e)}")
-        return jsonify({'success': False, 'error': f'評価の実行に失敗しました: {str(e)}'})
+        logger.error(f"❌ Claude評価エラー: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Claude評価中にエラーが発生しました: {str(e)}'
+        }), 500
 
 @unified_bp.route('/<structure_id>/complete', methods=['POST'])
 def complete_structure(structure_id):
@@ -968,31 +1364,29 @@ def complete_structure(structure_id):
             from src.routes.unified_routes import apply_gemini_completion
             completion_result = apply_gemini_completion(structure)
             
-            # 補完結果をメッセージとして追加
+            # 補完結果をgemini_outputに保存（messagesには追加しない）
             if completion_result.get('status') == 'success':
                 # 成功時
-                msg = create_message_param(
-                    role="assistant",
-                    content=f"Gemini補完: {completion_result.get('content', '')}",
-                    type="gemini_completion"
-                )
-                structure.setdefault('messages', []).append(msg)
+                structure["gemini_output"] = {
+                    "content": completion_result.get('content', ''),
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "status": "success"
+                }
                 save_structure(structure_id, cast(StructureDict, structure))
                 
                 # Claude修復結果があればレスポンスに含める
-                response_data = {'success': True, 'message': msg}
+                response_data = {'success': True, 'message': 'Gemini補完が完了しました'}
                 if completion_result.get('fallback'):
                     response_data['completion'] = completion_result
                 
                 return jsonify(response_data)
             else:
                 # エラー時
-                error_msg = create_message_param(
-                    role="assistant",
-                    content=f"Gemini補完に失敗しました。構文エラーが検出されました。詳細ログを確認してください。",
-                    type="gemini_error"
-                )
-                structure.setdefault('messages', []).append(error_msg)
+                structure["gemini_output"] = {
+                    "error": completion_result.get('error_message', ''),
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "status": "error"
+                }
                 save_structure(structure_id, cast(StructureDict, structure))
                 
                 # Claude修復結果があればレスポンスに含める
@@ -1003,8 +1397,7 @@ def complete_structure(structure_id):
                         'error_message': completion_result.get('error_message', ''),
                         'error_log_path': completion_result.get('error_log_path', ''),
                         'structure_id': structure_id
-                    },
-                    'message': error_msg
+                    }
                 }
                 if completion_result.get('fallback'):
                     response_data['completion'] = completion_result
@@ -1113,9 +1506,37 @@ def send_message(structure_id: str):
                 formatted_input = prompt_template_str.format(user_input=message_content)
                 logger.info("📨 structure化プロンプト使用: structure_from_input")
                 logger.info(f"🧠 入力: {formatted_input[:500]}...")
+                
+                # ChatGPTプロンプト全文をログ出力
+                logger.info("=" * 80)
+                logger.info("🔍 ChatGPTプロンプト全文:")
+                logger.info("=" * 80)
+                logger.info(formatted_input)
+                logger.info("=" * 80)
 
                 ai_response_dict = controller.call("chatgpt", [{"role": "user", "content": formatted_input}])
                 raw_response = ai_response_dict.get('content', '') if isinstance(ai_response_dict, dict) else str(ai_response_dict)
+                
+                # ChatGPT応答全文をログ出力
+                logger.info("=" * 80)
+                logger.info("🔍 ChatGPT応答全文:")
+                logger.info("=" * 80)
+                logger.info(raw_response)
+                logger.info("=" * 80)
+                logger.info(f"📊 ChatGPT応答統計: 文字数={len(raw_response)}, 改行数={raw_response.count(chr(10))}")
+                
+                # ChatGPT応答の特徴を分析
+                if "```json" in raw_response:
+                    logger.info("✅ ChatGPT応答にJSONコードブロックが含まれています")
+                elif "{" in raw_response and "}" in raw_response:
+                    logger.info("✅ ChatGPT応答にJSONオブジェクトが含まれています")
+                else:
+                    logger.warning("⚠️ ChatGPT応答にJSONが含まれていません")
+                
+                if "構成" in raw_response:
+                    logger.info("✅ ChatGPT応答に「構成」キーワードが含まれています")
+                if "JSON" in raw_response:
+                    logger.info("✅ ChatGPT応答に「JSON」キーワードが含まれています")
                 
                 # ChatGPTの応答が仮応答かどうかをチェック
                 if _is_placeholder_response(raw_response):
@@ -1141,412 +1562,279 @@ def send_message(structure_id: str):
                         "error": "ChatGPT仮応答のため構成生成をスキップ"
                     })
                 
+                # ChatGPT応答から最低限の構造を抽出
+                logger.info("🔍 ChatGPT応答から最低限構造を抽出開始")
+                minimum_structure = get_minimum_structure_with_gpt(raw_response)
+                logger.info(f"✅ 最低限構造抽出完了: title='{minimum_structure.get('title', 'N/A')}', modules数={len(minimum_structure.get('modules', []))}")
+                
+                # 抽出された最低限構造をstructureに適用
+                structure["title"] = minimum_structure.get("title", structure["title"])
+                structure["description"] = minimum_structure.get("description", structure["description"])
+                
+                # modulesをstructureに追加（Gemini補完用）
+                if "modules" in minimum_structure:
+                    structure["modules"] = minimum_structure["modules"]
+                
+                # 元のJSON抽出も試行（完全な構造がある場合）
+                logger.info("🔍 extract_json_part関数を呼び出し開始")
+                logger.info(f"📝 extract_json_part入力文字数: {len(raw_response)}")
                 extracted_json = extract_json_part(raw_response)
                 
-                if extracted_json:
-                    logger.info("✅ 応答から構成JSONの抽出に成功しました")
-                    natural_language_part = raw_response.split("```json")[0].strip()
-                    ai_response_content = natural_language_part if natural_language_part else "構成案を作成しました。ご確認ください。"
-                    
-                    structure["title"] = extracted_json.get("title", structure["title"])
-                    structure["description"] = extracted_json.get("description", structure["description"])
-                    structure["content"] = extracted_json.get("content", structure["content"])
-                    structure["metadata"]["updated_at"] = datetime.utcnow().isoformat()
-                    content_changed = True
-
-                    # ChatGPTの自然な返答（会話）
-                    structure["messages"].append(create_message_param(
-                        role="assistant",
-                        content=ai_response_content,
-                        source="chatgpt",
-                        type="assistant_reply"
-                    ))
-
-                    # Claudeによる構成評価（構成案カードとして）
-                    try:
-                        check_prompt_template = prompt_manager.get("claude_check_structure")
-                        if isinstance(check_prompt_template, str):
-                            claude_prompt = check_prompt_template.format(
-                                structure_json=json.dumps(extracted_json, ensure_ascii=False, indent=2)
-                            )
-                            logger.info("🤖 Claudeへの確認プロンプトを生成しました")
-                            
-                            claude_response_dict = controller.call("claude", [{"role": "user", "content": claude_prompt}])
-                            claude_response_content = claude_response_dict.get('content', '') if isinstance(claude_response_dict, dict) else str(claude_response_dict)
-
-                            if claude_response_content:
-                                # Claude評価結果はstructureに保存し、chat欄には通知のみ
-                                structure["claude_evaluation"] = {
-                                    "content": claude_response_content,
-                                    "timestamp": datetime.utcnow().isoformat(),
-                                    "status": "success"
-                                }
-                                
-                                # chat欄には通知メッセージのみを追加
-                                structure["messages"].append(create_message_param(
-                                    role="assistant",
-                                    content="🔍 Claude評価を実行しました。中央ペインに評価結果を表示しています。",
-                                    source="claude",
-                                    type="notification"
-                                ))
-                                logger.info("✅ Claude評価完了通知をメッセージに追加しました")
-                                
-                                # 確認メッセージは削除して一連の流れを自動化
-                                logger.info("✅ 構成生成と評価が完了しました。Gemini補完を自動実行します。")
-                                
-                                # Gemini補完を自動実行
-                                try:
-                                    logger.info("🔁 Gemini補完処理を呼び出します")
-                                    logger.info(f"📋 現在のstructure内容: {list(structure.keys())}")
-                                    logger.info(f"📋 structure['messages']の数: {len(structure.get('messages', []))}")
-                                    
-                                    # 最新のstructure_proposalメッセージを確認
-                                    structure_messages = structure.get('messages', [])
-                                    latest_structure_proposal = None
-                                    for msg in reversed(structure_messages):
-                                        if msg.get('type') == 'structure_proposal':
-                                            latest_structure_proposal = msg
-                                            break
-                                    
-                                    if latest_structure_proposal:
-                                        logger.info(f"✅ 最新のstructure_proposalを発見: {latest_structure_proposal.get('content', '')[:100]}...")
-                                    else:
-                                        logger.warning("⚠️ structure_proposalメッセージが見つかりません")
-                                    
-                                    completion_result = apply_gemini_completion(structure)
-                                    
-                                    logger.info(f"📤 Gemini補完結果: {completion_result.get('status', 'unknown')}")
-                                    
-                                    # Gemini補完結果をメッセージに追加
-                                    if completion_result.get("status") == "success":
-                                        logger.info("✅ Gemini補完が成功しました")
-                                        
-                                        # chat欄には通知メッセージのみを追加
-                                        structure["messages"].append(create_message_param(
-                                            role="assistant",
-                                            content="✨ Gemini補完が完了しました。右ペインに構成を表示しています。",
-                                            source="gemini",
-                                            type="notification"
-                                        ))
-                                        logger.info("✅ Gemini補完完了通知をメッセージに追加しました")
-                                        
-                                        # structure["modules"]が更新されているか確認
-                                        if "modules" in structure:
-                                            logger.info(f"✅ structure['modules']が更新されました - モジュール数: {len(structure['modules'])}")
-                                        else:
-                                            logger.warning("⚠️ structure['modules']が更新されていません")
-                                            
-                                    else:
-                                        logger.warning("⚠️ Gemini補完が失敗しました")
-                                        error_message = completion_result.get("error_message", "不明なエラー")
-                                        logger.error(f"❌ Gemini補完エラー詳細: {error_message}")
-                                        
-                                        # エラー通知メッセージを追加
-                                        structure["messages"].append(create_message_param(
-                                            role="assistant",
-                                            content="⚠️ Gemini補完に失敗しました。構成は正常に生成されています。",
-                                            source="gemini",
-                                            type="notification"
-                                        ))
-                                        
-                                        # フォールバックがある場合は通知のみ追加
-                                        if completion_result.get("fallback"):
-                                            structure["messages"].append(create_message_param(
-                                                role="assistant",
-                                                content="🔄 Claudeによる修復を試行しました。",
-                                                source="claude",
-                                                type="notification"
-                                            ))
-                                            logger.info("✅ Claude修復通知をメッセージに追加しました")
-                                        
-                                except Exception as gemini_error:
-                                    logger.error(f"❌ Gemini補完実行エラー: {str(gemini_error)}")
-                                    logger.error(f"❌ エラータイプ: {type(gemini_error).__name__}")
-                                    import traceback
-                                    logger.error(f"❌ スタックトレース: {traceback.format_exc()}")
-                                    
-                                    # エラー通知メッセージを追加
-                                    structure["messages"].append(create_message_param(
-                                        role="assistant",
-                                        content="❌ Gemini補完の実行中にエラーが発生しました。構成は正常に生成されています。",
-                                        source="system",
-                                        type="notification"
-                                    ))
-                        else:
-                            logger.warning("⚠️ Claudeからの応答が空でした。")
-                            # Claude評価失敗時のメッセージを追加
-                            structure["messages"].append(create_message_param(
-                                role="assistant",
-                                content="Claudeによる構成評価に失敗しました。構成は正常に生成されています。",
-                                source="claude",
-                                type="structure_proposal"
-                            ))
-                        if not isinstance(check_prompt_template, str):
-                            logger.warning("⚠️ claude_check_structureプロンプトが見つからないか、不正な形式です")
-                            # プロンプトが見つからない場合のメッセージを追加
-                            structure["messages"].append(create_message_param(
-                                role="assistant",
-                                content="Claudeによる構成評価の設定に問題があります。構成は正常に生成されています。",
-                                source="claude",
-                                type="structure_proposal"
-                            ))
-
-                    except PromptNotFoundError as e:
-                        log_exception(logger, e, "claude_check_structureプロンプトの取得に失敗")
-                        # プロンプト取得失敗時のメッセージを追加
-                        structure["messages"].append(create_message_param(
-                            role="assistant",
-                            content="Claudeによる構成評価の設定に問題があります。構成は正常に生成されています。",
-                            source="claude",
-                            type="structure_proposal"
-                        ))
-                    except Exception as claude_error:
-                        log_exception(logger, claude_error, "Claude呼び出し中にエラーが発生しました")
-                        # Claude呼び出しエラー時のメッセージを追加
-                        structure["messages"].append(create_message_param(
-                            role="assistant",
-                            content="Claudeによる構成評価中にエラーが発生しました。構成は正常に生成されています。",
-                            source="claude",
-                            type="structure_proposal"
-                        ))
-
+                # extract_json_partの結果を詳細ログ
+                logger.info("=" * 80)
+                logger.info("🔍 extract_json_part結果詳細:")
+                logger.info("=" * 80)
+                logger.info(f"結果型: {type(extracted_json)}")
+                
+                if isinstance(extracted_json, dict):
+                    if 'error' in extracted_json:
+                        logger.error(f"❌ extract_json_partエラー: {extracted_json['error']}")
+                        if 'reason' in extracted_json:
+                            logger.error(f"❌ 理由: {extracted_json['reason']}")
+                        if 'original_text' in extracted_json:
+                            logger.error(f"❌ 元テキスト: {extracted_json['original_text']}")
+                        if 'extracted_json_string' in extracted_json:
+                            logger.error(f"❌ 抽出されたJSON文字列: {extracted_json['extracted_json_string']}")
+                    else:
+                        logger.info(f"✅ extract_json_part成功")
+                        logger.info(f"✅ 抽出されたキー: {list(extracted_json.keys())}")
+                        logger.info(f"✅ 抽出された内容: {json.dumps(extracted_json, ensure_ascii=False, indent=2)[:500]}...")
                 else:
-                    logger.warning("⚠️ 応答から構成JSONを抽出できませんでした。再プロンプトで構成生成を強制します。")
+                    logger.warning(f"⚠️ 予期しない結果型: {extracted_json}")
+                logger.info("=" * 80)
+                
+                if extracted_json and not extracted_json.get("error"):
+                    logger.info("✅ 完全なJSON構造も抽出成功")
                     
-                    # 再プロンプトで構成生成を強制
-                    retry_prompt = f"""前回の応答でJSON形式での構成生成に失敗しました。
-
-元の要求: {message_content}
-
-**重要**: 必ず以下のJSON形式で構成を出力してください。自然文での説明は一切含めないでください。
-
-```json
-{{
-  "title": "構成タイトル",
-  "description": "構成の説明（任意）",
-  "content": {{
-    "セクション名": {{
-      "項目": "内容"
-    }}
-  }}
-}}
-```
-
-**出力ルール**:
-1. 必ずJSON形式のみで出力
-2. 自然文での説明は一切含めない
-3. コードブロック（```json）で囲む
-4. titleとcontentは必須フィールド
-
-必ず上記のJSON形式で出力してください。"""
+                    # structure["modules"]に統一保存
+                    if "modules" in extracted_json:
+                        structure["modules"] = extracted_json["modules"]
+                        logger.info(f"✅ structure['modules']に保存完了 - モジュール数: {len(extracted_json['modules'])}")
+                    else:
+                        # modulesがない場合は、抽出されたJSON全体をmodulesとして保存
+                        structure["modules"] = extracted_json
+                        logger.info(f"✅ structure['modules']にJSON全体を保存 - キー数: {len(extracted_json)}")
                     
-                    # ChatGPTに再プロンプトを送信
-                    retry_messages = [
-                        {"role": "user", "content": retry_prompt}
-                    ]
+                    # その他の情報も保存
+                    if "title" in extracted_json:
+                        structure["title"] = extracted_json["title"]
+                        logger.info(f"✅ titleを保存: {extracted_json['title']}")
                     
-                    retry_response_dict = controller.call("chatgpt", messages=retry_messages)
-                    retry_raw_response = retry_response_dict.get('content', '') if isinstance(retry_response_dict, dict) else str(retry_response_dict)
+                    if "description" in extracted_json:
+                        structure["description"] = extracted_json["description"]
+                        logger.info(f"✅ descriptionを保存: {extracted_json['description'][:100]}...")
                     
-                    # 再プロンプトでも仮応答チェック
-                    if _is_placeholder_response(retry_raw_response):
-                        logger.warning("⚠️ 再プロンプトでもChatGPTが仮応答を返しました。")
-                        logger.warning(f"再プロンプト仮応答内容: {retry_raw_response[:200]}...")
+                    # 旧フィールドは削除（統一のため）
+                    if "structure" in structure:
+                        del structure["structure"]
+                        logger.info("🗑️ 旧structureフィールドを削除")
+                    
+                    if "content" in structure:
+                        del structure["content"]
+                        logger.info("🗑️ 旧contentフィールドを削除")
                         
-                        # エラーメッセージをChat欄に表示
-                        error_message = "申し訳ございません。構成案の生成に失敗しました。もう一度、具体的な要件をお聞かせください。"
-                        structure["messages"].append(create_message_param(
-                            role="assistant",
-                            content=error_message,
-                            source="chatgpt",
-                            type="assistant_reply"
-                        ))
-                        
-                        # 構成生成をスキップ
-                        save_structure(structure_id, cast(StructureDict, structure))
-                        return jsonify({
-                            "success": True,
-                            "messages": structure.get("messages", []),
-                            "content": structure.get("content", {}),
-                            "content_changed": False,
-                            "error": "再プロンプトでもChatGPT仮応答のため構成生成をスキップ"
-                        })
+                else:
+                    logger.info("⚠️ 完全なJSON構造は抽出できませんでした。最低限構造を使用します。")
                     
-                    retry_extracted_json = extract_json_part(retry_raw_response)
+                    # 最低限構造をmodulesとして保存
+                    structure["modules"] = minimum_structure.get("modules", [])
+                    logger.info(f"✅ 最低限構造をmodulesとして保存 - モジュール数: {len(structure['modules'])}")
                     
-                    if retry_extracted_json:
-                        logger.info("✅ 再プロンプトで構成JSONの抽出に成功しました")
-                        
-                        structure["title"] = retry_extracted_json.get("title", structure["title"])
-                        structure["description"] = retry_extracted_json.get("description", structure["description"])
-                        structure["content"] = retry_extracted_json.get("content", structure["content"])
-                        structure["metadata"]["updated_at"] = datetime.utcnow().isoformat()
-                        content_changed = True
+                    # その他の情報も保存
+                    if "title" in minimum_structure:
+                        structure["title"] = minimum_structure["title"]
+                        logger.info(f"✅ titleを保存: {minimum_structure['title']}")
+                    
+                    if "description" in minimum_structure:
+                        structure["description"] = minimum_structure["description"]
+                        logger.info(f"✅ descriptionを保存: {minimum_structure['description'][:100]}...")
+                    
+                    # 旧フィールドは削除（統一のため）
+                    if "structure" in structure:
+                        del structure["structure"]
+                        logger.info("🗑️ 旧structureフィールドを削除")
+                    
+                    if "content" in structure:
+                        del structure["content"]
+                        logger.info("🗑️ 旧contentフィールドを削除")
+                
+                structure["metadata"]["updated_at"] = datetime.utcnow().isoformat()
+                content_changed = True
 
-                        # ChatGPTの自然な返答（会話）
-                        structure["messages"].append(create_message_param(
-                            role="assistant",
-                            content="構成案を作成しました。ご確認ください。",
-                            source="chatgpt",
-                            type="assistant_reply"
-                        ))
+                # ChatGPTの自然な返答（会話）
+                natural_language_part = raw_response.split("```json")[0].strip()
+                ai_response_content = natural_language_part if natural_language_part else "構成案を作成しました。ご確認ください。"
+                
+                structure["messages"].append(create_message_param(
+                    role="assistant",
+                    content=ai_response_content,
+                    source="chatgpt",
+                    type="assistant_reply"
+                ))
 
-                        # Claudeによる構成評価（構成案カードとして）
-                        try:
-                            check_prompt_template = prompt_manager.get("claude_check_structure")
-                            if isinstance(check_prompt_template, str):
-                                claude_prompt = check_prompt_template.format(
-                                    structure_json=json.dumps(retry_extracted_json, ensure_ascii=False, indent=2)
-                                )
-                                logger.info("🤖 Claudeへの確認プロンプトを生成しました")
+                # Claudeによる構成評価（最低限構造を使用）
+                try:
+                    logger.info("🔍 Claude評価開始")
+                    
+                    # _evaluate_and_append_message関数を呼び出してClaude評価を実行
+                    _evaluate_and_append_message(structure)
+                    
+                    # 評価結果を確認
+                    if "evaluations" in structure and "claude" in structure["evaluations"]:
+                        claude_eval = structure["evaluations"]["claude"]
+                        if claude_eval.get("status") == "success":
+                            logger.info("✅ Claude評価が成功しました")
+                            
+                            # chat欄には通知メッセージのみを追加
+                            structure["messages"].append(create_message_param(
+                                role="assistant",
+                                content="🔍 Claude評価を実行しました。中央ペインに評価結果を表示しています。",
+                                source="claude",
+                                type="notification"
+                            ))
+                            logger.info("✅ Claude評価完了通知をメッセージに追加しました")
+                            
+                            # Gemini補完を自動実行
+                            logger.info("✅ 構成生成と評価が完了しました。Gemini補完を自動実行します。")
+                            
+                            try:
+                                logger.info("🔁 Gemini補完処理を呼び出します")
+                                logger.info(f"📋 現在のstructure内容: {list(structure.keys())}")
+                                logger.info(f"📋 structure['modules']の数: {len(structure.get('modules', []))}")
                                 
-                                claude_response_dict = controller.call("claude", [{"role": "user", "content": claude_prompt}])
-                                claude_response_content = claude_response_dict.get('content', '') if isinstance(claude_response_dict, dict) else str(claude_response_dict)
-
-                                if claude_response_content:
-                                    # Claude評価結果はstructureに保存し、chat欄には通知のみ
-                                    structure["claude_evaluation"] = {
-                                        "content": claude_response_content,
-                                        "timestamp": datetime.utcnow().isoformat(),
-                                        "status": "success"
-                                    }
+                                completion_result = apply_gemini_completion(structure)
+                                
+                                logger.info(f"📤 Gemini補完結果: {completion_result.get('status', 'unknown')}")
+                                
+                                # Gemini補完結果をメッセージに追加
+                                if completion_result.get("status") == "success":
+                                    logger.info("✅ Gemini補完が成功しました")
                                     
                                     # chat欄には通知メッセージのみを追加
                                     structure["messages"].append(create_message_param(
                                         role="assistant",
-                                        content="🔍 Claude評価を実行しました。中央ペインに評価結果を表示しています。",
-                                        source="claude",
+                                        content="✨ Gemini補完が完了しました。右ペインに構成を表示しています。",
+                                        source="gemini",
                                         type="notification"
                                     ))
-                                    logger.info("✅ Claude評価完了通知をメッセージに追加しました")
+                                    logger.info("✅ Gemini補完完了通知をメッセージに追加しました")
                                     
-                                    # 確認メッセージは削除して一連の流れを自動化
-                                    logger.info("✅ 構成生成と評価が完了しました。Gemini補完を自動実行します。")
+                                    # structure["modules"]が更新されているか確認
+                                    if "modules" in structure:
+                                        logger.info(f"✅ structure['modules']が更新されました - モジュール数: {len(structure['modules'])}")
+                                    else:
+                                        logger.warning("⚠️ structure['modules']が更新されていません")
+                                        
+                                else:
+                                    logger.warning("⚠️ Gemini補完が失敗しました")
+                                    error_message = completion_result.get("error_message", "不明なエラー")
+                                    logger.error(f"❌ Gemini補完エラー詳細: {error_message}")
                                     
-                                    # Gemini補完を自動実行
-                                    try:
-                                        logger.info("🔁 Gemini補完処理を呼び出します")
-                                        logger.info(f"📋 現在のstructure内容: {list(structure.keys())}")
-                                        logger.info(f"📋 structure['messages']の数: {len(structure.get('messages', []))}")
-                                        
-                                        # 最新のstructure_proposalメッセージを確認
-                                        structure_messages = structure.get('messages', [])
-                                        latest_structure_proposal = None
-                                        for msg in reversed(structure_messages):
-                                            if msg.get('type') == 'structure_proposal':
-                                                latest_structure_proposal = msg
-                                                break
-                                        
-                                        if latest_structure_proposal:
-                                            logger.info(f"✅ 最新のstructure_proposalを発見: {latest_structure_proposal.get('content', '')[:100]}...")
-                                        else:
-                                            logger.warning("⚠️ structure_proposalメッセージが見つかりません")
-                                        
-                                        completion_result = apply_gemini_completion(structure)
-                                        
-                                        logger.info(f"📤 Gemini補完結果: {completion_result.get('status', 'unknown')}")
-                                        
-                                        # Gemini補完結果をメッセージに追加
-                                        if completion_result.get("status") == "success":
-                                            logger.info("✅ Gemini補完が成功しました")
-                                            
-                                            # chat欄には通知メッセージのみを追加
-                                            structure["messages"].append(create_message_param(
-                                                role="assistant",
-                                                content="✨ Gemini補完が完了しました。右ペインに構成を表示しています。",
-                                                source="gemini",
-                                                type="notification"
-                                            ))
-                                            logger.info("✅ Gemini補完完了通知をメッセージに追加しました")
-                                            
-                                            # structure["modules"]が更新されているか確認
-                                            if "modules" in structure:
-                                                logger.info(f"✅ structure['modules']が更新されました - モジュール数: {len(structure['modules'])}")
-                                            else:
-                                                logger.warning("⚠️ structure['modules']が更新されていません")
-                                                
-                                        else:
-                                            logger.warning("⚠️ Gemini補完が失敗しました")
-                                            error_message = completion_result.get("error_message", "不明なエラー")
-                                            logger.error(f"❌ Gemini補完エラー詳細: {error_message}")
-                                            
-                                            # エラー通知メッセージを追加
-                                            structure["messages"].append(create_message_param(
-                                                role="assistant",
-                                                content="⚠️ Gemini補完に失敗しました。構成は正常に生成されています。",
-                                                source="gemini",
-                                                type="notification"
-                                            ))
-                                            
-                                            # フォールバックがある場合は通知のみ追加
-                                            if completion_result.get("fallback"):
-                                                structure["messages"].append(create_message_param(
-                                                    role="assistant",
-                                                    content="🔄 Claudeによる修復を試行しました。",
-                                                    source="claude",
-                                                    type="notification"
-                                                ))
-                                                logger.info("✅ Claude修復通知をメッセージに追加しました")
-                                    except Exception as gemini_error:
-                                        logger.error(f"❌ Gemini補完実行エラー: {str(gemini_error)}")
-                                        logger.error(f"❌ エラータイプ: {type(gemini_error).__name__}")
-                                        import traceback
-                                        logger.error(f"❌ スタックトレース: {traceback.format_exc()}")
-                                        
-                                        # エラー通知メッセージを追加
+                                    # エラー通知メッセージを追加
+                                    structure["messages"].append(create_message_param(
+                                        role="assistant",
+                                        content="⚠️ Gemini補完に失敗しました。構成は正常に生成されています。",
+                                        source="gemini",
+                                        type="notification"
+                                    ))
+                                    
+                                    # フォールバックがある場合は通知のみ追加
+                                    if completion_result.get("fallback"):
                                         structure["messages"].append(create_message_param(
                                             role="assistant",
-                                            content="❌ Gemini補完の実行中にエラーが発生しました。構成は正常に生成されています。",
-                                            source="system",
+                                            content="🔄 Claudeによる修復を試行しました。",
+                                            source="claude",
                                             type="notification"
                                         ))
-                                else:
-                                    logger.warning("⚠️ Claudeからの応答が空でした。")
-                                    # Claude評価失敗時の通知メッセージを追加
-                                    structure["messages"].append(create_message_param(
-                                        role="assistant",
-                                        content="⚠️ Claude評価に失敗しました。構成は正常に生成されています。",
-                                        source="claude",
-                                        type="notification"
-                                    ))
-                                if not isinstance(check_prompt_template, str):
-                                    logger.warning("⚠️ claude_check_structureプロンプトが見つからないか、不正な形式です")
-                                    # プロンプトが見つからない場合の通知メッセージを追加
-                                    structure["messages"].append(create_message_param(
-                                        role="assistant",
-                                        content="⚠️ Claude評価の設定に問題があります。構成は正常に生成されています。",
-                                        source="claude",
-                                        type="notification"
-                                    ))
-
-                        except PromptNotFoundError as e:
-                            log_exception(logger, e, "claude_check_structureプロンプトの取得に失敗")
-                            # プロンプト取得失敗時の通知メッセージを追加
+                                        logger.info("✅ Claude修復通知をメッセージに追加しました")
+                                    
+                            except Exception as gemini_error:
+                                logger.error(f"❌ Gemini補完実行エラー: {str(gemini_error)}")
+                                logger.error(f"❌ エラータイプ: {type(gemini_error).__name__}")
+                                import traceback
+                                logger.error(f"❌ スタックトレース: {traceback.format_exc()}")
+                                
+                                # エラー通知メッセージを追加
+                                structure["messages"].append(create_message_param(
+                                    role="assistant",
+                                    content="❌ Gemini補完の実行中にエラーが発生しました。構成は正常に生成されています。",
+                                    source="system",
+                                    type="notification"
+                                ))
+                        else:
+                            logger.warning("⚠️ Claudeからの応答が空でした。")
+                            # Claude評価失敗時のメッセージを追加（改善版）
+                            evaluation_message = {
+                                "role": "system",
+                                "type": "notification",
+                                "content": (
+                                    "⚠️ Claudeによる構成評価は失敗しましたが、アプリの構成自体は問題なく作成されています。\n\n"
+                                    "✅ 構成タイトル: 「{title}」\n"
+                                    "📝 説明: {description}\n\n"
+                                    "このままGeminiによる構成補完が進みますので、画面の右側に出力される内容をご確認ください。"
+                                ).format(
+                                    title=structure.get("title", "タイトル未設定"),
+                                    description=structure.get("description", "説明が入力されていません"),
+                                )
+                            }
+                            
                             structure["messages"].append(create_message_param(
-                                role="assistant",
-                                content="⚠️ Claude評価の設定に問題があります。構成は正常に生成されています。",
+                                role=evaluation_message["role"],
+                                content=evaluation_message["content"],
                                 source="claude",
-                                type="notification"
+                                type=evaluation_message["type"]
                             ))
-                        except Exception as claude_error:
-                            log_exception(logger, claude_error, "Claude呼び出し中にエラーが発生しました")
-                            # Claude呼び出しエラー時の通知メッセージを追加
-                            structure["messages"].append(create_message_param(
-                                role="assistant",
-                                content="⚠️ Claude評価中にエラーが発生しました。構成は正常に生成されています。",
-                                source="claude",
-                                type="notification"
-                            ))
-                    
                     else:
-                        logger.error("❌ 再プロンプトでも構成JSONの抽出に失敗しました。エラーメッセージを表示します。")
-                        error_message = "申し訳ございません。構成の生成に失敗しました。もう一度、具体的な要件をお聞かせください。"
+                        logger.warning("⚠️ Claude評価結果が保存されていません")
+                        # Claude評価失敗時のメッセージを追加（改善版）
+                        evaluation_message = {
+                            "role": "system",
+                            "type": "notification",
+                            "content": (
+                                "⚠️ Claudeによる構成評価は失敗しましたが、アプリの構成自体は問題なく作成されています。\n\n"
+                                "✅ 構成タイトル: 「{title}」\n"
+                                "📝 説明: {description}\n\n"
+                                "このままGeminiによる構成補完が進みますので、画面の右側に出力される内容をご確認ください。"
+                            ).format(
+                                title=structure.get("title", "タイトル未設定"),
+                                description=structure.get("description", "説明が入力されていません"),
+                            )
+                        }
+                        
                         structure["messages"].append(create_message_param(
-                            role="assistant", 
-                            content=error_message, 
-                            source="chatgpt",
-                            type="assistant_reply"
+                            role=evaluation_message["role"],
+                            content=evaluation_message["content"],
+                            source="claude",
+                            type=evaluation_message["type"]
                         ))
+
+                except Exception as claude_error:
+                    logger.error(f"❌ Claude評価実行エラー: {str(claude_error)}")
+                    logger.error(f"❌ エラータイプ: {type(claude_error).__name__}")
+                    import traceback
+                    logger.error(f"❌ スタックトレース: {traceback.format_exc()}")
+                    
+                    # エラー通知メッセージを追加（改善版）
+                    evaluation_message = {
+                        "role": "system",
+                        "type": "notification",
+                        "content": (
+                            "⚠️ Claudeによる構成評価は失敗しましたが、アプリの構成自体は問題なく作成されています。\n\n"
+                            "✅ 構成タイトル: 「{title}」\n"
+                            "📝 説明: {description}\n\n"
+                            "このままGeminiによる構成補完が進みますので、画面の右側に出力される内容をご確認ください。"
+                        ).format(
+                            title=structure.get("title", "タイトル未設定"),
+                            description=structure.get("description", "説明が入力されていません"),
+                        )
+                    }
+                    
+                    structure["messages"].append(create_message_param(
+                        role=evaluation_message["role"],
+                        content=evaluation_message["content"],
+                        source="claude",
+                        type=evaluation_message["type"]
+                    ))
 
             except (PromptNotFoundError, Exception) as e:
                 log_exception(logger, e, "構成化プロンプト処理中にエラーが発生しました")
@@ -1581,6 +1869,17 @@ def send_message(structure_id: str):
         save_structure(structure_id, cast(StructureDict, structure))
         logger.info(f"✅ メッセージ送信処理完了 - structure_id: {structure_id}")
 
+        # 構成データがある場合、structureタイプのメッセージを追加（フロント側の構成カード描画用）
+        if structure.get("modules") and content_changed:
+            logger.info("📦 構成データを検出、structureタイプのメッセージを追加")
+            structure["messages"].append(create_message_param(
+                role="assistant",
+                content=json.dumps(structure["modules"], ensure_ascii=False, indent=2),
+                type="structure",
+                source="chatgpt"
+            ))
+            logger.info("✅ 構成メッセージをチャットに追加")
+
         # Gemini補完の結果を確認
         gemini_completion_result = None
         if "completions" in structure and structure["completions"]:
@@ -1603,11 +1902,18 @@ def send_message(structure_id: str):
             "title": structure.get("title", ""),
             "description": structure.get("description", ""),
             "content_changed": content_changed,
-            "gemini_completion": gemini_completion_result
+            "gemini_completion": gemini_completion_result,
+            "gemini_output": gemini_completion_result  # JS側の参照用に追加
         }
+        
+        # structure内にもgemini_outputを追加（JS側の参照用）
+        if gemini_completion_result:
+            structure["gemini_output"] = gemini_completion_result
+            logger.info("✅ structureにgemini_outputを追加しました")
         
         logger.info(f"📤 レスポンス送信 - modules数: {len(structure.get('modules', {}))}")
         logger.info(f"📤 レスポンス送信 - title: {structure.get('title', 'N/A')}")
+        logger.info(f"📤 レスポンス送信 - gemini_output: {gemini_completion_result is not None}")
         
         return jsonify(response_data)
 
@@ -1826,39 +2132,35 @@ def evaluate_improved_structure(structure_id):
 
 @unified_bp.route('/unified/<structure_id>/compare-structures', methods=['POST'])
 def compare_structures(structure_id):
-    """元の構成と改善構成の差分を生成する"""
+    """構成の比較を実行する"""
     try:
         data = request.get_json()
-        original_structure = data.get('original_structure')
-        improved_structure = data.get('improved_structure')
+        if not data:
+            return jsonify({'error': 'データがありません'}), 400
+        
+        original_structure = data.get('original')
+        improved_structure = data.get('improved')
         
         if not original_structure or not improved_structure:
-            return jsonify({'success': False, 'error': '構成データが不足しています'})
-        
-        logger.info(f"🔍 構成差分生成開始 - structure_id: {structure_id}")
+            return jsonify({'error': '比較対象の構成が不足しています'}), 400
         
         # 差分を生成
         diff_result = generate_structure_diff(original_structure, improved_structure)
         
-        if not diff_result:
-            return jsonify({'success': False, 'error': '差分生成に失敗しました'})
-        
-        # 差分をHTML形式で生成
-        diff_html = generate_diff_html(diff_result)
-        
-        logger.info(f"✅ 構成差分生成完了")
+        # HTML形式で差分を生成
+        diff_html = generate_diff_result_html(diff_result)
         
         return jsonify({
             'success': True,
-            'diff_html': diff_html,
-            'diff_result': diff_result
+            'diff_result': diff_result,
+            'diff_html': diff_html
         })
         
     except Exception as e:
-        log_exception(logger, e, "構成差分生成")
-        return jsonify({'success': False, 'error': str(e)})
+        logger.error(f"構成比較エラー: {str(e)}")
+        return jsonify({'error': f'構成比較中にエラーが発生しました: {str(e)}'}), 500
 
-def generate_diff_html(diff_result):
+def generate_diff_result_html(diff_result):
     """差分結果をHTML形式で生成"""
     try:
         html_parts = []
@@ -2217,15 +2519,12 @@ def auto_complete_confirmation(structure_id: str):
             # 自動補完を実行
             enhanced_structure = auto_complete_structure(structure, missing_fields)
             
-            # 成功メッセージを追加
-            enhanced_structure["messages"].append(
-                create_message_param(
-                    role="assistant",
-                    content="✅ 構成を自動補完しました。",
-                    type="completion_success",
-                    source="system"
-                )
-            )
+            # 補完結果を専用フィールドに保存（messagesには追加しない）
+            enhanced_structure["auto_completion"] = {
+                "status": "success",
+                "timestamp": datetime.utcnow().isoformat(),
+                "message": "✅ 構成を自動補完しました。"
+            }
             
             # 構成を保存
             save_structure(structure_id, cast(StructureDict, enhanced_structure))
@@ -2238,7 +2537,7 @@ def auto_complete_confirmation(structure_id: str):
             })
         
         else:  # confirmation == 'no'
-            # 手動補完を促すメッセージを追加
+            # 手動補完を促すメッセージを専用フィールドに保存（messagesには追加しない）
             logger.info("❌ 自動補完をキャンセルしました")
             
             completeness_check = check_structure_completeness(structure)
@@ -2248,14 +2547,11 @@ def auto_complete_confirmation(structure_id: str):
             # ガイダンスメッセージを生成
             guidance_message = render_guidance_message(missing_fields, suggestions)
             
-            structure["messages"].append(
-                create_message_param(
-                    role="assistant",
-                    content=guidance_message,
-                    type="completion_guidance",
-                    source="system"
-                )
-            )
+            structure["auto_completion"] = {
+                "status": "cancelled",
+                "timestamp": datetime.utcnow().isoformat(),
+                "message": guidance_message
+            }
             
             # 構成を保存
             save_structure(structure_id, cast(StructureDict, structure))
@@ -2880,78 +3176,94 @@ def validate_gemini_response_structure(response: str) -> Dict[str, Any]:
     
     return validation
 
-def analyze_structure_state(structure: Dict[str, Any]) -> Dict[str, Any]:
+def analyze_structure_state(evaluation: str) -> dict:
     """
-    構成の現在の状態を分析し、介入が必要かどうかを判定する
+    Claudeの評価文を解析し、構成の状態（未完成、完成、判別不能）を返す
     
     Args:
-        structure: 分析対象の構成データ
+        evaluation: Claudeの評価文
         
     Returns:
-        Dict[str, Any]: 分析結果
-            - intervention_needed (bool): 介入が必要かどうか
-            - intervention_type (str): 介入の種類
-            - analysis_details (Dict): 詳細な分析結果
+        dict: 分析結果
+            - status: "incomplete", "complete", "unknown"
+            - reason: 理由の説明
     """
     try:
-        analysis = {
-            "intervention_needed": False,
-            "intervention_type": None,
-            "analysis_details": {}
+        if not evaluation or not isinstance(evaluation, str):
+            return {"status": "unknown", "reason": "評価文が空または無効です。"}
+        
+        evaluation_lower = evaluation.lower()
+        
+        # 未完成を示すキーワード
+        incomplete_keywords = [
+            "不十分", "未定義", "不足", "不完全", "欠如", "未実装",
+            "insufficient", "undefined", "missing", "incomplete", "lack", "not implemented",
+            "改善が必要", "修正が必要", "追加が必要", "補完が必要",
+            "needs improvement", "needs fixing", "needs addition", "needs completion"
+        ]
+        
+        # 完成を示すキーワード
+        complete_keywords = [
+            "問題ありません", "適切です", "十分です", "完成", "良好",
+            "no problem", "appropriate", "sufficient", "complete", "good",
+            "満足", "優秀", "完璧", "理想的",
+            "satisfactory", "excellent", "perfect", "ideal"
+        ]
+        
+        # 未完成チェック
+        for keyword in incomplete_keywords:
+            if keyword in evaluation_lower:
+                return {
+                    "status": "incomplete", 
+                    "reason": f"構成に未定義の項目があります。補完が必要です。（キーワード: {keyword}）"
+                }
+        
+        # 完成チェック
+        for keyword in complete_keywords:
+            if keyword in evaluation_lower:
+                return {
+                    "status": "complete",
+                    "reason": f"構成は完成しています。（キーワード: {keyword}）"
+                }
+        
+        # スコアベースの判定（数値が含まれている場合）
+        import re
+        score_patterns = [
+            r'(\d+(?:\.\d+)?)/10',  # 10点満点
+            r'(\d+(?:\.\d+)?)%',    # パーセンテージ
+            r'スコア[：:]\s*(\d+(?:\.\d+)?)',  # スコア: 数値
+            r'score[：:]\s*(\d+(?:\.\d+)?)'    # score: 数値
+        ]
+        
+        for pattern in score_patterns:
+            match = re.search(pattern, evaluation)
+            if match:
+                try:
+                    score = float(match.group(1))
+                    if score < 6.0:  # 60%未満は未完成
+                        return {
+                            "status": "incomplete",
+                            "reason": f"評価スコアが低いです（{score}）。改善が必要です。"
+                        }
+                    elif score >= 8.0:  # 80%以上は完成
+                        return {
+                            "status": "complete",
+                            "reason": f"評価スコアが高いです（{score}）。構成は完成しています。"
+                        }
+                except ValueError:
+                    continue
+        
+        # デフォルト: 判別不能
+        return {
+            "status": "unknown", 
+            "reason": "評価文から状態を特定できませんでした。"
         }
         
-        # 構成の基本チェック
-        content = structure.get("content", {})
-        messages = structure.get("messages", [])
-        evaluation = structure.get("evaluation", {})
-        
-        # 1. 空の構成チェック
-        if not content or (isinstance(content, dict) and not content):
-            analysis["intervention_needed"] = True
-            analysis["intervention_type"] = "empty_structure"
-            analysis["analysis_details"]["reason"] = "構成が空です。構成生成を開始してください。"
-            return analysis
-        
-        # 2. 評価結果のチェック
-        if evaluation and evaluation.get("status") == "failed":
-            analysis["intervention_needed"] = True
-            analysis["intervention_type"] = "evaluation_failed"
-            analysis["analysis_details"]["reason"] = "評価に失敗しました。再評価を試してください。"
-            return analysis
-        
-        # 3. 低スコアのチェック
-        if evaluation and evaluation.get("score"):
-            score = float(evaluation.get("score", 0))
-            if score < 0.6:
-                analysis["intervention_needed"] = True
-                analysis["intervention_type"] = "low_score"
-                analysis["analysis_details"]["reason"] = f"評価スコアが低いです（{score:.2f}）。改善を検討してください。"
-                return analysis
-        
-        # 4. メッセージ履歴のチェック
-        if len(messages) > 10:
-            analysis["intervention_needed"] = True
-            analysis["intervention_type"] = "long_conversation"
-            analysis["analysis_details"]["reason"] = "会話が長くなっています。構成を整理することをお勧めします。"
-            return analysis
-        
-        # 5. エラー構成のチェック
-        if isinstance(content, dict) and "error" in content:
-            analysis["intervention_needed"] = True
-            analysis["intervention_type"] = "error_structure"
-            analysis["analysis_details"]["reason"] = f"構成にエラーがあります: {content['error']}"
-            return analysis
-        
-        # 介入不要の場合
-        analysis["analysis_details"]["reason"] = "構成は正常な状態です。"
-        return analysis
-        
     except Exception as e:
-        logger.error(f"構成状態分析中にエラーが発生: {str(e)}")
+        logger.error(f"評価文解析中にエラーが発生: {str(e)}")
         return {
-            "intervention_needed": False,
-            "intervention_type": "analysis_error",
-            "analysis_details": {"reason": f"分析中にエラーが発生しました: {str(e)}"}
+            "status": "unknown", 
+            "reason": f"評価文の解析中にエラーが発生しました: {str(e)}"
         }
 
 def generate_intervention_message(analysis: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -3184,3 +3496,714 @@ def generate_structure_diff(original_structure: Dict[str, Any], improved_structu
                 "unchanged": 0
             }
         }
+
+def ensure_modules_exist(structure: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    構造データにmodulesキーが存在しない場合、自動生成する
+    
+    Args:
+        structure: 構造データ
+        
+    Returns:
+        Dict[str, Any]: modulesが存在する構造データ
+    """
+    logger.info(f"🔍 modules存在確認開始: {list(structure.keys())}")
+    
+    # modulesが既に存在する場合は何もしない
+    if "modules" in structure and structure["modules"]:
+        logger.info(f"✅ modulesが既に存在します: {len(structure['modules'])}件")
+        return structure
+    
+    logger.info("⚠️ modulesが存在しないため、自動生成を実行")
+    
+    # 既存のデータからmodulesを生成
+    modules = []
+    
+    # 1. structure["structure"]から生成
+    if "structure" in structure and structure["structure"]:
+        try:
+            if isinstance(structure["structure"], str):
+                structure_data = json.loads(structure["structure"])
+            else:
+                structure_data = structure["structure"]
+            
+            if "modules" in structure_data:
+                modules = structure_data["modules"]
+                logger.info(f"✅ structure['structure']からmodulesを取得: {len(modules)}件")
+            elif isinstance(structure_data, dict):
+                # 構造データ全体をmodulesとして扱う
+                modules = [{"name": key, "detail": str(value)} for key, value in structure_data.items()]
+                logger.info(f"✅ structure['structure']からmodulesを生成: {len(modules)}件")
+        except Exception as e:
+            logger.warning(f"⚠️ structure['structure']からのmodules生成に失敗: {e}")
+    
+    # 2. structure["content"]から生成
+    if not modules and "content" in structure and structure["content"]:
+        try:
+            if isinstance(structure["content"], str):
+                content_data = json.loads(structure["content"])
+            else:
+                content_data = structure["content"]
+            
+            if "modules" in content_data:
+                modules = content_data["modules"]
+                logger.info(f"✅ structure['content']からmodulesを取得: {len(modules)}件")
+            elif isinstance(content_data, dict):
+                # contentデータ全体をmodulesとして扱う
+                modules = [{"name": key, "detail": str(value)} for key, value in content_data.items()]
+                logger.info(f"✅ structure['content']からmodulesを生成: {len(modules)}件")
+        except Exception as e:
+            logger.warning(f"⚠️ structure['content']からのmodules生成に失敗: {e}")
+    
+    # 3. completionsから生成
+    if not modules and "completions" in structure and structure["completions"]:
+        try:
+            for completion in structure["completions"]:
+                if completion.get("extracted_json") and "modules" in completion["extracted_json"]:
+                    modules = completion["extracted_json"]["modules"]
+                    logger.info(f"✅ completionsからmodulesを取得: {len(modules)}件")
+                    break
+        except Exception as e:
+            logger.warning(f"⚠️ completionsからのmodules生成に失敗: {e}")
+    
+    # 4. デフォルトのmodulesを生成
+    if not modules:
+        modules = [
+            {"name": "基本機能", "detail": "アプリケーションの基本機能"},
+            {"name": "データ管理", "detail": "データの保存・取得・更新・削除機能"},
+            {"name": "ユーザーインターフェース", "detail": "ユーザーとの対話機能"}
+        ]
+        logger.info(f"✅ デフォルトmodulesを生成: {len(modules)}件")
+    
+    # modulesを構造データに追加
+    structure["modules"] = modules
+    logger.info(f"✅ modulesを構造データに追加完了: {len(modules)}件")
+    
+    return structure
+
+@unified_bp.route('/<structure_id>/data')
+def get_structure_data(structure_id):
+    """構成データを取得する（カードクリック時用）"""
+    try:
+        structure = load_structure_by_id(structure_id)
+        if not structure:
+            return jsonify({'success': False, 'error': '構造が見つかりません'}), 404
+        
+        # 基本情報のみを返す（セキュリティ考慮）
+        response_data = {
+            'success': True,
+            'structure': {
+                'id': structure.get('id'),
+                'title': structure.get('title'),
+                'description': structure.get('description'),
+                'content': structure.get('content'),
+                'modules': structure.get('modules'),
+                'gemini_output': structure.get('gemini_output'),
+                'completions': structure.get('completions'),
+                'evaluations': structure.get('evaluations'),
+                'messages': structure.get('messages', [])[-10:]  # 最新10件のみ
+            }
+        }
+        
+        logger.info(f"✅ 構成データ取得成功: {structure_id}")
+        return jsonify(response_data)
+        
+    except Exception as e:
+        logger.error(f"❌ 構成データ取得エラー: {str(e)}")
+        return jsonify({'success': False, 'error': f'構成データの取得に失敗しました: {str(e)}'}), 500
+
+def _validate_structure_completeness(structure_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    構造データの完全性を検証する
+    
+    Args:
+        structure_data: 検証対象の構造データ
+        
+    Returns:
+        Dict[str, Any]: 検証結果
+    """
+    validation_result = {
+        "is_valid": False,
+        "missing_fields": [],
+        "invalid_modules": [],
+        "suggestions": []
+    }
+    
+    try:
+        # 基本フィールドのチェック
+        if "title" not in structure_data:
+            validation_result["missing_fields"].append("title")
+        
+        if "modules" not in structure_data:
+            validation_result["missing_fields"].append("modules")
+            validation_result["suggestions"].append("modules配列を追加してください")
+            return validation_result
+        
+        modules = structure_data.get("modules", [])
+        if not isinstance(modules, list) or len(modules) == 0:
+            validation_result["suggestions"].append("modules配列に少なくとも1つのモジュールを含めてください")
+            return validation_result
+        
+        # 各モジュールの検証
+        valid_modules = 0
+        for i, module in enumerate(modules):
+            module_validation = _validate_module(module, i)
+            if not module_validation["is_valid"]:
+                validation_result["invalid_modules"].append({
+                    "index": i,
+                    "errors": module_validation["errors"],
+                    "suggestions": module_validation["suggestions"]
+                })
+            else:
+                valid_modules += 1
+        
+        # 全体の妥当性判定
+        if len(validation_result["missing_fields"]) == 0 and valid_modules > 0:
+            validation_result["is_valid"] = True
+            validation_result["suggestions"].append("構造は有効です")
+        
+        return validation_result
+        
+    except Exception as e:
+        logger.error(f"構造検証エラー: {str(e)}")
+        validation_result["suggestions"].append(f"構造検証中にエラーが発生しました: {str(e)}")
+        return validation_result
+
+def _validate_module(module: Dict[str, Any], index: int) -> Dict[str, Any]:
+    """
+    個別モジュールの妥当性を検証する
+    
+    Args:
+        module: 検証対象のモジュール
+        index: モジュールのインデックス
+        
+    Returns:
+        Dict[str, Any]: 検証結果
+    """
+    validation_result = {
+        "is_valid": False,
+        "errors": [],
+        "suggestions": []
+    }
+    
+    try:
+        # 必須フィールドのチェック
+        required_fields = ["id", "type", "title"]
+        for field in required_fields:
+            if field not in module:
+                validation_result["errors"].append(f"必須フィールド '{field}' が不足しています")
+        
+        if validation_result["errors"]:
+            return validation_result
+        
+        # モジュールタイプに応じた配列のチェック
+        module_type = module.get("type", "")
+        type_requirements = {
+            "form": {"fields": "list"},
+            "table": {"columns": "list"}, 
+            "api": {"endpoints": "list"},
+            "chart": {"chart_config": "dict"},
+            "auth": {"auth_config": "dict"},
+            "database": {"tables": "list"},
+            "config": {"settings": "list"},
+            "page": {"layout": "dict"},
+            "component": {"component_config": "dict"}
+        }
+        
+        if module_type in type_requirements:
+            for field_name, expected_type in type_requirements[module_type].items():
+                if field_name not in module:
+                    validation_result["errors"].append(f"モジュールタイプ '{module_type}' には '{field_name}' フィールドが必要です")
+                else:
+                    field_value = module[field_name]
+                    if expected_type == "list":
+                        if not isinstance(field_value, list) or len(field_value) == 0:
+                            validation_result["errors"].append(f"'{field_name}' 配列が空または無効です")
+                    elif expected_type == "dict":
+                        if not isinstance(field_value, dict):
+                            validation_result["errors"].append(f"'{field_name}' は辞書（オブジェクト）である必要があります")
+        
+        # 有効なモジュールタイプのチェック
+        valid_types = list(type_requirements.keys()) + ["unknown"]
+        if module_type not in valid_types:
+            validation_result["suggestions"].append(f"モジュールタイプ '{module_type}' は標準タイプではありません")
+        
+        # 妥当性判定
+        if len(validation_result["errors"]) == 0:
+            validation_result["is_valid"] = True
+            validation_result["suggestions"].append("モジュールは有効です")
+        
+        return validation_result
+        
+    except Exception as e:
+        logger.error(f"モジュール検証エラー (index {index}): {str(e)}")
+        validation_result["errors"].append(f"モジュール検証中にエラーが発生しました: {str(e)}")
+        return validation_result
+
+@unified_bp.route('/<structure_id>/structure-history')
+def get_structure_history_api(structure_id: str):
+    """構造履歴を取得するAPIエンドポイント"""
+    try:
+        from src.structure.history import load_structure_history, get_structure_history_by_provider
+        
+        # クエリパラメータの取得
+        provider = request.args.get('provider')  # claude または gemini
+        limit = request.args.get('limit', type=int, default=50)  # 取得件数制限
+        
+        if provider:
+            # プロバイダー指定の場合
+            history_list = get_structure_history_by_provider(structure_id, provider)
+        else:
+            # 全履歴の場合
+            history_list = load_structure_history(structure_id)
+        
+        # 件数制限を適用
+        if limit and limit > 0:
+            history_list = history_list[:limit]
+        
+        # レスポンス用にデータを整形
+        formatted_history = []
+        for entry in history_list:
+            formatted_entry = {
+                "timestamp": entry.get("timestamp"),
+                "provider": entry.get("provider"),
+                "score": entry.get("score"),
+                "comment": entry.get("comment", ""),
+                "status": entry.get("structure", {}).get("status", "unknown"),
+                "structure_summary": {
+                    "title": entry.get("structure", {}).get("title", "不明"),
+                    "module_count": len(entry.get("structure", {}).get("modules", {}))
+                }
+            }
+            formatted_history.append(formatted_entry)
+        
+        return jsonify({
+            "status": "success",
+            "structure_id": structure_id,
+            "provider": provider,
+            "total_count": len(formatted_history),
+            "history": formatted_history
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ 構造履歴取得エラー: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": f"構造履歴の取得に失敗しました: {str(e)}"
+        }), 500
+
+
+@unified_bp.route('/<structure_id>/structure-history/compare')
+def compare_structure_history_api(structure_id: str):
+    """構造履歴の比較APIエンドポイント"""
+    try:
+        from src.structure.history import compare_structure_history
+        
+        # クエリパラメータの取得
+        index1 = request.args.get('index1', type=int, default=0)
+        index2 = request.args.get('index2', type=int, default=1)
+        
+        # 履歴比較を実行
+        diff_result = compare_structure_history(structure_id, index1, index2)
+        
+        if diff_result is None:
+            return jsonify({
+                "status": "error",
+                "message": "履歴比較に失敗しました。インデックスが範囲外の可能性があります。"
+            }), 400
+        
+        return jsonify({
+            "status": "success",
+            "structure_id": structure_id,
+            "index1": index1,
+            "index2": index2,
+            "comparison": diff_result
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ 構造履歴比較エラー: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": f"構造履歴の比較に失敗しました: {str(e)}"
+        }), 500
+
+
+@unified_bp.route('/<structure_id>/structure-history/latest')
+def get_latest_structure_history_api(structure_id: str):
+    """最新の構造履歴を取得するAPI"""
+    try:
+        from src.structure.history import get_latest_structure_history
+        
+        history = get_latest_structure_history(structure_id)
+        if history:
+            return jsonify({
+                "status": "success",
+                "history": history
+            })
+        else:
+            return jsonify({
+                "status": "not_found",
+                "message": "履歴が見つかりません"
+            }), 404
+            
+    except Exception as e:
+        logger.error(f"❌ 最新履歴取得エラー: {e}")
+        return jsonify({
+            "status": "error",
+            "message": f"履歴取得に失敗しました: {str(e)}"
+        }), 500
+
+@unified_bp.route('/<structure_id>/module-diff')
+def get_module_diff_api(structure_id: str):
+    """モジュール差分データを取得するAPI"""
+    try:
+        # 構造データを取得
+        structure = load_structure(structure_id)
+        if not structure:
+            return jsonify({
+                "status": "not_found",
+                "message": "構造が見つかりません"
+            }), 404
+        
+        # モジュール差分データを取得
+        module_diff = structure.get("module_diff")
+        if not module_diff:
+            return jsonify({
+                "status": "not_found",
+                "message": "モジュール差分データが見つかりません"
+            }), 404
+        
+        return jsonify({
+            "status": "success",
+            "module_diff": module_diff
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ モジュール差分取得エラー: {e}")
+        return jsonify({
+            "status": "error",
+            "message": f"モジュール差分取得に失敗しました: {str(e)}"
+        }), 500
+
+@unified_bp.route("/<structure_id>/yes_no_response", methods=["POST"])
+def handle_yes_no_response(structure_id):
+    """
+    Yes/No応答を処理するAPI
+    
+    Args:
+        structure_id: 構成ID
+        
+    Returns:
+        JSON response with status and message
+    """
+    try:
+        log_request(logger, request, f"handle_yes_no_response - structure_id: {structure_id}")
+        logger.info(f"🤔 Yes/No応答処理開始 - structure_id: {structure_id}")
+
+        data = request.get_json()
+        if not data:
+            logger.error("❌ リクエストデータがありません")
+            return jsonify({"error": "リクエストデータがありません"}), 400
+
+        answer = data.get("answer")
+        if not answer:
+            logger.error("❌ 応答が指定されていません")
+            return jsonify({"error": "応答が指定されていません"}), 400
+
+        logger.info(f"📝 ユーザー応答: {answer}")
+
+        if answer == "はい":
+            logger.info("✅ ユーザーが「はい」と回答、Gemini補完を実行します")
+            
+            # 構成を読み込み
+            structure = load_structure_by_id(structure_id)
+            if not structure:
+                logger.error("❌ 構成が見つかりません")
+                return jsonify({"error": "構成が見つかりません"}), 404
+            
+            # Gemini補完を実行
+            try:
+                apply_gemini_completion(structure)
+                logger.info("✅ Gemini補完が正常に完了しました")
+                
+                # 成功メッセージを構成に追加
+                success_message = create_message_param(
+                    role="assistant",
+                    content="Geminiによる補完を実行しました。構成が更新されました。",
+                    source="system",
+                    type="notification"
+                )
+                structure["messages"].append(success_message)
+                save_structure(structure_id, cast(StructureDict, structure))
+                
+                return jsonify({
+                    "status": "completed", 
+                    "message": "Geminiによる補完を実行しました。"
+                })
+                
+            except Exception as e:
+                logger.error(f"❌ Gemini補完実行中にエラーが発生: {str(e)}")
+                return jsonify({
+                    "status": "error",
+                    "message": f"Gemini補完の実行に失敗しました: {str(e)}"
+                }), 500
+                
+        elif answer == "いいえ":
+            logger.info("❌ ユーザーが「いいえ」と回答、誘導メッセージを表示します")
+            
+            # 構成を読み込み
+            structure = load_structure_by_id(structure_id)
+            if not structure:
+                logger.error("❌ 構成が見つかりません")
+                return jsonify({"error": "構成が見つかりません"}), 404
+            
+            # 誘導メッセージを作成
+            guidance_message = create_message_param(
+                role="assistant",
+                content="了解しました。不足している項目や修正したい点を入力してください。一緒に構成を練り直しましょう。",
+                source="system",
+                type="notification"
+            )
+            
+            # メッセージを構成に追加
+            structure["messages"].append(guidance_message)
+            save_structure(structure_id, cast(StructureDict, structure))
+            
+            return jsonify({
+                "status": "noted", 
+                "message": "了解しました。不足している項目や修正したい点を入力してください。一緒に構成を練り直しましょう。"
+            })
+            
+        else:
+            logger.warning(f"⚠️ 予期しない応答: {answer}")
+            return jsonify({"status": "ignored", "message": "応答が認識されませんでした。"})
+            
+    except Exception as e:
+        logger.error(f"❌ Yes/No応答処理中にエラーが発生: {str(e)}")
+        return jsonify({"error": f"処理中にエラーが発生しました: {str(e)}"}), 500
+
+def generate_diff_result_html(diff_result):
+    """差分結果をHTML形式で生成"""
+    try:
+        html_parts = []
+        
+        # 差分サマリー
+        if diff_result.get('summary'):
+            html_parts.append(f"""
+                <div class="diff-summary" style="background: rgba(78, 201, 176, 0.1); border-left: 4px solid #4ec9b0; padding: 15px; margin-bottom: 20px; border-radius: 0 8px 8px 0;">
+                    <h4 style="color: #4ec9b0; margin: 0 0 10px 0;">📊 差分サマリー</h4>
+                    <p style="margin: 0; color: #cccccc;">{diff_result['summary']}</p>
+                </div>
+            """)
+        
+        # 詳細差分
+        if diff_result.get('details'):
+            html_parts.append('<div class="diff-details">')
+            html_parts.append('<h4 style="color: #4ec9b0; margin: 0 0 15px 0;">🔍 詳細差分</h4>')
+            
+            for detail in diff_result['details']:
+                change_type = detail.get('type', 'unknown')
+                field = detail.get('field', 'unknown')
+                old_value = detail.get('old_value', '')
+                new_value = detail.get('new_value', '')
+                
+                # 変更タイプに応じたスタイル
+                if change_type == 'added':
+                    style_class = 'added'
+                    icon = '➕'
+                    title = '追加'
+                elif change_type == 'removed':
+                    style_class = 'removed'
+                    icon = '➖'
+                    title = '削除'
+                elif change_type == 'modified':
+                    style_class = 'changed'
+                    icon = '🔄'
+                    title = '変更'
+                else:
+                    style_class = 'unchanged'
+                    icon = '📝'
+                    title = 'その他'
+                
+                html_parts.append(f"""
+                    <div class="diff-item {style_class}" style="background: rgba(78, 201, 176, 0.05); border: 1px solid rgba(78, 201, 176, 0.2); border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                        <div class="diff-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                            <span style="font-size: 16px;">{icon}</span>
+                            <strong style="color: #4ec9b0;">{title}</strong>
+                            <span style="color: #cccccc;">- {field}</span>
+                        </div>
+                        <div class="diff-content">
+                            {f'<div class="diff-line removed" style="background: rgba(220, 53, 69, 0.1); color: #dc3545; padding: 8px; border-radius: 4px; margin-bottom: 5px;"><strong>削除:</strong> {old_value}</div>' if old_value else ''}
+                            {f'<div class="diff-line added" style="background: rgba(40, 167, 69, 0.1); color: #28a745; padding: 8px; border-radius: 4px;"><strong>追加:</strong> {new_value}</div>' if new_value else ''}
+                        </div>
+                    </div>
+                """)
+            
+            html_parts.append('</div>')
+        
+        # 統計情報
+        if diff_result.get('statistics'):
+            stats = diff_result['statistics']
+            html_parts.append(f"""
+                <div class="diff-statistics" style="background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; padding: 15px; margin-top: 20px; border-radius: 0 8px 8px 0;">
+                    <h4 style="color: #ffc107; margin: 0 0 10px 0;">📈 変更統計</h4>
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <div><strong>追加:</strong> <span style="color: #28a745;">{stats.get('added', 0)}</span></div>
+                        <div><strong>削除:</strong> <span style="color: #dc3545;">{stats.get('removed', 0)}</span></div>
+                        <div><strong>変更:</strong> <span style="color: #ffc107;">{stats.get('modified', 0)}</span></div>
+                        <div><strong>変更なし:</strong> <span style="color: #6c757d;">{stats.get('unchanged', 0)}</span></div>
+                    </div>
+                </div>
+            """)
+        
+        return ''.join(html_parts)
+        
+    except Exception as e:
+        log_exception(logger, e, "差分HTML生成")
+        return f'<div style="color: #dc3545;">差分表示エラー: {str(e)}</div>'
+
+@unified_bp.route('/test-debug')
+def test_debug_interface():
+    """
+    デバッグモードテスト用ルート
+    """
+    logger.info("🧪 デバッグモードテスト用ルート呼び出し")
+    
+    # テスト用の構造データを作成
+    test_structure = {
+        "id": "test-structure-001",
+        "title": "テスト構成",
+        "description": "デバッグモードテスト用の構成です",
+        "content": {
+            "sections": [
+                {
+                    "title": "テストセクション",
+                    "description": "これは構成の表示と評価用のテストです。",
+                    "components": [
+                        {
+                            "type": "text",
+                            "content": "サンプルテキストです。"
+                        }
+                    ]
+                }
+            ]
+        },
+        "gemini_output": {
+            "テストセクション": {
+                "title": "テストセクション",
+                "output": "これはGeminiのデバッグ出力です。"
+            }
+        },
+        "messages": [],
+        "created_at": datetime.now().isoformat(),
+        "status": "test",
+        "test_mode": True
+    }
+    
+    return render_template(
+        "structure/unified_interface.html",
+        structure_id="test-structure-001",
+        structure=test_structure,
+        structure_data=test_structure,
+        messages=test_structure.get("messages", []),
+        evaluation=None,
+        restore_index=None,
+        timestamp=datetime.now().strftime("%Y%m%d_%H%M%S")
+    )
+
+@unified_bp.route('/v2/<structure_id>')
+def unified_v2_interface(structure_id):
+    """
+    Unified v2 インターフェース
+    """
+    logger.info(f"🧪 Unified v2 インターフェース呼び出し: {structure_id}")
+    
+    try:
+        # 構造データの読み込み
+        structure = load_structure_by_id(structure_id)
+        
+        if not structure:
+            # 構造が見つからない場合は新規作成
+            logger.info(f"📝 新規構造作成: {structure_id}")
+            structure = create_blank_structure(structure_id)
+        
+        # メッセージの取得
+        messages = structure.get("messages", [])
+        
+        # 評価データの取得
+        evaluation = None
+        if structure.get("evaluation"):
+            evaluation = structure["evaluation"]
+        
+        # 復元インデックスの取得
+        restore_index = request.args.get('restore_index', type=int)
+        
+        return render_template(
+            "structure/unified_v2.html",
+            structure_id=structure_id,
+            structure=structure,
+            structure_data=structure,
+            messages=messages,
+            evaluation=evaluation,
+            restore_index=restore_index,
+            timestamp=datetime.now().strftime("%Y%m%d_%H%M%S")
+        )
+        
+    except Exception as e:
+        logger.error(f"❌ Unified v2 インターフェースエラー: {str(e)}")
+        flash(f"エラーが発生しました: {str(e)}", "error")
+        return redirect(url_for('unified.unified_interface', structure_id=structure_id))
+
+@unified_bp.route('/test-v2')
+def test_v2_interface():
+    """
+    Unified v2 テスト用ルート
+    """
+    logger.info("🧪 Unified v2 テスト用ルート呼び出し")
+    
+    # テスト用の構造データを作成
+    test_structure = {
+        "id": "test-structure-v2",
+        "title": "v2テスト構成",
+        "description": "Unified v2用のテスト構成です",
+        "content": {
+            "sections": [
+                {
+                    "title": "v2テストセクション",
+                    "description": "これはv2構成の表示と評価用のテストです。",
+                    "components": [
+                        {
+                            "type": "text",
+                            "content": "v2サンプルテキストです。"
+                        }
+                    ]
+                }
+            ]
+        },
+        "gemini_output": {
+            "v2テストセクション": {
+                "title": "v2テストセクション",
+                "output": "これはGeminiのv2デバッグ出力です。\n\n```javascript\n// v2サンプルコード\nfunction v2Test() {\n    console.log('Hello, v2!');\n}\n```\n\n**v2太字テキスト**と*v2斜体テキスト*も表示されます。",
+                "metadata": {
+                    "生成時刻": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "モード": "v2デバッグ",
+                    "バージョン": "v2.0.0"
+                }
+            }
+        },
+        "messages": [],
+        "created_at": datetime.now().isoformat(),
+        "status": "test",
+        "test_mode": True
+    }
+    
+    return render_template(
+        "structure/unified_v2.html",
+        structure_id="test-structure-v2",
+        structure=test_structure,
+        structure_data=test_structure,
+        messages=test_structure.get("messages", []),
+        evaluation=None,
+        restore_index=None,
+        timestamp=datetime.now().strftime("%Y%m%d_%H%M%S")
+    )

@@ -1,0 +1,76 @@
+{
+  "id": "test-v2",
+  "title": "v2テスト構成",
+  "description": "Unified v2用のテスト構成です",
+  "content": {
+    "sections": [
+      {
+        "title": "v2テストセクション",
+        "description": "これはv2構成の表示と評価用のテストです。",
+        "components": [
+          {
+            "type": "text",
+            "content": "v2サンプルテキストです。"
+          },
+          {
+            "type": "code",
+            "language": "javascript",
+            "content": "function v2Test() {\n    console.log('Hello, v2!');\n    return 'v2 success';\n}"
+          }
+        ]
+      },
+      {
+        "title": "v2評価セクション",
+        "description": "評価機能のテスト用セクションです。",
+        "components": [
+          {
+            "type": "text",
+            "content": "このセクションは評価機能をテストするために作成されました。"
+          }
+        ]
+      }
+    ]
+  },
+  "gemini_output": {
+    "v2テストセクション": {
+      "title": "v2テストセクション",
+      "output": "これはGeminiのv2デバッグ出力です。\n\n```javascript\n// v2サンプルコード\nfunction v2Test() {\n    console.log('Hello, v2!');\n    return 'v2 success';\n}\n```\n\n**v2太字テキスト**と*v2斜体テキスト*も表示されます。\n\nこのセクションはv2インターフェースのテスト用に作成されました。",
+      "metadata": {
+        "生成時刻": "2025-01-28 12:00:00",
+        "モード": "v2デバッグ",
+        "バージョン": "v2.0.0",
+        "処理時間": "1.2秒"
+      }
+    },
+    "v2評価セクション": {
+      "title": "v2評価セクション",
+      "output": "評価機能のテスト出力です。\n\nこのセクションは評価機能が正常に動作することを確認するために作成されました。\n\n- 評価項目1: ✅ 正常\n- 評価項目2: ✅ 正常\n- 評価項目3: ⚠️ 注意",
+      "metadata": {
+        "生成時刻": "2025-01-28 12:01:00",
+        "モード": "v2評価",
+        "バージョン": "v2.0.0",
+        "評価結果": "良好"
+      }
+    }
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "v2テスト用のメッセージです。"
+    },
+    {
+      "role": "assistant",
+      "content": "v2テスト用の応答です。"
+    }
+  ],
+  "evaluation": {
+    "score": 85,
+    "feedback": "v2テスト用の評価フィードバックです。",
+    "status": "completed"
+  },
+  "created_at": "2025-01-28T12:00:00",
+  "updated_at": "2025-01-28T12:01:00",
+  "status": "test",
+  "test_mode": true,
+  "version": "v2.0.0"
+} 

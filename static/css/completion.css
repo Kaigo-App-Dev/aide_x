@@ -1,0 +1,1595 @@
+/* AIDE-X Completion CSS - 右ペイン（Gemini補完、差分、履歴） */
+
+/* 右ペイン */
+.right-pane {
+    min-width: 250px;
+}
+
+.right-pane .pane-content {
+    padding: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Gemini出力 */
+.gemini-output {
+    background: var(--bg-primary);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px;
+    box-shadow: var(--shadow-light);
+    animation: fadeInSlide 0.5s ease-out;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.gemini-output {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-light);
+}
+
+.gemini-output.success {
+    border-left: 4px solid var(--success-color);
+}
+
+.gemini-output.error {
+    border-left: 4px solid var(--danger-color);
+}
+
+.gemini-output.unknown {
+    border-left: 4px solid var(--warning-color);
+}
+
+.output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.output-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-icon {
+    font-size: 16px;
+}
+
+.status-icon.success {
+    color: var(--success-color);
+}
+
+.status-icon.error {
+    color: var(--danger-color);
+}
+
+.status-icon.unknown {
+    color: var(--warning-color);
+}
+
+.output-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.timestamp {
+    color: var(--text-muted);
+}
+
+.output-content {
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 12px;
+}
+
+.content-section,
+.output-content {
+    margin-bottom: 12px;
+}
+
+.content-section h4,
+.output-content h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.content-text,
+.output-content {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-light);
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+
+.error-message {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+.modules-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.module-item {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 8px;
+}
+
+.module-key {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+.module-value {
+    color: var(--text-secondary);
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    background: var(--bg-secondary);
+    padding: 4px 6px;
+    border-radius: 3px;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+
+.no-modules {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 20px;
+}
+
+/* Gemini出力プレースホルダー */
+.gemini-output-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    background: var(--bg-secondary);
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    margin: 1rem;
+    min-height: 200px;
+}
+
+.placeholder-icon {
+    font-size: 3rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.placeholder-text h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.placeholder-text p {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.placeholder-text .text-muted {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.placeholder-actions {
+    margin-top: 1rem;
+}
+
+.placeholder-actions .btn {
+    margin: 0 0.25rem;
+}
+
+/* Claude評価セクション */
+.claude-evaluation-section {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-light);
+}
+
+.claude-evaluation-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.claude-evaluation-section .section-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.claude-evaluation-section .section-content {
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.evaluation-placeholder {
+    text-align: center;
+    padding: 2rem;
+}
+
+.evaluation-placeholder .empty-message h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.evaluation-placeholder .empty-message p {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.evaluation-placeholder .empty-message .text-muted {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+/* 補完履歴ペイン */
+.completion-history-pane {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-light);
+}
+
+.completion-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.completion-history-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.completion-history-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+#completion-history-select {
+    padding: 4px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 12px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+#completion-history-select option {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.completion-history-content {
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.completion-history-placeholder {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+}
+
+.completion-success {
+    background: var(--bg-primary);
+    border: 1px solid var(--success-color);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.completion-error {
+    background: var(--bg-primary);
+    border: 1px solid var(--danger-color);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.completion-unknown {
+    background: var(--bg-primary);
+    border: 1px solid var(--warning-color);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.completion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.completion-header h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.completion-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.completion-timestamp {
+    color: var(--text-muted);
+}
+
+.completion-status {
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+}
+
+.completion-status:contains('成功') {
+    background: var(--success-color);
+    color: white;
+}
+
+.completion-status:contains('失敗') {
+    background: var(--danger-color);
+    color: white;
+}
+
+.completion-content h5 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 8px 0 4px 0;
+}
+
+.extracted-json {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    margin-top: 8px;
+}
+
+.raw-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    margin-top: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* 差分ペイン */
+.diff-pane {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-light);
+}
+
+.diff-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.diff-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.diff-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.diff-content {
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    padding: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.diff-placeholder {
+    text-align: center;
+    padding: 2rem;
+}
+
+.diff-placeholder-icon {
+    font-size: 3rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.diff-placeholder-text h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.diff-placeholder-text p {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.diff-placeholder-text .text-muted {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+/* 履歴ペイン */
+.history-pane {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-light);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.history-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.history-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.history-content {
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    padding: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.history-placeholder {
+    text-align: center;
+    padding: 2rem;
+}
+
+.history-placeholder-icon {
+    font-size: 3rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.history-placeholder-text h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.history-placeholder-text p {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+/* 履歴カード */
+.history-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 8px;
+    transition: all var(--transition-duration) ease;
+    cursor: pointer;
+}
+
+.history-card:hover {
+    box-shadow: var(--shadow-light);
+    transform: translateY(-1px);
+}
+
+.history-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.history-card-provider {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+.history-card-provider.claude {
+    background: var(--info-color);
+    color: white;
+}
+
+.history-card-provider.gemini {
+    background: var(--warning-color);
+    color: var(--dark-color);
+}
+
+.history-card-timestamp {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.history-card-content {
+    margin-bottom: 8px;
+}
+
+.history-card-info {
+    margin-bottom: 4px;
+}
+
+.history-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.history-card-details {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.history-card-score {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--success-color);
+    margin-bottom: 8px;
+}
+
+.history-card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.history-card-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color var(--transition-duration) ease;
+}
+
+.history-card-btn.details {
+    background: var(--primary-color);
+    color: white;
+}
+
+.history-card-btn.details:hover {
+    background: #0056b3;
+}
+
+.history-card-btn.compare {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.history-card-btn.compare:hover {
+    background: var(--dark-color);
+}
+
+/* 履歴モーダル */
+.history-modal,
+.history-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1200;
+}
+
+.history-modal.show,
+.history-modal-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* モーダル表示時のbodyスクロール抑制 */
+body.modal-open {
+    overflow: hidden !important;
+    position: fixed;
+    width: 100%;
+}
+
+.history-modal-overlay,
+.history-modal-content {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.history-modal-content,
+.history-modal-body {
+    background: var(--bg-primary);
+    border-radius: 8px;
+    box-shadow: var(--shadow-medium);
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-modal-header,
+.history-modal-footer {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.history-modal-header h3,
+.history-modal-footer {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.history-modal-close,
+.history-modal-footer {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all var(--transition-duration) ease;
+}
+
+.history-modal-close:hover,
+.history-modal-footer {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.history-modal-body,
+.history-modal-footer {
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.history-modal-footer {
+    border-top: 1px solid var(--border-color);
+    border-bottom: none;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* 履歴詳細 */
+.history-detail-section {
+    margin-bottom: 16px;
+}
+
+.history-detail-section h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.history-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    padding: 8px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.history-detail-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 100px;
+}
+
+.history-detail-value {
+    color: var(--text-secondary);
+    text-align: right;
+    flex: 1;
+}
+
+.history-detail-comment {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.history-detail-structure {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 8px;
+    margin-top: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.history-detail-structure pre {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* 差分表示セクション */
+.diff-display-section {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-light);
+}
+
+.diff-display-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.diff-display-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.diff-display-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.diff-panel {
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-duration) ease;
+}
+
+.diff-panel.hidden {
+    display: none;
+}
+
+.diff-panel .diff-content {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.diff-panel .diff-placeholder {
+    text-align: center;
+    padding: 2rem;
+}
+
+.diff-panel .diff-placeholder-icon {
+    font-size: 3rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.diff-panel .diff-placeholder-text h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.diff-panel .diff-placeholder-text p {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.diff-panel .diff-placeholder-text .text-muted {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+/* モジュール差分 */
+.module-diff-container {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-light);
+    transition: all var(--transition-duration) ease;
+}
+
+.module-diff-container:hover {
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-1px);
+}
+
+.module-diff-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.module-diff-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.module-diff-summary {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.diff-summary-item {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+.diff-summary-item.added {
+    background: var(--success-color);
+    color: white;
+}
+
+.diff-summary-item.removed {
+    background: var(--danger-color);
+    color: white;
+}
+
+.diff-summary-item.changed {
+    background: var(--warning-color);
+    color: var(--dark-color);
+}
+
+.module-diff-content {
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.diff-section {
+    margin-bottom: 16px;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.diff-section.added-section {
+    background: rgba(40, 167, 69, 0.1);
+    border-color: var(--success-color);
+}
+
+.diff-section.removed-section {
+    background: rgba(220, 53, 69, 0.1);
+    border-color: var(--danger-color);
+}
+
+.diff-section.changed-section {
+    background: rgba(255, 193, 7, 0.1);
+    border-color: var(--warning-color);
+}
+
+.diff-section.no-changes-section {
+    background: rgba(108, 117, 125, 0.1);
+    border-color: var(--secondary-color);
+}
+
+.diff-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 12px 0;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.diff-section-title.added {
+    color: var(--success-color);
+}
+
+.diff-section-title.removed {
+    color: var(--danger-color);
+}
+
+.diff-section-title.changed {
+    color: var(--warning-color);
+}
+
+.diff-module-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.diff-module-item {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 8px;
+    transition: all var(--transition-duration) ease;
+}
+
+.diff-module-item:hover {
+    box-shadow: var(--shadow-light);
+    transform: translateY(-1px);
+}
+
+.diff-module-item.added {
+    border-color: var(--success-color);
+    background: rgba(40, 167, 69, 0.05);
+}
+
+.diff-module-item.removed {
+    border-color: var(--danger-color);
+    background: rgba(220, 53, 69, 0.05);
+}
+
+.diff-module-item.changed {
+    border-color: var(--warning-color);
+    background: rgba(255, 193, 7, 0.05);
+}
+
+.module-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.diff-icon {
+    font-size: 12px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.diff-module-item.added .diff-icon {
+    background: var(--success-color);
+    color: white;
+}
+
+.diff-module-item.removed .diff-icon {
+    background: var(--danger-color);
+    color: white;
+}
+
+.diff-module-item.changed .diff-icon {
+    background: var(--warning-color);
+    color: var(--dark-color);
+}
+
+.module-description {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.module-changes {
+    margin-top: 8px;
+}
+
+.changes-details {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    padding: 8px;
+}
+
+.changes-summary {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    cursor: pointer;
+    padding: 4px 6px;
+    background: var(--bg-primary);
+    border-radius: 3px;
+    transition: background-color var(--transition-duration) ease;
+}
+
+.changes-summary:hover {
+    background: var(--bg-tertiary);
+}
+
+.changes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.change-item {
+    font-size: 11px;
+    padding: 4px 6px;
+    border-radius: 3px;
+    background: var(--bg-primary);
+}
+
+.change-field {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.change-values {
+    display: flex;
+    gap: 8px;
+    font-size: 10px;
+}
+
+.change-before,
+.change-after {
+    flex: 1;
+    padding: 2px 4px;
+    border-radius: 2px;
+    font-family: 'Courier New', monospace;
+}
+
+.change-label {
+    font-weight: 600;
+    margin-bottom: 2px;
+    font-size: 9px;
+    text-transform: uppercase;
+}
+
+.change-before .change-label {
+    color: var(--danger-color);
+}
+
+.change-after .change-label {
+    color: var(--success-color);
+}
+
+.change-value {
+    background: var(--bg-secondary);
+    padding: 2px 4px;
+    border-radius: 2px;
+    word-break: break-all;
+}
+
+.no-changes-message {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+}
+
+.no-changes-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.no-changes-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.no-changes-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* モジュール差分パネル */
+.module-diff-panel {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-light);
+    transition: all var(--transition-duration) ease;
+}
+
+.module-diff-panel.hidden {
+    display: none;
+}
+
+.module-diff-panel .module-diff-container {
+    margin-bottom: 0;
+    box-shadow: none;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .claude-evaluation-section,
+    .completion-history-pane,
+    .diff-pane,
+    .history-pane {
+        margin: 8px;
+        padding: 12px;
+    }
+    
+    .evaluation-header,
+    .completion-history-header,
+    .diff-header,
+    .history-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .evaluation-meta,
+    .completion-meta {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    #completion-history-select {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    
+    .completion-history-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .history-modal-content,
+    .history-modal-body {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .history-modal-body {
+        padding: 12px;
+    }
+    
+    .history-card-content {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .history-card-actions {
+        justify-content: flex-start;
+    }
+    
+    .module-diff-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .module-diff-summary {
+        justify-content: flex-start;
+    }
+    
+    .diff-summary-item {
+        font-size: 11px;
+    }
+    
+    .module-name {
+        font-size: 13px;
+    }
+    
+    .module-description {
+        font-size: 11px;
+    }
+    
+    .changes-summary {
+        font-size: 11px;
+    }
+    
+    .change-item {
+        font-size: 10px;
+    }
+    
+    .change-before,
+    .change-after {
+        font-size: 9px;
+    }
+    
+    .change-field {
+        font-size: 10px;
+    }
+}
+
+/* Gemini出力コンテナ */
+.gemini-output-container {
+    display: block !important;
+    width: 100%;
+    min-width: 300px;
+    background: #f7f7f7;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-y: auto;
+    position: relative;
+    z-index: 10;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin: 1rem;
+    min-height: 200px;
+}
+
+.gemini-output-container .gemini-output-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    background: var(--bg-secondary);
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    min-height: 200px;
+}
+
+.gemini-output-container .placeholder-icon {
+    font-size: 3rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.gemini-output-container .placeholder-text {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.gemini-output-container .placeholder-subtext {
+    font-size: 0.9em;
+    color: var(--text-muted);
+}
+
+/* Gemini出力エラー表示 */
+.gemini-output-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    background: #fff3f3;
+    border: 2px solid #ff6b6b;
+    border-radius: 8px;
+    color: #d63031;
+}
+
+.error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.error-text {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.error-message {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+/* Gemini出力用のスタイル */
+.gemini-section {
+    margin-bottom: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.gemini-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.gemini-section-title {
+    font-weight: 600;
+    color: #495057;
+    font-size: 1rem;
+}
+
+.gemini-section-status {
+    font-size: 0.85rem;
+    color: #28a745;
+    font-weight: 500;
+}
+
+.gemini-section-content {
+    padding: 16px;
+}
+
+.gemini-output-text {
+    line-height: 1.6;
+    color: #212529;
+}
+
+.gemini-output-text code {
+    background: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #e83e8c;
+}
+
+.gemini-output-text pre {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 12px;
+    margin: 12px 0;
+    overflow-x: auto;
+}
+
+.gemini-output-text pre code {
+    background: none;
+    padding: 0;
+    color: #212529;
+}
+
+.gemini-section-metadata {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #dee2e6;
+}
+
+.metadata-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.metadata-item {
+    display: flex;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+.metadata-key {
+    font-weight: 600;
+    color: #6c757d;
+    min-width: 80px;
+}
+
+.metadata-value {
+    color: #495057;
+}
+
+/* データなし状態 */
+.gemini-no-data {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.no-data-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+}
+
+.no-data-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #495057;
+}
+
+.no-data-description {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* エラー状態 */
+.gemini-error {
+    text-align: center;
+    padding: 40px 20px;
+    color: #dc3545;
+}
+
+.error-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+}
+
+.error-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.error-message {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* ローディング状態 */
+.gemini-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: #007bff;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e9ecef;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+.loading-text {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .gemini-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .gemini-section-content {
+        padding: 12px;
+    }
+    
+    .gemini-output-text pre {
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+    
+    .metadata-item {
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .metadata-key {
+        min-width: auto;
+    }
+} 

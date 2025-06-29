@@ -1,0 +1,372 @@
+/* ========================================
+   AIDE-X Unified v2 CSS
+   ======================================== */
+
+/* 新UIコンテナ */
+.unified-v2-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    background: #f8f9fa;
+    overflow: hidden;
+}
+
+/* ヘッダー */
+.unified-v2-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 100;
+    min-height: 60px;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-title h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #007bff;
+}
+
+.structure-id {
+    font-size: 0.9rem;
+    color: #6c757d;
+    background: #f8f9fa;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.header-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.header-controls .btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+/* メインコンテンツエリア */
+.unified-v2-main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ペイン共通スタイル */
+.unified-v2-pane {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border-right: 1px solid #dee2e6;
+    min-width: 250px;
+    max-width: 50%;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.unified-v2-pane:last-child {
+    border-right: none;
+}
+
+/* ペイン折りたたみ状態 */
+.unified-v2-pane.collapsed {
+    min-width: 0;
+    width: 0;
+    overflow: hidden;
+    flex: 0 0 0;
+}
+
+.unified-v2-pane.collapsed .pane-content {
+    display: none;
+}
+
+/* ペインヘッダー */
+.pane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    min-height: 50px;
+}
+
+.pane-title {
+    font-weight: 600;
+    color: #495057;
+    font-size: 1rem;
+}
+
+.pane-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.pane-toggle {
+    background: none;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #6c757d;
+    transition: all 0.2s ease;
+}
+
+.pane-toggle:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+/* ペインコンテンツ */
+.pane-content {
+    flex: 1;
+    overflow: auto;
+    padding: 16px;
+}
+
+/* リサイザー */
+.pane-resizer {
+    width: 4px;
+    background: #dee2e6;
+    cursor: col-resize;
+    transition: background 0.2s ease;
+    position: relative;
+}
+
+.pane-resizer:hover {
+    background: #007bff;
+}
+
+.pane-resizer.resizing {
+    background: #007bff;
+}
+
+/* ステータスバー */
+.unified-v2-statusbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: #ffffff;
+    border-top: 1px solid #dee2e6;
+    font-size: 0.85rem;
+    color: #6c757d;
+    min-height: 40px;
+}
+
+.status-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.status-text {
+    font-style: italic;
+}
+
+.status-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.version-info {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #adb5bd;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .unified-v2-header {
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+    }
+    
+    .header-title {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .unified-v2-main {
+        flex-direction: column;
+    }
+    
+    .unified-v2-pane {
+        min-width: 100%;
+        max-width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .unified-v2-pane:last-child {
+        border-bottom: none;
+    }
+    
+    .pane-resizer {
+        width: 100%;
+        height: 4px;
+        cursor: row-resize;
+    }
+}
+
+/* アニメーション */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.unified-v2-pane {
+    animation: fadeIn 0.3s ease;
+}
+
+/* ローディング状態 */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #007bff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* エラー状態 */
+.error {
+    border-left: 4px solid #dc3545;
+    background: rgba(220, 53, 69, 0.05);
+}
+
+.error .pane-title {
+    color: #dc3545;
+}
+
+/* 成功状態 */
+.success {
+    border-left: 4px solid #28a745;
+    background: rgba(40, 167, 69, 0.05);
+}
+
+.success .pane-title {
+    color: #28a745;
+}
+
+/* 警告状態 */
+.warning {
+    border-left: 4px solid #ffc107;
+    background: rgba(255, 193, 7, 0.05);
+}
+
+.warning .pane-title {
+    color: #ffc107;
+}
+
+/* アクセシビリティ */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* フォーカス管理 */
+*:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* 高コントラストモード対応 */
+@media (prefers-contrast: high) {
+    .unified-v2-pane {
+        border: 2px solid currentColor;
+    }
+    
+    .pane-toggle {
+        border: 2px solid currentColor;
+    }
+}
+
+/* アニメーション軽減設定 */
+@media (prefers-reduced-motion: reduce) {
+    .unified-v2-pane,
+    .pane-toggle,
+    .pane-resizer {
+        transition: none;
+    }
+    
+    .unified-v2-pane {
+        animation: none;
+    }
+} 
